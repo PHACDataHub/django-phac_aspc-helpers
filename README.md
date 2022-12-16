@@ -30,6 +30,14 @@ LANGUAGES = (
 
 ## Features
 
+### Security
+
+
+- AC-11 Session Timeouts
+
+
+
+
 ### translate decorator
 
 Use this decorator on your models to add translations via 
