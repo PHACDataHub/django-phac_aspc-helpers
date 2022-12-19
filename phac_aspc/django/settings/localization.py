@@ -5,3 +5,5 @@ LANGUAGES = (
     ('fr-ca', _('French')),
     ('en-ca', _('English')),
 )
+
+LANGUAGE_CODE = 'en-ca'
