@@ -1,15 +1,19 @@
 """Related to implementing WET"""
 from django import template
-from django.utils.html import format_html, mark_safe
-from django.templatetags.static import static
+from django import urls
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.template import loader
+from django.templatetags.static import static
+from django.urls.exceptions import NoReverseMatch
+from django.utils.html import format_html
 
 import json
 
 register = template.Library()
 
 @register.simple_tag
-def css(base_only=False):
+def phac_aspc_wet_css(base_only=False):
     """Generate the CSS tags required for WET
 
     If base_only is True, only those classes required for library features
@@ -28,7 +32,7 @@ def css(base_only=False):
     )
 
 @register.simple_tag
-def scripts(include_jquery=True):
+def phac_aspc_wet_scripts(include_jquery=True):
     """Generate the script tags required for WET
 
     If include_jquery is False, jquery will not be included
@@ -52,31 +56,43 @@ def scripts(include_jquery=True):
 
 
 @register.simple_tag(takes_context=True)
-def session_timeout_dialog(context, logout_url, include_h1=False):
+def phac_aspc_wet_session_timeout_dialog(context, logout_url):
     """Displays a dialog to the user warning them their session is about
     to expire, with the option to continue or end their session
 
     WARNING: Wet expects your page to have at least 1 H1 element, if not
-    this component will not behave properly.  For this reason the include_h1
-    property can be set to True, which will include an empty one.
+    this component will not behave properly.  For this reason if no h1 is
+    present one is automatically appended to the document with its display set
+    to none.
     """
     if not context['request'].user.is_authenticated:
         return ''
 
     session_alive = settings.SESSION_COOKIE_AGE * 1000
-    time_before_expiry = session_alive - (3 * 60) if session_alive >= 300000 \
-        else session_alive * 0.8
-    conf = dict(
-        inactivity=session_alive - time_before_expiry,
-        reactionTime=time_before_expiry,
-        sessionalive=session_alive,
-        logouturl=logout_url
-    )
-    invisible_h1 = f"<h1 style=\"display: none\"> \
-            Sessions timeout in {settings.SESSION_COOKIE_AGE / 60} minutes. \
-        </h1>" if include_h1 else ''
-    return format_html(
-        "{}<span class=\"wb-sessto\" data-wb-sessto='{}'></span>",
-        mark_safe(invisible_h1),
-        mark_safe(json.dumps(conf))
-    )
+    reaction_time = 180000 if session_alive >= 300000 else session_alive * 0.2
+
+    logouturl = logout_url
+    try:
+        logouturl = urls.reverse(logout_url)
+    except NoReverseMatch:
+        pass
+
+
+    try:
+        return loader.get_template(
+            "phac_aspc/helpers/wet/session_timeout.html"
+        ).render(
+            dict(
+                config=json.dumps(dict(
+                    inactivity=session_alive - reaction_time,
+                    reactionTime=reaction_time,
+                    refreshCallbackUrl=urls.reverse('phac_aspc_helpers_session'),
+                    method='PUT',
+                    sessionalive=session_alive,
+                    logouturl=logouturl
+                ))
+            ),
+            request=context['request']
+        )
+    except NoReverseMatch as exc:
+        raise ImproperlyConfigured("The WET urls are not loaded.  See README") from exc

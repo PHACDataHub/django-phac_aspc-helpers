@@ -1,5 +1,6 @@
 {
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
-    "editor.rulers": [80]
+    "editor.rulers": [80],
+    "markdown-preview-github-styles.colorTheme": "light"
 }
