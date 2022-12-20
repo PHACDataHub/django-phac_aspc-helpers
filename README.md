@@ -5,6 +5,10 @@ PHAC-ASPC's Django based projects.
 
 ## Quick start
 
+```bash
+pip install django-phac_aspc-helpers
+```
+
 Start by adding `phac_aspc.django.helpers` to your `INSTALLED_APPS`
 setting like this:
 
