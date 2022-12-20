@@ -1,3 +1,4 @@
 include LICENSE
 include README.md
-recursive-include phac_aspc *
+recursive-include phac_aspc/django/helpers/static *
+recursive-include phac_aspc/django/helpers/templates *

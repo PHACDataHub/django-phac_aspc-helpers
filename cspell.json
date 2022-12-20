@@ -1,0 +1,18 @@
+{
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [],
+    "ignoreWords": [
+        "aspc",
+        "inlines",
+        "logouturl",
+        "modeltranslation",
+        "phac",
+        "reactionTime",
+        "sessionalive",
+        "urlpatterns"
+    ],
+    "import": []
+}
