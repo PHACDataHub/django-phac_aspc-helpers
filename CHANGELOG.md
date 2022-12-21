@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.1.1...v0.2.0) (2022-12-21)
+
+
+### Features
+
+* Replaced built in WET with CDN hosted version ([74e6b77](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/74e6b7765c02afac478b488f70f7063fe4ad35b9))
+
 ## [0.1.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.1.0...v0.1.1) (2022-12-20)
 
 
