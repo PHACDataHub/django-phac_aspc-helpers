@@ -6,9 +6,12 @@
     "words": [],
     "ignoreWords": [
         "aspc",
+        "boew",
         "inlines",
+        "jsdelivr",
         "logouturl",
         "modeltranslation",
+        "noscript",
         "phac",
         "reactionTime",
         "sessionalive",

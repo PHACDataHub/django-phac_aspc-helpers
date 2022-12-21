@@ -1,4 +1,6 @@
 """Related to implementing WET"""
+import json
+
 from django import template
 from django import urls
 from django.conf import settings
@@ -8,9 +10,16 @@ from django.templatetags.static import static
 from django.urls.exceptions import NoReverseMatch
 from django.utils.html import format_html
 
-import json
-
 register = template.Library()
+
+WET_CDN_ROOT = 'https://cdn.jsdelivr.net/gh/wet-boew'
+
+
+def jsdelivr(pkg, asset):
+    """Construct a jsdelivr CDN URL for the provided WET package and asset."""
+    ver = settings.WET_VERSION if pkg == 'wet-boew' else settings.THEME_VERSION
+    return f"{WET_CDN_ROOT}/{pkg}-dist@{ver}/{asset}"
+
 
 @register.simple_tag
 def phac_aspc_wet_css(base_only=False):
@@ -22,8 +31,8 @@ def phac_aspc_wet_css(base_only=False):
     This should be used in the HEAD section of your templates.
     """
     css_url = static('phac_aspc_helpers/base.css') if base_only \
-        else static('phac_aspc_helpers/GCWeb/css/theme.css')
-    no_script = static('phac_aspc_helpers/wet-boew/css/noscript.min.css')
+        else jsdelivr('themes', 'GCWeb/css/theme.min.css')
+    no_script = jsdelivr('wet-boew', 'wet-boew/css/noscript.min.css')
     return format_html(
         (
             f"<link rel=\"stylesheet\" href=\"{css_url}\">"
@@ -46,8 +55,8 @@ def phac_aspc_wet_scripts(include_jquery=True):
         integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB"
         crossorigin="anonymous"
       ></script>""" if include_jquery else ''
-    wet_js = static('phac_aspc_helpers/wet-boew/js/wet-boew.min.js')
-    gcweb_js = static('phac_aspc_helpers/GCWeb/js/theme.min.js')
+    wet_js = jsdelivr('wet-boew', 'wet-boew/js/wet-boew.min.js')
+    gcweb_js = jsdelivr('themes', 'GCWeb/js/theme.min.js')
     return format_html(f"""
         {jquery}
         <script src="{ wet_js }"></script>
