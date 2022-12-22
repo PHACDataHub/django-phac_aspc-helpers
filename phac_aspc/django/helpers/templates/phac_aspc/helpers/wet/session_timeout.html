@@ -1,11 +1,12 @@
 <script>
-    $(document).ready(() => {{
-      if (document.getElementsByTagName('h1').length === 0) {{
-        const h1 = document.createElement('h1');
-        h1.setAttribute('style', 'display: none;');
-        document.body.appendChild(h1);
-      }}
-    }});
+  document.addEventListener('DOMContentLoaded', (event) => {
+    if (document.getElementsByTagName('h1').length === 0) {{
+      console.log('fire');
+      const h1 = document.createElement('h1');
+      h1.setAttribute('style', 'display: none;');
+      document.body.appendChild(h1);
+    }}
+  })  
 </script>
 
 <span class="wb-sessto" data-wb-sessto='{{ config }}'></span>
