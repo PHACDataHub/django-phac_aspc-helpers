@@ -141,7 +141,7 @@ button.mfp-arrow {
     box-shadow: none;
 }
 
-button::-moz-focus-inner {
+.wb-modal button::-moz-focus-inner {
     padding: 0;
     border: 0;
 }
@@ -505,12 +505,12 @@ body.wb-modal summary {
     visibility: hidden !important;
 }
 
-.lbx-hide-gal li {
+.wb-modal .lbx-hide-gal li {
     display: none;
     list-style-type: none;
 }
 
-.lbx-hide-gal li:first-child {
+.wb-modal .lbx-hide-gal li:first-child {
     display: block;
 }
 
@@ -518,21 +518,21 @@ body.wb-modal .modal-dialog summary {
     visibility: visible !important;
 }
 
-.modal-dialog {
+.wb-modal .modal-dialog {
     left: auto;
     padding: 0;
     position: relative;
 }
 
-.modal-content {
+.wb-modal .modal-content {
     background: transparent;
 }
 
-.modal-body {
+.wb-modal .modal-body {
     background: #fff;
 }
 
-.modal-footer {
+.wb-modal .modal-footer {
     background: #fff;
     margin-top: 0;
 }
@@ -698,41 +698,41 @@ body.wb-modal .modal-dialog summary {
 /*
      *	Overlay parts
      */
-.overlay-def {
+.wb-modal .overlay-def {
     overflow-y: auto;
 }
 
-.overlay-def header {
+.wb-modal .overlay-def header {
     background-color: #2e5274;
     color: #fff;
     display: block;
     padding: 0 44px 0 1em;
 }
 
-.overlay-def .modal-title {
+.wb-modal .overlay-def .modal-title {
     font-size: 1.55em;
     padding: 10px 0;
 }
 
-.overlay-def.wb-bar-t,
-.overlay-def.wb-bar-b {
+.wb-modal .overlay-def.wb-bar-t,
+.wb-modal .overlay-def.wb-bar-b {
     background-color: #000;
 }
 
-.overlay-def.wb-bar-t header,
-.overlay-def.wb-bar-b header {
+.wb-modal .overlay-def.wb-bar-t header,
+.wb-modal .overlay-def.wb-bar-b header {
     background-color: #000;
 }
 
-.overlay-def .mfp-close {
+.wb-modal .overlay-def .mfp-close {
     color: #fff;
 }
 
-.hidden-hd .modal-body {
+.wb-modal .hidden-hd .modal-body {
     padding-top: 50px;
 }
 
-.hidden-hd .overlay-close:not(.btn) {
+.wb-modal .hidden-hd .overlay-close:not(.btn) {
     background-color: #000;
     border-radius: 999px;
     height: 1em;
@@ -757,18 +757,18 @@ body.wb-modal .modal-dialog summary {
     right: auto;
 }
 
-[dir=rtl] .overlay-def header {
+[dir=rtl] .wb-modal .overlay-def header {
     padding: 0 1em 0 44px;
 }
 
 /*
     * Overlay-specific overrides
     */
-.overlay-def header {
+.wb-modal .overlay-def header {
     background: #26374a;
 }
 
-.overlay-def .modal-header {
+.wb-modal .overlay-def .modal-header {
     background: #2e5274;
 }
 
