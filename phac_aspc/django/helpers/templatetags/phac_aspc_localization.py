@@ -1,7 +1,6 @@
 """Related to implementing WET"""
 from django import template
-from django.utils.translation import to_locale, get_language
-    
+from django.utils.translation import get_language
 
 register = template.Library()
 

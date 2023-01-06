@@ -65,6 +65,64 @@ urlpatterns = [
 > For more information, refer to the Jinja
 > [documentation](https://jinja.palletsprojects.com/en/3.0.x/api/).
 
+## Environment variables
+
+Several settings or behaviours implemented by this library can be controlled via
+environment variables.  This is done via the
+[django-environ](https://django-environ.readthedocs.io/en/latest/) library.
+(Refer to their documentation on how to format special data types like lists)
+If your project root has a `.env` file, those values will be used.
+
+If you want to use environment variables in your project's configuration, you
+can simply reference django-environ directly as it will automatically be
+installed.  For example:
+
+```python
+import environ
+
+env = environ.Env(DEBUG=(bool, False))
+environ.Env.read_env()
+
+DEBUG = env('DEBUG')
+
+```
+
+This library also provides a utility that automatically declares a module level
+global while checking the environment.  It is particularly useful when declaring
+django settings.
+
+```python
+from .utils import global_from_env
+
+global_from_env(
+    SESSION_COOKIE_AGE=(int, 1200),
+)
+```
+
+The example above creates the module level global `SESSION_COOKIE_AGE` with a
+default value of 1200, unless there is an environment variable (or **.env** file
+entry) `PHAC_ASPC_SESSION_COOKIE_AGE`.  By default the declared variable name is
+prefixed with `PHAC_ASPC_`.  The prefix can be changed by providing a custom
+prefix.
+
+```python
+from .utils import global_from_env
+
+global_from_env(
+    prefix='MY_PREFIX_',
+    SESSION_COOKIE_AGE=(int, 1200),
+)
+```
+
+### Environment variable list
+
+All variables are prefixed with `PHAC_ASPC_` to avoid name conflicts.  
+
+| Variable                        | Type | Purpose                         |
+| ------------------------------- | ---- | ------------------------------- |
+| PHAC_ASPC_SESSION_COOKIE_AGE    | int  | Session expiry in seconds       |
+| PHAC_ASPC_SESSION_COOKIE_SECURE | bool | Use secure cookies (HTTPS only) |
+| PHAC_ASPC_LANGUAGE_CODE         | str  | Default language                |
 
 ## Features
 
@@ -139,6 +197,14 @@ from phac_aspc.django.settings import *
 
 SESSION_COOKIE_AGE=1800
 
+```
+
+Configuration parameters can also be overridden using environment variables.
+For example here is a **.env** file that achieves the same result as above.
+
+```bash
+# .env
+PHAC_ASPC_SESSION_COOKIE_AGE=1800
 ```
 
 > For more information on sessions, refer to Django's
