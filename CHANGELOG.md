@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.2.1...v0.3.0) (2023-01-06)
+
+
+### Features
+
+* Environment variable support ([8383e8b](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/8383e8b62556f31658f0309be7ab699bab23ca05))
+
 ## [0.2.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.2.0...v0.2.1) (2022-12-22)
 
 
