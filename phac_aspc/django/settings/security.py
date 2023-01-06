@@ -1,8 +1,18 @@
 """Recommended values related to security controls"""
-from django.conf import settings
+from .utils import global_from_env
 
 #  AC-11 - Session controls
-SESSION_COOKIE_AGE=1200 # By default expire sessions in 20 minutes
-SESSION_COOKIE_SECURE=True # Use HTTPS
-SESSION_EXPIRE_AT_BROWSER_CLOSE=True # Sessions close when browser is closed
-SESSION_SAVE_EVERY_REQUEST=True # Every requests extends the session
+global_from_env(
+    # Sessions expire in 20 minutes
+    SESSION_COOKIE_AGE=(int, 1200),
+
+    # Use HTTPS for session cookie
+    SESSION_COOKIE_SECURE=(bool, True),
+
+    # Sessions close when browser is closed
+    SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, True),
+
+    # Every requests extends the session (This is required for the WET session
+    # plugin to function properly.)
+    SESSION_SAVE_EVERY_REQUEST=(bool, True),
+)

@@ -6,12 +6,12 @@ from modeltranslation.translator import translator, TranslationOptions
 from phac_aspc.django.helpers.ready import execute_when_ready
 
 
-class translate():
+class translate:  # pylint: disable=invalid-name,too-few-public-methods
     """Add localization to a model
     Usage:
         >>> from django.db import models
         >>> from phac_aspc.django.localization.decorators import translate
-        >>> 
+        >>>
         >>> @translate('title')
         >>> class Person(models.Model):
         >>>     name = models.CharField(max_length=255)
@@ -32,8 +32,15 @@ class translate():
 
     def __call__(self, cls):
         def register_model():
-            translator.register(cls, type(
-                'f"{cls.__name__}TranslationOptions"', (TranslationOptions,), {'fields': self.fields}))
+            translator.register(
+                cls,
+                type(
+                    'f"{cls.__name__}TranslationOptions"',
+                    (TranslationOptions,),
+                    {"fields": self.fields},
+                ),
+            )
             cls.__is_translated_model__ = True
+
         execute_when_ready(register_model)
         return cls

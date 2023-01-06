@@ -1,3 +1,4 @@
+"""Decorators related to django admin"""
 from django.contrib.admin import site, ModelAdmin, TabularInline
 
 from modeltranslation.admin import TranslationAdmin
@@ -5,7 +6,7 @@ from modeltranslation.admin import TranslationAdmin
 from phac_aspc.django.helpers.ready import execute_when_ready
 
 
-class add_admin():
+class add_admin:  # pylint: disable=invalid-name,too-few-public-methods
     """
     Add a model Django's administration interface.
 
@@ -16,11 +17,11 @@ class add_admin():
     Usage:
         >>> from django.db import models
         >>> from phac_aspc.django.admin.decorators import add_admin
-        >>> 
+        >>>
         >>> @add_admin()
         >>> class Person(models.Model):
         >>>     ...
-        >>>     
+        >>>
 
     """
 
@@ -34,12 +35,21 @@ class add_admin():
             opts["inlines"] = []
             if self.inlines is not None:
                 for model in self.inlines:
-                    opts["inlines"].append(type('f"{cls.__name__}_{model}InlineAdmin"',
-                                                (TabularInline,), {'model': model}))
-            
-            base_class = TranslationAdmin if hasattr(cls, '__is_translated_model__') else ModelAdmin
+                    opts["inlines"].append(
+                        type(
+                            'f"{cls.__name__}_{model}InlineAdmin"',
+                            (TabularInline,),
+                            {"model": model},
+                        )
+                    )
 
-            site.register(
-                cls, type('f"{cls.__name__}Admin"', (base_class,), opts))
+            base_class = (
+                TranslationAdmin
+                if hasattr(cls, "__is_translated_model__")
+                else ModelAdmin
+            )
+
+            site.register(cls, type('f"{cls.__name__}Admin"', (base_class,), opts))
+
         execute_when_ready(register_model)
         return cls

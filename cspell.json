@@ -3,7 +3,16 @@
     "ignorePaths": [],
     "dictionaryDefinitions": [],
     "dictionaries": [],
-    "words": [],
+    "words": [
+        "behaviours",
+        "Belliveau"
+    ],
+    "languageSettings": [
+        {
+            "languageId": "*",
+            "locale": "en-CA,fr-CA"
+        }
+    ],
     "ignoreWords": [
         "aspc",
         "boew",
