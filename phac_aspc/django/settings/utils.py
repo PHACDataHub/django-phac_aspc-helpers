@@ -3,7 +3,8 @@ import inspect
 
 import environ
 
-def global_from_env(prefix='PHAC_ASPC_', **conf):
+
+def global_from_env(prefix="PHAC_ASPC_", **conf):
     """Create named global variables based on the provided environment variable
     scheme.  Variables defined in the scheme will be inserted into the calling
     module's globals and prefixed with `PHAC_ASPC_` when fetching the
@@ -22,7 +23,7 @@ def global_from_env(prefix='PHAC_ASPC_', **conf):
 
     mod = inspect.getmodule(inspect.stack()[1][0])
 
-    scheme = dict()
+    scheme = {}
     for name, values in conf.items():
         scheme[f"{prefix}{name}"] = values
 

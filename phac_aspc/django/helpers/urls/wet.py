@@ -4,5 +4,5 @@ from django.urls import path
 from ..views import wet
 
 urlpatterns = [
-    path('phac-aspc/helpers/session', wet.session, name='phac_aspc_helpers_session')
+    path("phac-aspc/helpers/session", wet.session, name="phac_aspc_helpers_session")
 ]
