@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.3.0...v0.3.1) (2023-01-09)
+
+
+### Documentation
+
+* Updated import statement in readme file ([76d6856](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/76d685679a055f380e290c408c4e13f3d46dd67e))
+
 ## [0.3.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.2.1...v0.3.0) (2023-01-06)
 
 
