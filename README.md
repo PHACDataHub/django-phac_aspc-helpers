@@ -92,7 +92,7 @@ global while checking the environment.  It is particularly useful when declaring
 django settings.
 
 ```python
-from .utils import global_from_env
+from phac_aspc.django.settings.utils import global_from_env
 
 global_from_env(
     SESSION_COOKIE_AGE=(int, 1200),
@@ -106,7 +106,7 @@ prefixed with `PHAC_ASPC_`.  The prefix can be changed by providing a custom
 prefix.
 
 ```python
-from .utils import global_from_env
+from phac_aspc.django.settings.utils import global_from_env
 
 global_from_env(
     prefix='MY_PREFIX_',
