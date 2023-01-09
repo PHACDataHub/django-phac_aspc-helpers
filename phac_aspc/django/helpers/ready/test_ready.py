@@ -3,7 +3,11 @@ Ready unit tests
 """
 from unittest.mock import MagicMock
 
-from phac_aspc.django.helpers.ready import process_ready_hooks, execute_when_ready, ready_hooks
+from phac_aspc.django.helpers.ready import (
+    process_ready_hooks,
+    execute_when_ready,
+    ready_hooks,
+)
 
 
 def test_execute_ready():
@@ -11,6 +15,7 @@ def test_execute_ready():
     Test that functions registered with `execute_when_ready` are added to the
     queue, called by `process_ready_hooks` and removed.
     """
+    process_ready_hooks()  # Make sure there are no lingering hooks
     func = MagicMock()
     execute_when_ready(func)
     assert len(ready_hooks) == 1

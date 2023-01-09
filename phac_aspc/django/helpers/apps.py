@@ -13,8 +13,9 @@ class HelpersConfig(AppConfig):
     last in INSTALLED_APPS, the `ready` function below will be executed
     when all other applications have been loaded.
     """
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'phac_aspc.django.helpers'
+
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "phac_aspc.django.helpers"
 
     def ready(self):
         process_ready_hooks()
