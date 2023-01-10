@@ -25,7 +25,8 @@
         "phac",
         "reactionTime",
         "sessionalive",
-        "urlpatterns"
+        "urlpatterns",
+        "COOLOFF"
     ],
     "import": []
 }
