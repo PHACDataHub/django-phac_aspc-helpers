@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.3.1...v0.4.0) (2023-01-10)
+
+
+### Features
+
+* AC-7: Implemented account lockout controls ([c5f07ef](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/c5f07efb554181f9cb81716f8861b61901afca56))
+
 ## [0.3.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.3.0...v0.3.1) (2023-01-09)
 
 
