@@ -61,8 +61,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ./dist/django-phac_aspc-helpers-${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}-py3-none-any.whl
-          asset_name: django-phac_aspc-helpers-${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}-py3-none-any.whl
+          asset_path: ./dist/django_phac_aspc-helpers-${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}-py3-none-any.whl
+          asset_name: django_phac_aspc-helpers-${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}-py3-none-any.whl
           asset_content_type: application/x-wheel+zip          
         
 
