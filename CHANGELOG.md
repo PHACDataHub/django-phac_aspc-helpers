@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.0...v0.4.1) (2023-02-09)
+
+
+### Bug Fixes
+
+* Updated incorrect django version dependency ([82f1218](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/82f1218f9aeefdd8bf345a68cfe32e78806a9c6f))
+
 ## [0.4.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.3.1...v0.4.0) (2023-01-10)
 
 
