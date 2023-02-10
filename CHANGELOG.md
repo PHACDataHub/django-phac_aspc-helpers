@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.1...v0.4.2) (2023-02-10)
+
+
+### Bug Fixes
+
+* Added utility to alter settings during unit tests ([540228f](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/540228ffed72d44095a8e7776b1b164a7d2f92b8))
+
 ## [0.4.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.0...v0.4.1) (2023-02-09)
 
 
