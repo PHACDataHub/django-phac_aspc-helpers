@@ -4,12 +4,15 @@ import inspect
 import environ
 
 from django.core import checks
+from django.conf import settings
 
 
 def trigger_configuration_warning(msg, **kwargs):
     """Trigger a configuration error programmatically"""
 
-    def phac_aspc_conf_warning(app_configs, **conf_kwargs):  # pylint: disable=unused-argument
+    def phac_aspc_conf_warning(
+        app_configs, **conf_kwargs
+    ):  # pylint: disable=unused-argument
         return [checks.Warning(msg, **kwargs)]
 
     checks.register(phac_aspc_conf_warning)
@@ -93,3 +96,18 @@ def global_from_env(prefix="PHAC_ASPC_", **conf):
 
     for name in conf:
         setattr(mod, name, env(f"{prefix}{name}"))
+
+
+def configure_settings_for_tests():
+    """
+    Modify django settings so they are suitable to run unit tests.
+      - Disables the Axes authentcation backend, to allow the test client
+        to function.  You could instead modify the request as described here:
+        https://django-axes.readthedocs.io/en/latest/3_usage.html#authenticating-users
+    """
+    # settings.AXES_ENABLED = False
+    settings.AUTHENTICATION_BACKENDS = [
+        x
+        for x in settings.AUTHENTICATION_BACKENDS
+        if x != "axes.backends.AxesStandaloneBackend"
+    ]
