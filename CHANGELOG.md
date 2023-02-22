@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.2...v0.4.3) (2023-02-22)
+
+
+### Bug Fixes
+
+* Removed tests from templatetags directory ([c801855](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/c801855c779b1f10b5175c8baf2f57df8d894460))
+
 ## [0.4.2](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.1...v0.4.2) (2023-02-10)
 
 
