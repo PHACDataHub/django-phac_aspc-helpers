@@ -1,4 +1,5 @@
 """This file contains utilities helpful for settings declarations"""
+import os
 import inspect
 
 import environ
@@ -92,7 +93,9 @@ def global_from_env(prefix="PHAC_ASPC_", **conf):
         scheme[f"{prefix}{name}"] = values
 
     env = environ.Env(**scheme)
-    environ.Env.read_env()
+    environ.Env.read_env(
+        os.path.join(os.path.abspath(os.path.dirname(__name__)), ".env")
+    )
 
     for name in conf:
         setattr(mod, name, env(f"{prefix}{name}"))
