@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.3...v0.4.4) (2023-03-06)
+
+
+### Bug Fixes
+
+* Ensure .env file from root of project dir is read by django-environ ([05dc452](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/05dc4526b34f6dea5e03ec8ebd6fb3f21754e68f))
+
 ## [0.4.3](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.2...v0.4.3) (2023-02-22)
 
 
