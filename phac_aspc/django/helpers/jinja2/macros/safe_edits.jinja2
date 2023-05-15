@@ -1,0 +1,187 @@
+{# Safe Edits
+  
+  Safe Edits are a collection of macros to prevent browser navigation if form
+  elements are modified.
+
+#}
+{% macro init() -%}
+  {#
+  Init
+
+  Initializes safe edits by providing the reusable Javascript code.
+
+  Should be called once per template, by convention at the bottom inside the 
+  body tag.
+
+  <html>
+    <body>
+      ...
+      {{ safe_edits.init() }}
+    </body>
+  </html>
+
+#}
+  <script src="{% static 'phac_aspc_helpers/safe_edits.js' %}"></script>
+  <script type="text/javascript">
+    (function() {
+      let retries = 0;
+      const call_init = () => {
+        retries += 1;
+        if (retries > 5) {
+          console.error('Timeout waiting to initialize.');
+          return false;
+        }
+        if (typeof safe_edits !== 'undefined') {
+          return safe_edits.activate();
+        }
+        setTimeout(call_init, 500);
+      }
+      setTimeout(call_init, 0);
+    })();
+  </script>
+{%- endmacro %}
+{% macro register(id="", tag="input,select", on="input", class="", element="div") -%}
+  {# Register an element or group of elements to be safeguarded
+Arguments:
+
+id      The Id of the container object to create or reference
+tag     What element tag should be monitored for changes, defaults to input
+on      What event should be monitored, defaults to input
+
+element When using call() syntax, use the specified element.  Defaults to 'div'
+class   When using call() syntax, add the specified class to the container
+
+Example using call syntax
+{% call safe_edits.register() %}
+<form>
+  <input type="text" value="muffins">
+</form>
+{% endcall %}
+
+Example referencing existing elements
+
+<form id="my_form_id">
+  <input type="text" value="">
+</form>
+{{ safe_edits.register("my_form_id") }}
+
+#}
+  {%- set id = "wnp__" + random_id() if not id else id %}
+  {{ _create_container(id, class, element, caller, "data-safe-edits-container=true") }}
+  {{ _js_register('register', id, tag, on) }}
+{%- endmacro %}
+{% macro bypass(id="", tag="button", on="click", class="", element="div") -%}
+  {# Register an element or group of elements that bypass the current state
+Arguments:
+
+id      The Id of the container object to create or reference
+tag     What element tag should be monitored for changes, defaults to button
+on      What event should be monitored, defaults to input
+
+element When using call() syntax, use the specified element.  Defaults to 'div'
+class   When using call() syntax, add the specified class to the container
+
+Example using call syntax
+{% call safe_edits.bypass() %}
+  <input type="submit">
+{% endcall %}
+
+Example referencing existing elements
+
+<div id="my_submit_button_container">
+  <input type="submit">
+</div>
+{{ safe_edits.bypass("my_submit_button_container") }}
+
+#}
+  {%- set id = "wnp__" + random_id() if not id else id %}
+  {{ _create_container(id, class, element, caller) }}
+  {{ _js_register('register_bypass', id, tag, on) }}
+{%- endmacro %}
+{% macro reset(id="", tag="button", on="click", class="", element="div") -%}
+  {# Register an element of group of elements to reset the current state.
+If the elements targetted by reset() are part of a container created with
+`register()`, only those elements registered in that container will be reset, 
+otherwise all elements on the page are reset.
+
+Arguments:
+
+id      The Id of the container object to create or reference
+tag     What element tag should be monitored for changes, defaults to button
+on      What event should be monitored, defaults to click
+
+element When using call() syntax, use the specified element.  Defaults to 'div'
+class   When using call() syntax, add the specified class to the container
+
+Example using call syntax
+{% call safe_edits.reset() %}
+  <input type="reset">
+{% endcall %}
+
+Example referencing existing elements
+
+<div id="my_reset_button_container">
+  <input type="reset">
+</div>
+{{ safe_edits.reset("my_reset_button_container") }}
+
+
+#}
+  {%- set id = "wnp__" + random_id() if not id else id %}
+  {{ _create_container(id, class, element, caller) }}
+  {{ _js_register('register_reset', id, tag, on) }}
+{%- endmacro %}
+{% macro freeze(frozen=True) -%}
+  {# Freeze stores the number of elements being monitored to determine if
+elements are added or removed.
+#}
+  <script type="text/javascript">
+  (function() {
+    setTimeout(() => {
+      safe_edits.freeze({{ "true" if frozen else "false" }});
+    }, 100);
+  })();
+  </script>
+{% endmacro %}
+{% macro _create_container(id, class, element, children, attrs="") -%}
+  {# Create a surrounding container with the given id
+If children is defined, surround children with the element requested in
+`element`, with an optionally defined class and an ID attribute.
+
+If children is not defined, `class` and `element` must be empty, otherwise an
+exception will be raised.
+#}
+  {% if children %}
+    {%- set class_attr = "class=%s" % class if class else "" %}
+    <{{ element }} id="{{ id }}" {{ class_attr }} {{ attrs }}>
+    {{ children() }}
+    </{{ element }}>
+  {% else %}
+    {% if class != "" or element != "div" %}
+      {{ raise("\"class\" and \"element\" can only be used by the \"call\" syntax.") }}
+    {% endif %}
+  {% endif %}
+{%- endmacro %}
+{% macro _js_register(method, id, tag, on) -%}
+  {# Create a script element that registers the target element
+If `safe_edits` is defined, call the appropriate `method` function, otherwise
+retry until a timeout is reached.
+#}
+  <script type="text/javascript">
+  (function() {
+    let retries = 0;
+    const call_register = () => {
+      retries += 1;
+      if (retries > 5) {
+        console.error('Timeout waiting to register.  Did you forget \{\{ safe_edits.init() \}\} ?');
+        return false;
+      }
+      if (typeof safe_edits !== 'undefined') {
+        return safe_edits.{{ method }}('{{ id }}', '{{ tag }}', '{{ on }}');
+      }
+      setTimeout(call_register, 500);
+    }
+    setTimeout(call_register, 0);
+  })();
+  </script>
+{%- endmacro %}
