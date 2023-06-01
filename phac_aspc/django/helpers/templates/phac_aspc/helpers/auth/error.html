@@ -1,0 +1,25 @@
+{% load phac_aspc_wet %}
+{% load phac_aspc_localization %}
+<!DOCTYPE html>
+<html lang="{% phac_aspc_localization_lang %}">
+    <head>
+        {% phac_aspc_wet_css %}
+        {% block title %}
+            <title>Authentication Error</title>
+        {% endblock title %}
+    </head>
+    <body>
+        <section class="panel panel-danger mrgn-tp-xl mrgn-lft-xl mrgn-rght-xl">
+            <div class="panel-body">
+                <section class="alert alert-danger">
+                    <h1>Authentication Error</h1>
+                    <pre>{{ description }}</pre>
+                </section>
+            </div>
+        </section>
+        <div class="mrgn-tp-sm mrgn-lft-xl">
+            <a href="{% url 'phac_aspc_helper_login' %}">Login</a>
+        </div>
+        {% phac_aspc_wet_scripts %}
+    </body>
+</html>

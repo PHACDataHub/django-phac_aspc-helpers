@@ -69,6 +69,35 @@ def configure_middleware(middleware_list):
     return suffix + middleware_list
 
 
+def get_env_value(env, key, prefix="PHAC_ASPC_"):
+    """Return prefixed value from environment"""
+    return env(f"{prefix}{key}")
+
+
+def get_env(prefix="PHAC_ASPC_", **conf):
+    """Return django-environ configured with the provided values and
+    using the prefix.
+
+    prefix can be used to change the environment variable prefix that is added
+    to the beginning on the variables defined in conf.  By default this value is
+    `PHAC_ASPC_`.
+
+    conf is a dictionary used to generate the scheme for django-environ.
+    
+    See https://django-environ.readthedocs.io/en/latest/api.html#environ.Env for
+    additional information on the scheme.
+    """
+    scheme = {}
+    for name, values in conf.items():
+        scheme[f"{prefix}{name}"] = values
+
+    env = environ.Env(**scheme)
+    environ.Env.read_env(
+        os.path.join(os.path.abspath(os.path.dirname(__name__)), ".env")
+    )
+    return env
+
+
 def global_from_env(prefix="PHAC_ASPC_", **conf):
     """Create named global variables based on the provided environment variable
     scheme.  Variables defined in the scheme will be inserted into the calling
@@ -81,24 +110,14 @@ def global_from_env(prefix="PHAC_ASPC_", **conf):
 
     conf is a dictionary used to generate the scheme for django-environ.
 
-    See https://django-environ.readthedocs.io/en/latest/api.html#environ.Env for
-    additional information on the scheme.
 
     """
 
     mod = inspect.getmodule(inspect.stack()[1][0])
-
-    scheme = {}
-    for name, values in conf.items():
-        scheme[f"{prefix}{name}"] = values
-
-    env = environ.Env(**scheme)
-    environ.Env.read_env(
-        os.path.join(os.path.abspath(os.path.dirname(__name__)), ".env")
-    )
+    env = get_env(prefix, **conf)
 
     for name in conf:
-        setattr(mod, name, env(f"{prefix}{name}"))
+        setattr(mod, name, get_env_value(env, name))
 
 
 def configure_settings_for_tests():

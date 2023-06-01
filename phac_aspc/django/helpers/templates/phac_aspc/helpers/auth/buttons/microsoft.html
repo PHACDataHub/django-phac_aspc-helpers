@@ -1,0 +1,27 @@
+{% load static %}
+<style type="text/css">
+    .btn-ms-login {
+        border: 1px solid #8c8c8c;
+        font-family: Segoe UI Regular;
+        font-size: 15px;
+        font-weight: 600;
+        color: #5e5e5e;
+        background-color: #fff;
+        height: 41px;
+        align-items: center;
+        display: inline-flex;
+        padding: 0 12px 0 0;
+        text-decoration: none;
+        }
+        
+        .btn-ms-login img {
+        margin: 0 12px 0 12px;
+        }
+</style>        
+<a href="{% url 'phac_aspc_helper_login'%}" class="btn-ms-login align-self-end">
+    <img width="21"
+         height="21"
+         src="{% static 'phac_aspc_helpers/auth/buttons/ms-logo.svg' %}"
+         alt="Microsoft Logo">
+    Sign in with Microsoft
+  </a>
