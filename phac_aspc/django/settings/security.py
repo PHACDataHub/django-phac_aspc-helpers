@@ -1,5 +1,7 @@
 """Recommended values related to security controls"""
 from django.core.exceptions import ImproperlyConfigured
+from django.conf import settings
+
 from .utils import (
     global_from_env,
     get_env,
@@ -25,13 +27,6 @@ AXES_META_PRECEDENCE_ORDER = [
     "HTTP_X_FORWARDED_FOR",
     "REMOTE_ADDR",
 ]
-
-#  AC-7 Automatic lockout of users after invalid login attempts
-AUTHENTICATION_BACKENDS = configure_authentication_backends(
-    [
-        "django.contrib.auth.backends.ModelBackend",
-    ]
-)
 
 # Configure the identity provider if the `{PREFIX}OAUTH_PROVIDER`
 # `environment variable is set.
@@ -65,12 +60,20 @@ if get_env_value(auth_config, "OAUTH_PROVIDER") == "microsoft":
         }
     }
 
-    AUTHENTICATION_BACKENDS = [
-        "phac_aspc.django.helpers.auth.backend.PhacAspcOAuthBackend"
-    ] + AUTHENTICATION_BACKENDS
+    PHAC_ASPC_OAUTH_USE_BACKEND = getattr(
+        settings,
+        "PHAC_ASPC_OAUTH_USE_BACKEND",
+        "phac_aspc.django.helpers.auth.backend.PhacAspcOAuthBackend",
+    )
+    settings.PHAC_ASPC_OAUTH_USE_BACKEND = PHAC_ASPC_OAUTH_USE_BACKEND
+    PHAC_ASPC_HELPER_OAUTH_PROVIDER = provider
 
-    PHAC_ASPC_HELPER_OAUTH_PROVIDER=provider
-
+#  AC-7 Automatic lockout of users after invalid login attempts
+AUTHENTICATION_BACKENDS = configure_authentication_backends(
+    [
+        "django.contrib.auth.backends.ModelBackend",
+    ]
+)
 
 #  AC-11 - Session controls
 global_from_env(

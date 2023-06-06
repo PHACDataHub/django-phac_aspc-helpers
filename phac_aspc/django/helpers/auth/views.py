@@ -1,3 +1,4 @@
+"""OAuth authentication related views"""
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib.auth import authenticate
@@ -10,7 +11,7 @@ from authlib.integrations.django_client import OAuth, OAuthError
 
 oauth = OAuth()
 provider = getattr(settings, "PHAC_ASPC_HELPER_OAUTH_PROVIDER", False)
-
+backend = getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", False)
 
 if provider:
     oauth.register(provider)
@@ -50,7 +51,7 @@ def authorize(request):
                 auth_login(
                     request,
                     user=user,
-                    backend="phac_aspc.django.helpers.auth.backend.PhacAspcOAuthBackend",
+                    backend=backend,
                 )
                 return HttpResponseRedirect(reverse("my_threats"))
             else:
@@ -66,8 +67,8 @@ def authorize(request):
                     "description": err.description,
                 },
             )
-        except Exception as err:
-            # TODO: this should be logged.
+
+        except Exception as err:  # pylint: disable=broad-exception-caught
             return render(
                 request,
                 "phac_aspc/helpers/auth/error.html",

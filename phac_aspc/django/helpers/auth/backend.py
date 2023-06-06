@@ -1,22 +1,16 @@
+"""Example authentication backend used by oauth login flow"""
 from typing import Any
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth import get_user_model, login as auth_login
+from django.contrib.auth import get_user_model
 from django.http.request import HttpRequest
-from django.conf import settings
 
 
 class PhacAspcOAuthBackend(BaseBackend):
+    """Authentication backend that creates a user using only the oid and email"""
     def _sync_user(self, user, user_info, force=False):
-        if (
-            not force
-            or user.email != user_info["email"]
-            or user.first_name != user_info["given_name"]
-            or user.last_name != user_info["family_name"]
-        ):
+        if not force or user.email != user_info["email"]:
             user.email = user_info["email"]
-            user.first_name = user_info["given_name"]
-            user.last_name = user_info["family_name"]
             user.save()
 
     def authenticate(

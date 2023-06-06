@@ -7,8 +7,8 @@ from ...helpers.auth.views import login, authorize
 urlpatterns = (
     [
         path("phac_aspc_helper_login", login, name="phac_aspc_helper_login"),
-        path("authorize", authorize, name="phac_aspc_authorize"),
+        path("phac_aspc_helper_authorize", authorize, name="phac_aspc_authorize"),
     ]
-    if settings.PHAC_ASPC_HELPER_OAUTH_PROVIDER
+    if getattr(settings, "PHAC_ASPC_HELPER_OAUTH_PROVIDER", False)
     else []
 )

@@ -56,9 +56,14 @@ def configure_authentication_backends(backend_list):
     By default importing the settings will automatically configure the backend,
     however if you want to customize the authentication backend used by your
     project, you can use this method to ensure proper configuration."""
+    oauth_backend = (
+        [getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", "")]
+        if getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", "")
+        else []
+    )
 
     prefix_backends = warn_and_remove(
-        ["axes.backends.AxesStandaloneBackend"], backend_list
+        ["axes.backends.AxesStandaloneBackend"] + oauth_backend, backend_list
     )
     return prefix_backends + backend_list
 
@@ -83,18 +88,33 @@ def get_env(prefix="PHAC_ASPC_", **conf):
     `PHAC_ASPC_`.
 
     conf is a dictionary used to generate the scheme for django-environ.
-    
+
     See https://django-environ.readthedocs.io/en/latest/api.html#environ.Env for
     additional information on the scheme.
     """
+
+    def _find_env_file(path):
+        # look for .env file in provided path
+        filename = os.path.join(path, ".env")
+        if os.path.isfile(filename):
+            return filename
+
+        # search the parent
+        parent = os.path.dirname(path)
+        if parent and os.path.normcase(parent) != os.path.normcase(
+            os.path.abspath(os.sep)
+        ):
+            return _find_env_file(parent)
+
+        # Not found
+        return ""
+
     scheme = {}
     for name, values in conf.items():
         scheme[f"{prefix}{name}"] = values
 
     env = environ.Env(**scheme)
-    environ.Env.read_env(
-        os.path.join(os.path.abspath(os.path.dirname(__name__)), ".env")
-    )
+    environ.Env.read_env(_find_env_file(os.path.abspath(os.path.dirname(__name__))))
     return env
 
 

@@ -179,6 +179,100 @@ or if you're using Jinja:
 | Web Experience Toolkit (WET) | v4.0.56.4 |
 | Canada.ca (GCWeb)            | v12.5.0   |
 
+
+### Sign in using Microsoft
+
+By adding a few environment variables, authentication using Microsoft's
+identity platform is automatically configured via the [Authlib](https://docs.authlib.org/en/latest/)
+library.  When enabled by setting the `PHAC_ASPC_OAUTH_PROVIDER` variable to
+"microsoft", two new routes are added:
+
+  - phac_aspc_helper_login  (`/phac_aspc_helper_login`)
+  - phac_aspc_authorize (`/phac_aspc_helper_authorize`)
+
+You must add the authorize URL `/phac_aspc_helper_authorize` to the list of 
+redirect URLs in the App Registration in Azure.
+
+Sending the browser to `/phac_aspc_helper_login` will trigger the authentication
+flow.  After successful authentication, a new user is created using the
+Azure uuid as the username.  To override this behaviour, add the following to
+your `settings.py`:
+
+```python
+
+PHAC_ASPC_OAUTH_USE_BACKEND = "custom.authentication.backend"
+
+from phac_aspc.django.settings import *
+```
+
+Here is an example backend that sets the user's name to the value provided
+by the identity service.
+
+```python
+from typing import Any
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.http.request import HttpRequest
+
+
+class OAuthBackend(BaseBackend):
+    def _sync_user(self, user, user_info, force=False):
+        if (
+            not force
+            or user.email != user_info["email"]
+            or user.name != user_info["name"]
+        ):
+            user.email = user_info["email"]
+            user.name = user_info["name"]
+            user.save()
+
+    def authenticate(
+        self,
+        request: HttpRequest,
+        user_info: dict | None = None,
+        **kwargs: Any,
+    ) -> AbstractBaseUser | None:
+        if user_info is not None:
+            user_model = get_user_model()
+            try:
+                user = user_model.objects.get(username=user_info["oid"])
+                self._sync_user(user, user_info)
+            except user_model.DoesNotExist:
+                user = user_model(username=user_info["oid"])
+                self._sync_user(user, user_info, True)
+            return user
+        return None
+
+    def get_user(self, user_id):
+        user_model = get_user_model()
+        try:
+            user = user_model.objects.get(pk=user_id)
+            print(user)
+            return user_model.objects.get(pk=user_id)
+        except user_model.DoesNotExist:
+            return None
+```
+
+#### Environment Variables
+
+| Variable                    | Type | Purpose                                                              |
+| --------------------------- | ---- | -------------------------------------------------------------------- |
+| PHAC_ASPC_OAUTH_PROVIDER    | str  | If set, enables OAuth.  Only "microsoft" is supported at the moment. |
+| PHAC_ASPC_APP_CLIENT_ID     | str  | Client ID (from the App Registration)                                |
+| PHAC_ASPC_APP_CLIENT_SECRET | str  | Client Secret (from the App Registration)                            |
+| PHAC_ASPC_MICROSOFT_TENANT  | str  | Microsoft Tenant ID                                                  |
+
+#### Template Tag
+
+A "Sign in with Microsoft" button is available as a template tag:
+
+```django
+{% load phac_aspc_auth %}
+{% phac_aspc_auth_signin_microsoft_button %}
+```
+
 ### Security Controls
 
 #### AC-7 Automatic lockout of users after invalid login attempts
