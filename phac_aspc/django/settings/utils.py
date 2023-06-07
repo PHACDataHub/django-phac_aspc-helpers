@@ -70,8 +70,11 @@ def configure_authentication_backends(backend_list):
 
 def configure_middleware(middleware_list):
     """Return the list of middleware configured for this library"""
-    suffix = warn_and_remove(["axes.middleware.AxesMiddleware"], middleware_list)
-    return suffix + middleware_list
+    prefix = warn_and_remove(
+        ["axes.middleware.AxesMiddleware", "django.middleware.locale.LocaleMiddleware"],
+        middleware_list,
+    )
+    return prefix + middleware_list
 
 
 def get_env_value(env, key, prefix="PHAC_ASPC_"):
