@@ -257,12 +257,12 @@ class OAuthBackend(BaseBackend):
 
 #### Environment Variables
 
-| Variable                    | Type | Purpose                                                              |
-| --------------------------- | ---- | -------------------------------------------------------------------- |
-| PHAC_ASPC_OAUTH_PROVIDER    | str  | If set, enables OAuth.  Only "microsoft" is supported at the moment. |
-| PHAC_ASPC_APP_CLIENT_ID     | str  | Client ID (from the App Registration)                                |
-| PHAC_ASPC_APP_CLIENT_SECRET | str  | Client Secret (from the App Registration)                            |
-| PHAC_ASPC_MICROSOFT_TENANT  | str  | Microsoft Tenant ID                                                  |
+| Variable                          | Type | Purpose                                                              |
+| --------------------------------- | ---- | -------------------------------------------------------------------- |
+| PHAC_ASPC_OAUTH_PROVIDER          | str  | If set, enables OAuth.  Only "microsoft" is supported at the moment. |
+| PHAC_ASPC_OAUTH_APP_CLIENT_ID     | str  | Client ID (from the App Registration)                                |
+| PHAC_ASPC_OAUTH_APP_CLIENT_SECRET | str  | Client Secret (from the App Registration)                            |
+| PHAC_ASPC_OAUTH_MICROSOFT_TENANT  | str  | Microsoft Tenant ID                                                  |
 
 #### Template Tag
 
