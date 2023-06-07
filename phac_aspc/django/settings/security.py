@@ -53,7 +53,7 @@ if get_env_value(auth_config, "OAUTH_PROVIDER") == "microsoft":
         f"{provider}": {
             "client_id": client_id,
             "client_secret": client_secret,
-            "server_metadata_url": f"https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration",
+            "server_metadata_url": f"https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration",  # pylint: disable=line-too-long  # noqa: E501
             "client_kwargs": {
                 "scope": "openid email profile",
             },

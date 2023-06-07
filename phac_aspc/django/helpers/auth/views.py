@@ -10,12 +10,13 @@ from django.core.exceptions import ImproperlyConfigured
 from authlib.integrations.django_client import OAuth, OAuthError
 
 oauth = OAuth()
-provider = getattr(settings, "PHAC_ASPC_HELPER_OAUTH_PROVIDER", False)
-backend = getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", False)
-redirect_login = getattr(settings, "PHAC_ASPC_OAUTH_REDIRECT_ON_LOGIN", "")
 
-if provider:
-    oauth.register(provider)
+PROVIDER = getattr(settings, "PHAC_ASPC_HELPER_OAUTH_PROVIDER", False)
+BACKEND = getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", False)
+REDIRECT_LOGIN = getattr(settings, "PHAC_ASPC_OAUTH_REDIRECT_ON_LOGIN", "")
+
+if PROVIDER:
+    oauth.register(PROVIDER)
 
 
 def validate_iss(claims, value):
@@ -28,8 +29,8 @@ def validate_iss(claims, value):
 
 def login(request):
     """Redirect users to the provider's login page"""
-    if provider:
-        client = oauth.create_client(provider)
+    if PROVIDER:
+        client = oauth.create_client(PROVIDER)
         return client.authorize_redirect(
             request, request.build_absolute_uri(reverse("phac_aspc_authorize"))
         )
@@ -38,9 +39,9 @@ def login(request):
 
 def authorize(request):
     """Verify the token received and perform authentication"""
-    if provider:
+    if PROVIDER:
         try:
-            client = oauth.create_client(provider)
+            client = oauth.create_client(PROVIDER)
             token = client.authorize_access_token(
                 request,
                 claims_options={"iss": {"essential": True, "validate": validate_iss}},
@@ -51,20 +52,19 @@ def authorize(request):
                 auth_login(
                     request,
                     user=user,
-                    backend=backend,
+                    backend=BACKEND,
                 )
                 return HttpResponseRedirect(
-                    reverse(redirect_login) if redirect_login else "/"
+                    reverse(REDIRECT_LOGIN) if REDIRECT_LOGIN else "/"
                 )
-            else:
-                return render(
-                    request,
-                    "phac_aspc/helpers/auth/error.html",
-                    {
-                        "type": "oauth",
-                        "details": "Access denied",
-                    },
-                )
+            return render(
+                request,
+                "phac_aspc/helpers/auth/error.html",
+                {
+                    "type": "oauth",
+                    "details": "Access denied",
+                },
+            )
 
         except OAuthError as err:
             return render(
@@ -75,7 +75,7 @@ def authorize(request):
                     "details": err.description,
                 },
             )
-        except Exception as err:  # pylint: disable=broad-exception-caught
+        except Exception as err:  # pylint: disable=broad-except
             return render(
                 request,
                 "phac_aspc/helpers/auth/error.html",

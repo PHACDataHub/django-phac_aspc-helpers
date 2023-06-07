@@ -1,5 +1,5 @@
 """Example authentication backend used by oauth login flow"""
-from typing import Any
+from typing import Any, Union
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth import get_user_model
@@ -10,13 +10,13 @@ class PhacAspcOAuthBackend(BaseBackend):
     """Authentication backend that creates a user using only the oid and email"""
     def _sync_user(self, user, user_info, force=False):
         email = user_info["email"] if "email" in user_info else ""
-        if force or (email != "" and user.email != email):
+        if force or (email not in ('', user.email)):
             user.email = email
             user.save()
 
     def authenticate(
-        self, request: HttpRequest, user_info: dict | None = None, **kwargs: Any
-    ) -> AbstractBaseUser | None:
+        self, request: HttpRequest, user_info: Union(dict, None) = None, **kwargs: Any
+    ) -> Union(AbstractBaseUser, None):
         if user_info is not None:
             user_model = get_user_model()
             try:
