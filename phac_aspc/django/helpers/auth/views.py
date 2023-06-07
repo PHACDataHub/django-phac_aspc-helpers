@@ -12,6 +12,7 @@ from authlib.integrations.django_client import OAuth, OAuthError
 oauth = OAuth()
 provider = getattr(settings, "PHAC_ASPC_HELPER_OAUTH_PROVIDER", False)
 backend = getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", False)
+redirect_login = getattr(settings, "PHAC_ASPC_OAUTH_REDIRECT_ON_LOGIN", "")
 
 if provider:
     oauth.register(provider)
@@ -29,7 +30,6 @@ def login(request):
     """Redirect users to the provider's login page"""
     if provider:
         client = oauth.create_client(provider)
-        print(request.build_absolute_uri(reverse("phac_aspc_authorize")))
         return client.authorize_redirect(
             request, request.build_absolute_uri(reverse("phac_aspc_authorize"))
         )
@@ -53,29 +53,35 @@ def authorize(request):
                     user=user,
                     backend=backend,
                 )
-                return HttpResponseRedirect(reverse("my_threats"))
+                return HttpResponseRedirect(
+                    reverse(redirect_login) if redirect_login else "/"
+                )
             else:
-                return HttpResponseRedirect(reverse("landing"))
+                return render(
+                    request,
+                    "phac_aspc/helpers/auth/error.html",
+                    {
+                        "type": "oauth",
+                        "details": "Access denied",
+                    },
+                )
 
         except OAuthError as err:
             return render(
                 request,
                 "phac_aspc/helpers/auth/error.html",
                 {
-                    "title": "Authentication Error",
-                    "error": err.error,
-                    "description": err.description,
+                    "type": "oauth",
+                    "details": err.description,
                 },
             )
-
         except Exception as err:  # pylint: disable=broad-exception-caught
             return render(
                 request,
                 "phac_aspc/helpers/auth/error.html",
                 {
-                    "title": "Application Error",
-                    "error": "exception",
-                    "description": str(err),
+                    "type": "general",
+                    "details": str(err),
                 },
             )
     raise ImproperlyConfigured("The authorize route is not configured.")

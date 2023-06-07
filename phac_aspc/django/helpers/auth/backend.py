@@ -9,8 +9,9 @@ from django.http.request import HttpRequest
 class PhacAspcOAuthBackend(BaseBackend):
     """Authentication backend that creates a user using only the oid and email"""
     def _sync_user(self, user, user_info, force=False):
-        if not force or user.email != user_info["email"]:
-            user.email = user_info["email"]
+        email = user_info["email"] if "email" in user_info else ""
+        if force or (email != "" and user.email != email):
+            user.email = email
             user.save()
 
     def authenticate(

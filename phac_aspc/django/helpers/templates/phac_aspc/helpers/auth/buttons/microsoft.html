@@ -1,4 +1,5 @@
 {% load static %}
+{% load phac_aspc_localization %}
 <style type="text/css">
     .btn-ms-login {
         border: 1px solid #8c8c8c;
@@ -17,11 +18,12 @@
         .btn-ms-login img {
         margin: 0 12px 0 12px;
         }
-</style>        
-<a href="{% url 'phac_aspc_helper_login'%}" class="btn-ms-login align-self-end">
+</style>
+<a href="{% url 'phac_aspc_helper_login' %}"
+   class="btn-ms-login align-self-end">
     <img width="21"
          height="21"
          src="{% static 'phac_aspc_helpers/auth/buttons/ms-logo.svg' %}"
-         alt="Microsoft Logo">
-    Sign in with Microsoft
-  </a>
+         alt="{% use_string "microsoft_logo" %}" />
+    {% use_string "signin_with_microsoft" %}
+</a>

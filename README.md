@@ -218,14 +218,21 @@ from django.http.request import HttpRequest
 
 
 class OAuthBackend(BaseBackend):
+    def _get(self, user_info, value, default=""):
+        return user_info[value] if value in user_info else default
+
+    def _should_update(self, user_info, value, current):
+        v = self._get(user_info, value)
+        return v != "" and v != current
+
     def _sync_user(self, user, user_info, force=False):
         if (
-            not force
-            or user.email != user_info["email"]
-            or user.name != user_info["name"]
+            force
+            or self._should_update(user_info, "email", user.email)
+            or self._should_update(user_info, "name", user.first_name)
         ):
-            user.email = user_info["email"]
-            user.name = user_info["name"]
+            user.email = self._get(user_info, "email", user.email)
+            user.first_name = self._get(user_info, "name", user.first_name)
             user.save()
 
     def authenticate(
@@ -248,11 +255,10 @@ class OAuthBackend(BaseBackend):
     def get_user(self, user_id):
         user_model = get_user_model()
         try:
-            user = user_model.objects.get(pk=user_id)
-            print(user)
             return user_model.objects.get(pk=user_id)
         except user_model.DoesNotExist:
             return None
+
 ```
 
 #### Environment Variables
