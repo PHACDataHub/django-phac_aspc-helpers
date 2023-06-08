@@ -34,18 +34,18 @@
                                     {% block details %}
                                         <pre>{{ details }}</pre>
                                     {% endblock details %}
-                                    {% block alert %}
-                                    </section>
-                                {% endblock panel %}
-                            </div>
-                        {% endblock section %}
-                    </section>
-                    {% block retry %}
-                        <div class="mrgn-tp-sm mrgn-lft-xl">
-                            <a href="{% url 'phac_aspc_helper_login' %}">{% use_string "error_retry" %}</a>
-                        </div>
-                    {% endblock retry %}
-                    {% phac_aspc_wet_scripts %}
-                {% endblock body %}
-            </body>
-        </html>
+                                {% endblock alert %}
+                            </section>
+                        {% endblock panel %}
+                    </div>
+                {% endblock section %}
+            </section>
+            {% block retry %}
+                <div class="mrgn-tp-sm mrgn-lft-xl">
+                    <a href="{% url 'phac_aspc_helper_login' %}">{% use_string "error_retry" %}</a>
+                </div>
+            {% endblock retry %}
+            {% phac_aspc_wet_scripts %}
+        {% endblock body %}
+    </body>
+</html>
