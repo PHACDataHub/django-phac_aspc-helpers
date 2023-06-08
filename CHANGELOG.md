@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.4...v0.5.0) (2023-06-08)
+
+
+### Features
+
+* Added support to sign in using the Microsoft Identity Platform ([c430b5f](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/c430b5f26e75e603dad149276c5af387ac9d9a51))
+
 ## [0.4.4](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.3...v0.4.4) (2023-03-06)
 
 
