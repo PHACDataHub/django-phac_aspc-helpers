@@ -3,5 +3,6 @@
     "python.linting.pylintEnabled": true,
     "editor.rulers": [80],
     "markdown-preview-github-styles.colorTheme": "light",
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "cSpell.language": "en-ca"
 }

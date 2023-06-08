@@ -4,17 +4,20 @@
     "dictionaryDefinitions": [],
     "dictionaries": [],
     "words": [
+        "Authlib",
         "autouse",
-        "behaviours",
-        "Belliveau"
+        "Belliveau",
+        "pylint",
+        "templating"
     ],
     "languageSettings": [
         {
             "languageId": "*",
-            "locale": "en-CA,fr-CA"
+            "locale": "en-ca,fr-ca"
         }
     ],
     "ignoreWords": [
+        "COOLOFF",
         "aspc",
         "boew",
         "inlines",
@@ -25,8 +28,8 @@
         "phac",
         "reactionTime",
         "sessionalive",
-        "urlpatterns",
-        "COOLOFF"
+        "signin",
+        "urlpatterns"
     ],
     "import": []
 }
