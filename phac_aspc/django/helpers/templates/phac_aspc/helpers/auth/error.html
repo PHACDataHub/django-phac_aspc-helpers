@@ -1,0 +1,51 @@
+{% load phac_aspc_wet %}
+{% load phac_aspc_localization %}
+<!DOCTYPE html>
+<html lang="{% phac_aspc_localization_lang %}">
+    <head>
+        {% block head %}
+            {% phac_aspc_wet_css %}
+            <title>{% use_string "error_title" %}</title>
+            <meta chartset="UTF-8" />
+            <meta name="description"
+                  content="{% use_string "error_page_description" %}"/>
+            <meta name="keywords" content="" />
+            {% block extrahead %}
+            {% endblock extrahead %}
+        {% endblock head %}
+    </head>
+    <body>
+        {% block body %}
+            <section class="panel panel-danger mrgn-tp-xl mrgn-lft-xl mrgn-rght-xl">
+                {% block section %}
+                    <div class="panel-body">
+                        {% block panel %}
+                            <section class="alert alert-danger">
+                                {% block alert %}
+                                    {% block header %}
+                                        <h1>
+                                            {% if type == "general" %}
+                                                {% use_string "error_type_general" %}
+                                            {% elif type == "oauth" %}
+                                                {% use_string "error_type_oauth" %}
+                                            {% endif %}
+                                        </h1>
+                                    {% endblock header %}
+                                    {% block details %}
+                                        <pre>{{ details }}</pre>
+                                    {% endblock details %}
+                                {% endblock alert %}
+                            </section>
+                        {% endblock panel %}
+                    </div>
+                {% endblock section %}
+            </section>
+            {% block retry %}
+                <div class="mrgn-tp-sm mrgn-lft-xl">
+                    <a href="{% url 'phac_aspc_helper_login' %}">{% use_string "error_retry" %}</a>
+                </div>
+            {% endblock retry %}
+            {% phac_aspc_wet_scripts %}
+        {% endblock body %}
+    </body>
+</html>

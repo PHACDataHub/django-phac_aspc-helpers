@@ -71,14 +71,14 @@ For more information, refer to the Jinja
 ## Environment variables
 
 Several settings or behaviours implemented by this library can be controlled via
-environment variables.  This is done via the
+environment variables. This is done via the
 [django-environ](https://django-environ.readthedocs.io/en/latest/) library.
 (Refer to their documentation on how to format special data types like lists)
 If your project root has a `.env` file, those values will be used.
 
 If you want to use environment variables in your project's configuration, you
 can simply reference django-environ directly as it will automatically be
-installed.  For example:
+installed. For example:
 
 ```python
 import environ
@@ -91,7 +91,7 @@ DEBUG = env('DEBUG')
 ```
 
 This library also provides a utility that automatically declares a module level
-global while checking the environment.  It is particularly useful when declaring
+global while checking the environment. It is particularly useful when declaring
 django settings.
 
 ```python
@@ -104,8 +104,8 @@ global_from_env(
 
 The example above creates the module level global `SESSION_COOKIE_AGE` with a
 default value of 1200, unless there is an environment variable (or **.env** file
-entry) `PHAC_ASPC_SESSION_COOKIE_AGE`.  By default the declared variable name is
-prefixed with `PHAC_ASPC_`.  The prefix can be changed by providing a custom
+entry) `PHAC_ASPC_SESSION_COOKIE_AGE`. By default the declared variable name is
+prefixed with `PHAC_ASPC_`. The prefix can be changed by providing a custom
 prefix.
 
 ```python
@@ -119,7 +119,7 @@ global_from_env(
 
 ### Environment variable list
 
-All variables are prefixed with `PHAC_ASPC_` to avoid name conflicts.  
+All variables are prefixed with `PHAC_ASPC_` to avoid name conflicts.
 
 | Variable                        | Type | Purpose                         |
 | ------------------------------- | ---- | ------------------------------- |
@@ -179,6 +179,151 @@ or if you're using Jinja:
 | Web Experience Toolkit (WET) | v4.0.56.4 |
 | Canada.ca (GCWeb)            | v12.5.0   |
 
+### Sign in using Microsoft
+
+By adding a few environment variables, authentication using Microsoft's
+identity platform is automatically configured via the [Authlib](https://docs.authlib.org/en/latest/)
+library. Setting the `PHAC_ASPC_OAUTH_PROVIDER` variable to "microsoft" enables
+OAuth and adds the following new routes:
+
+- /en-ca/phac_aspc_helper_login (`phac_aspc_helper_login`)
+- /fr-ca/phac_aspc_helper_login (`phac_aspc_helper_login`)
+- /en-ca/phac_aspc_helper_authorize (`phac_aspc_authorize`)
+- /fr-ca/phac_aspc_helper_authorize (`phac_aspc_authorize`)
+
+The `phac_aspc_authorize` URLs above must be added to the list of redirect URLs
+in the Azure App Registration.
+
+The login flow is triggered by redirecting the browser to the named route
+`phac_aspc_helper_login`. The browser will automatically redirect the user to
+Microsoft's Sign in page and after successful authentication, return the user to
+the redirect route named `phac_aspc_authorize` along with a token containing
+information about the user.
+
+By default, the authentication backend will look for a user who's username is
+the user's uuid from Microsoft - if not found a new user is created.  To
+customize this behaviour, a custom authentication backend class can be specified
+via `PHAC_ASPC_OAUTH_USE_BACKEND` in `settings.py`.
+
+After successful authentication, the user is redirected to `/`.  To customize
+this behaviour, set `PHAC_ASPC_OAUTH_REDIRECT_ON_LOGIN` in `settings.py` to the
+name of the desired route.
+
+```python
+
+PHAC_ASPC_OAUTH_USE_BACKEND = "custom.authentication.backend"
+PHAC_ASPC_OAUTH_REDIRECT_ON_LOGIN = "home"
+
+# pylint: disable=wrong-import-position, unused-wildcard-import, wildcard-import
+from phac_aspc.django.settings import *
+```
+
+> **Note**
+> It is important that these settings be declared **before** the wildcard import.
+
+Here is an example custom backend that sets the user's name to the value
+provided by the identity service.
+
+```python
+from typing import Any
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.http.request import HttpRequest
+
+
+class OAuthBackend(BaseBackend):
+    def _get(self, user_info, value, default=""):
+        return user_info[value] if value in user_info else default
+
+    def _should_update(self, user_info, value, current):
+        v = self._get(user_info, value)
+        return v != "" and v != current
+
+    def _sync_user(self, user, user_info, force=False):
+        if (
+            force
+            or self._should_update(user_info, "email", user.email)
+            or self._should_update(user_info, "name", user.first_name)
+        ):
+            user.email = self._get(user_info, "email", user.email)
+            user.first_name = self._get(user_info, "name", user.first_name)
+            user.save()
+
+    def authenticate(
+        self,
+        request: HttpRequest,
+        user_info: dict | None = None,
+        **kwargs: Any,
+    ) -> AbstractBaseUser | None:
+        if user_info is not None:
+            user_model = get_user_model()
+            try:
+                user = user_model.objects.get(username=user_info["oid"])
+                self._sync_user(user, user_info)
+            except user_model.DoesNotExist:
+                user = user_model(username=user_info["oid"])
+                self._sync_user(user, user_info, True)
+            return user
+        return None
+
+    def get_user(self, user_id):
+        user_model = get_user_model()
+        try:
+            return user_model.objects.get(pk=user_id)
+        except user_model.DoesNotExist:
+            return None
+
+```
+
+#### Environment Variables
+
+| Variable                          | Type | Purpose                                      |
+| --------------------------------- | ---- | -------------------------------------------- |
+| PHAC_ASPC_OAUTH_PROVIDER          | str  | Only "microsoft" is supported at the moment. |
+| PHAC_ASPC_OAUTH_APP_CLIENT_ID     | str  | Client ID (from the App Registration)        |
+| PHAC_ASPC_OAUTH_APP_CLIENT_SECRET | str  | Client Secret (from the App Registration)    |
+| PHAC_ASPC_OAUTH_MICROSOFT_TENANT  | str  | Microsoft Tenant ID                          |
+
+#### Template Tag
+
+A "Sign in with Microsoft" button is available as a template tag:
+
+```django
+{% load phac_aspc_auth %}
+{% phac_aspc_auth_signin_microsoft_button %}
+```
+
+#### Handling Errors
+
+If there are any errors during the authentication flow, they are displayed to
+the user via the [error.html](phac_aspc/django/helpers/templates/phac_aspc/helpers/auth/error.html)
+template.  The template can be extended using standard django templating by
+creating a `templates/phac_aspc/helpers/auth/error.html` file in the host
+project.
+
+#### Strings and locales
+
+Strings displayed to the user during the authentication flow are available in
+Canada's both official languages.  These strings can be customized by creating
+templates in the host project.  Here is a list of strings and templates used by
+the authentication flow:
+
+| Template                    | Context                                              |
+| --------------------------- | ---------------------------------------------------- |
+| error_title.html            | Error page title tag value                           |
+| error_page_description.html | Description of error page (meta tag)                 |
+| error_type_general.html     | Error header displayed for general exceptions        |
+| error_type_oauth.html       | Error header displayed for authentication errors     |
+| error_retry.html            | Text of retry link                                   |
+| microsoft_logo.html         | Alt text of sign the Microsoft logo in signin button |
+| signin_with_microsoft.html  | Text displayed in sign in button                     |
+
+> **Note**
+> String templates should be placed in the `templates/phac_aspc/helpers/strings`
+> directory.
+
 ### Security Controls
 
 #### AC-7 Automatic lockout of users after invalid login attempts
@@ -204,6 +349,7 @@ duration, you can modify the `AXES_COOLOFF_TIME` setting.
 AXES_COOLOFF_TIME = None   # An administrator must unlock the account
 AXES_COOLOFF_TIME = 2      # Accounts will be locked out for 2 hours
 ```
+
 For more information regarding available configuration options, visit
 django-axes's [documentation](https://django-axes.readthedocs.io/en/latest/4_configuration.html)
 
@@ -213,6 +359,7 @@ remove all of the lockouts you can run:
 ```bash
 python -m manage axes_reset
 ```
+
 See the [usage](https://django-axes.readthedocs.io/en/latest/3_usage.html)
 documentation for more details.
 
@@ -226,7 +373,7 @@ The default configuration makes the following configuration changes to django:
 - Any requests to the server automatically extends the session.
 
 You can override any of these settings by adding them below the settings import
-line.  For example to use 30 minutes sessions:
+line. For example to use 30 minutes sessions:
 
 ```python
 #settings.py
@@ -279,7 +426,7 @@ or if you're using Jinja
 
 ### Localization
 
-Django will be configured to support English (en-ca) and French (fr-ca).  This
+Django will be configured to support English (en-ca) and French (fr-ca). This
 can be changed in your projects settings using `LANGUAGES` and `LANGUAGE_CODE`.
 
 > For more information on Django's localization, see their
@@ -300,11 +447,10 @@ Or in you're using Jinja
 <html lang="{{ phac_aspc.localization.lang() }}">
 ```
 
-
 #### translate decorator
 
 Use this decorator on your models to add translations via
-`django-modeltranslation`.  The example below adds translations for the
+`django-modeltranslation`. The example below adds translations for the
 `title` field.
 
 ```python

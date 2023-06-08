@@ -56,17 +56,69 @@ def configure_authentication_backends(backend_list):
     By default importing the settings will automatically configure the backend,
     however if you want to customize the authentication backend used by your
     project, you can use this method to ensure proper configuration."""
+    oauth_backend = (
+        [getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", "")]
+        if getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", "")
+        else []
+    )
 
     prefix_backends = warn_and_remove(
-        ["axes.backends.AxesStandaloneBackend"], backend_list
+        ["axes.backends.AxesStandaloneBackend"] + oauth_backend, backend_list
     )
     return prefix_backends + backend_list
 
 
 def configure_middleware(middleware_list):
     """Return the list of middleware configured for this library"""
-    suffix = warn_and_remove(["axes.middleware.AxesMiddleware"], middleware_list)
-    return suffix + middleware_list
+    prefix = warn_and_remove(
+        ["axes.middleware.AxesMiddleware", "django.middleware.locale.LocaleMiddleware"],
+        middleware_list,
+    )
+    return prefix + middleware_list
+
+
+def get_env_value(env, key, prefix="PHAC_ASPC_"):
+    """Return prefixed value from environment"""
+    return env(f"{prefix}{key}")
+
+
+def get_env(prefix="PHAC_ASPC_", **conf):
+    """Return django-environ configured with the provided values and
+    using the prefix.
+
+    prefix can be used to change the environment variable prefix that is added
+    to the beginning on the variables defined in conf.  By default this value is
+    `PHAC_ASPC_`.
+
+    conf is a dictionary used to generate the scheme for django-environ.
+
+    See https://django-environ.readthedocs.io/en/latest/api.html#environ.Env for
+    additional information on the scheme.
+    """
+
+    def _find_env_file(path):
+        # look for .env file in provided path
+        filename = os.path.join(path, ".env")
+        if os.path.isfile(filename):
+            return filename
+
+        # search the parent
+        parent = os.path.dirname(path)
+        if parent and os.path.normcase(parent) != os.path.normcase(
+            os.path.abspath(os.sep)
+        ):
+            return _find_env_file(parent)
+
+        # Not found
+        return ""
+
+    scheme = {}
+    for name, values in conf.items():
+        scheme[f"{prefix}{name}"] = values
+
+    env = environ.Env(**scheme)
+    environ.Env.read_env(_find_env_file(os.path.abspath(os.path.dirname(__name__))))
+    return env
 
 
 def global_from_env(prefix="PHAC_ASPC_", **conf):
@@ -81,24 +133,14 @@ def global_from_env(prefix="PHAC_ASPC_", **conf):
 
     conf is a dictionary used to generate the scheme for django-environ.
 
-    See https://django-environ.readthedocs.io/en/latest/api.html#environ.Env for
-    additional information on the scheme.
 
     """
 
     mod = inspect.getmodule(inspect.stack()[1][0])
-
-    scheme = {}
-    for name, values in conf.items():
-        scheme[f"{prefix}{name}"] = values
-
-    env = environ.Env(**scheme)
-    environ.Env.read_env(
-        os.path.join(os.path.abspath(os.path.dirname(__name__)), ".env")
-    )
+    env = get_env(prefix, **conf)
 
     for name in conf:
-        setattr(mod, name, env(f"{prefix}{name}"))
+        setattr(mod, name, get_env_value(env, name))
 
 
 def configure_settings_for_tests():

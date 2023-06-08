@@ -108,15 +108,35 @@ def test_configure_middleware():
     the list"""
     num = len(registry.get_checks())
     test = configure_middleware([])
-    assert test == ["axes.middleware.AxesMiddleware"]
+    assert test == [
+        "axes.middleware.AxesMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+    ]
     assert len(registry.get_checks()) == num
 
     num = len(registry.get_checks())
     test = configure_middleware(["a", "b"])
-    assert test == ["axes.middleware.AxesMiddleware", "a", "b"]
+    assert test == [
+        "axes.middleware.AxesMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+        "a",
+        "b",
+    ]
     assert len(registry.get_checks()) == num
 
     num = len(registry.get_checks())
-    test = configure_middleware(["a", "axes.middleware.AxesMiddleware", "b"])
-    assert test == ["a", "axes.middleware.AxesMiddleware", "b"]
-    assert len(registry.get_checks()) == num + 1
+    test = configure_middleware(
+        [
+            "a",
+            "axes.middleware.AxesMiddleware",
+            "django.middleware.locale.LocaleMiddleware",
+            "b",
+        ]
+    )
+    assert test == [
+        "a",
+        "axes.middleware.AxesMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+        "b",
+    ]
+    assert len(registry.get_checks()) == num + 2
