@@ -1,7 +1,7 @@
 """Example authentication backend used by oauth login flow"""
-from typing import Any, Union
+from typing import Any
 from django.contrib.auth.backends import BaseBackend
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.base_user import AbstractBaseUser  # pylint: disable=unused-import
 from django.contrib.auth import get_user_model
 from django.http.request import HttpRequest
 
@@ -15,8 +15,8 @@ class PhacAspcOAuthBackend(BaseBackend):
             user.save()
 
     def authenticate(
-        self, request: HttpRequest, user_info: Union(dict, None) = None, **kwargs: Any
-    ) -> Union(AbstractBaseUser, None):
+        self, request: HttpRequest, user_info: "dict | None" = None, **kwargs: Any
+    ) -> "AbstractBaseUser | None":
         if user_info is not None:
             user_model = get_user_model()
             try:
