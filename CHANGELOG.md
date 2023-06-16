@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.5.0...v0.5.1) (2023-06-16)
+
+
+### Bug Fixes
+
+* Include translation files in release ([37e165d](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/37e165d048e64526258dcfe340dd23f319a9db98))
+
 ## [0.5.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.4.4...v0.5.0) (2023-06-08)
 
 
