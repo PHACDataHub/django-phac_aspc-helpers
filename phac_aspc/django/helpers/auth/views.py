@@ -32,9 +32,10 @@ def login(request):
     """Redirect users to the provider's login page"""
     if PROVIDER:
         client = oauth.create_client(PROVIDER)
-        auth_url_extra_params = {'state': request.build_absolute_uri()}
+        auth_url_extra_params = {"state": request.build_absolute_uri()}
         return client.authorize_redirect(
-            request, request.build_absolute_uri(reverse("phac_aspc_authorize")),
+            request,
+            request.build_absolute_uri(reverse("phac_aspc_authorize")),
             **auth_url_extra_params
         )
     raise ImproperlyConfigured("The login route is not configured.")
@@ -50,7 +51,9 @@ def authorize(request):
                 claims_options={"iss": {"essential": True, "validate": validate_iss}},
             )
             user_info = token["userinfo"]
-            query_params = dict(parse.parse_qsl(parse.urlsplit(request.GET['state']).query))
+            query_params = dict(
+                parse.parse_qsl(parse.urlsplit(request.GET["state"]).query)
+            )
             user = authenticate(request, user_info=user_info)
             if user is not None:
                 auth_login(
@@ -59,11 +62,9 @@ def authorize(request):
                     backend=BACKEND,
                 )
 
-                if 'next' in query_params:
-                    return HttpResponseRedirect(
-                        query_params['next']
-                    )
-                
+                if "next" in query_params:
+                    return HttpResponseRedirect(query_params["next"])
+
                 return HttpResponseRedirect(
                     reverse(REDIRECT_LOGIN) if REDIRECT_LOGIN else "/"
                 )
