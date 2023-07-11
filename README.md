@@ -492,3 +492,4 @@ class Signal(models.Model):
     title = models.CharField(max_length=400)
     location = models.ManyToManyField("Location", through='SignalLocation')
 ```
+
