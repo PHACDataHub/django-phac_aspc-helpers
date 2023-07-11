@@ -1,12 +1,13 @@
 """OAuth authentication related views"""
+from urllib import parse
+
+from django.conf import settings
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.contrib.auth import authenticate
 from django.urls import reverse
-from django.contrib.auth import login as auth_login
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from urllib import parse
 
 from authlib.integrations.django_client import OAuth, OAuthError
 

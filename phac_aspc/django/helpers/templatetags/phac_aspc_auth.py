@@ -1,7 +1,7 @@
 """Related to Authentication"""
 from django import template
-from django.template import loader
 from django.conf import settings
+from django.template import loader
 
 register = template.Library()
 
