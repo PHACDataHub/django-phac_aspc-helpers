@@ -209,6 +209,8 @@ After successful authentication, the user is redirected to `/`.  To customize
 this behaviour, set `PHAC_ASPC_OAUTH_REDIRECT_ON_LOGIN` in `settings.py` to the
 name of the desired route.
 
+Redirecting to a specific page is also supported through the `?next=<url>` query parameter. See "Template Tag" examples below.
+
 ```python
 
 PHAC_ASPC_OAUTH_USE_BACKEND = "custom.authentication.backend"
@@ -294,6 +296,15 @@ A "Sign in with Microsoft" button is available as a template tag:
 {% load phac_aspc_auth %}
 {% phac_aspc_auth_signin_microsoft_button %}
 ```
+
+To redirect to a specific page after logging in, pass the `next` query parameter through to the template tag as an argument.
+
+e.g. with Jinja, on a login page where the URL ends with `?next=/some-protected-page/`:
+
+```
+{{ phac_aspc.phac_aspc_auth_signin_microsoft_button(request.GET.urlencode()) }}
+```
+
 
 #### Handling Errors
 

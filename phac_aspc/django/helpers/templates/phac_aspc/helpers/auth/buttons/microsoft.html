@@ -13,13 +13,13 @@
         display: inline-flex;
         padding: 0 12px 0 0;
         text-decoration: none;
-        }
-        
-        .btn-ms-login img {
+    }
+    
+    .btn-ms-login img {
         margin: 0 12px 0 12px;
-        }
+    }
 </style>
-<a href="{% url 'phac_aspc_helper_login' %}"
+<a href="{% url 'phac_aspc_helper_login' %}{% if query_params %}?{{query_params}}{% endif %}"
    class="btn-ms-login align-self-end">
     <img width="21"
          height="21"
