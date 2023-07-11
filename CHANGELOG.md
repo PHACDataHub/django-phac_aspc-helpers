@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.5.1...v0.6.0) (2023-07-11)
+
+
+### Features
+
+* support URL query params (including 'next' redirect) ([#25](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/25)) ([8c99399](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/8c99399bcf0a26a4c40ceb68c93b84e0a91c5451))
+
 ## [0.5.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.5.0...v0.5.1) (2023-06-16)
 
 
