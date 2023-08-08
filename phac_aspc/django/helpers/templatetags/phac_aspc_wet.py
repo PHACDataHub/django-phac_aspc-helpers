@@ -98,18 +98,18 @@ def phac_aspc_wet_session_timeout_dialog(context, logout_url):
 
     try:
         return loader.get_template("phac_aspc/helpers/wet/session_timeout.html").render(
-            dict(
-                config=json.dumps(
-                    dict(
-                        inactivity=session_alive - reaction_time,
-                        reactionTime=reaction_time,
-                        refreshCallbackUrl=urls.reverse("phac_aspc_helpers_session"),
-                        method="PUT",
-                        sessionalive=session_alive,
-                        logouturl=logouturl,
-                    )
+            {
+                "config": json.dumps(
+                    {
+                        "inactivity": session_alive - reaction_time,
+                        "reactionTime": reaction_time,
+                        "refreshCallbackUrl": urls.reverse("phac_aspc_helpers_session"),
+                        "method": "PUT",
+                        "sessionalive": session_alive,
+                        "logouturl": logouturl,
+                    }
                 )
-            ),
+            },
             request=context["request"],
         )
     except NoReverseMatch as exc:
