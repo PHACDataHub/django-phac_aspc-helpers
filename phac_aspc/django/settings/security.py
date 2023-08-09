@@ -9,8 +9,8 @@ from .utils import (
     configure_authentication_backends,
 )
 
-# Lockout users based on their username and IP address
-AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
+# Lockout users based on their (username, IP address) combinations
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
 
 # Log unsuccessful logins
 AXES_ENABLE_ACCESS_FAILURE_LOG = True
@@ -22,8 +22,8 @@ AXES_FAILURE_LIMIT = 3
 AXES_COOLOFF_TIME = 0.5
 
 # Reverse proxy configuration
-AXES_PROXY_COUNT = 1  # (Behind 1 proxy)
-AXES_META_PRECEDENCE_ORDER = [
+AXES_IPWARE_PROXY_COUNT = 1  # (Behind 1 proxy)
+AXES_IPWARE_META_PRECEDENCE_ORDER = [
     "HTTP_X_FORWARDED_FOR",
     "REMOTE_ADDR",
 ]
