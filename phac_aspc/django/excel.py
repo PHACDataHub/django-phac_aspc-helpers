@@ -118,6 +118,37 @@ class CustomColumn(Column):
     def get_value(self, record):
         return self.get_val(record)
 
+class ManyToManyColumn(Column):
+    def __init__(
+        self,
+        model: type,
+        field_name: str,
+        get_related_str: callable = None,
+        delimiter: str = ", ",
+        header=None,
+    ):
+        self.model = model
+        self.field_name = field_name
+        self.header = header
+        if get_related_str:
+            self.get_related_str = get_related_str
+        else:
+            self.get_related_str = lambda x: str(x)
+
+        self.delimiter = delimiter
+
+    def get_header(self):
+        if self.header:
+            return self.header
+        return self.model._meta.get_field(self.field_name).verbose_name
+
+    def get_value(self, record):
+        related_records = list(getattr(record, self.field_name).all())
+        return self.delimiter.join(
+            [self.get_related_str(x) for x in related_records]
+        )
+
+
 
 class ModelToSheetWriter:
     def __init__(self, workbook, queryset):
