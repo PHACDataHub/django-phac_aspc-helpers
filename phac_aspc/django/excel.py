@@ -7,7 +7,7 @@ from django.utils.safestring import SafeString
 try:
     from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
     from openpyxl.utils import escape as escapeSvc
-except (ImportError, ModuleNotFoundError) as e:
+except (ImportError, ModuleNotFoundError):
     raise ImportError("must install openpyxl==3.0.10 to use excel helpers")
 
 # Note that OPENPXYL starts columns and rows at index 1.
@@ -31,7 +31,6 @@ def write_queryset_to_sheet(workbook, queryset):
     - warning: uses queryset.iterator, prefetches are ignored
     """
 
-    model = queryset.model
     ModelToSheetWriter(workbook=workbook, queryset=queryset).write()
 
 
@@ -118,6 +117,7 @@ class CustomColumn(Column):
     def get_value(self, record):
         return self.get_val(record)
 
+
 class ManyToManyColumn(Column):
     def __init__(
         self,
@@ -147,7 +147,6 @@ class ManyToManyColumn(Column):
         return self.delimiter.join(
             [self.get_related_str(x) for x in related_records]
         )
-
 
 
 class ModelToSheetWriter:
@@ -220,5 +219,3 @@ def get_default_sheet_name_for_qs(queryset):
     """
     model_name = queryset.model._meta.verbose_name
     return f"{model_name[:30]}"
-
-

@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+
 def group_by(iterable, key: callable):
     groups = defaultdict(list)
     for item in iterable:
