@@ -12,7 +12,7 @@ so we don't get extra migrations when we change verbose names or related_names
 """
 
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+
 
 migration_ignored_attrs = [
     "help_text",
@@ -54,9 +54,10 @@ class ManyToManyField(DescriptionMixin, models.ManyToManyField):
 
 class EmptyToNullMixin:
     """
-    Replace NULL values with empty string "" 
+    Replace NULL values with empty string ""
     So there's only one way to represent an empty string
     """
+
     def __init__(self, *args, null_to_empty=False, **kwargs):
         if null_to_empty:
             bad_keys = [
