@@ -1,3 +1,7 @@
+# pylint: disable=missing-function-docstring, missing-class-docstring
+"""
+utilities for writing excel data using openpyxl 
+"""
 import re
 
 from django.core.paginator import Paginator
@@ -7,19 +11,27 @@ from django.utils.safestring import SafeString
 try:
     from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
     from openpyxl.utils import escape as escapeSvc
-except (ImportError, ModuleNotFoundError):
-    raise ImportError("must install openpyxl==3.0.10 to use excel helpers")
+except (ImportError, ModuleNotFoundError) as exc:
+    raise ImportError("must install openpyxl==3.0.10 to use excel helpers") from exc
 
 # Note that OPENPXYL starts columns and rows at index 1.
+
 
 GLOBAL_MAX_COL_LEN = 5000
 
 
 def escape_for_xlsx(text):
+    """
+        escape a string for excel
+    """
+    # pylint: disable=unidiomatic-typecheck
     return escapeSvc.escape(text) if type(text) == str else text
 
 
 def create_field_val_getter(field_name):
+    """
+    returns a function that gets the value of a field for a django model instance
+    """
     return lambda record: record.serializable_value(field_name)
 
 
@@ -36,15 +48,15 @@ def write_queryset_to_sheet(workbook, queryset):
 
 def page_queryset(queryset, per_page=1000):
     """
-    While in a perfect world you would use queryset.iterator(), but there is an issue that it fails to
-    load any prefetch_related() fields specified. Using Paginator() we can mimic the same functionality
-
-    > Note that if you use iterator() to run the query, prefetch_related() calls will be ignored since these two
-    > optimizations do not make sense together.
+    While in a perfect world you would use queryset.iterator()
+    but there is an issue that it fails to
+    load any prefetch_related() fields specified. 
+    Paginator() can mimic the same functionality
 
     https://github.com/django-import-export/django-import-export/issues/774#issuecomment-449064652
     """
 
+    # pylint: disable=protected-access
     if queryset._prefetch_related_lookups:
         if not queryset.query.order_by:
             # Paginator() throws a warning if there is no sorting attached to the queryset
@@ -57,10 +69,15 @@ def page_queryset(queryset, per_page=1000):
 
 
 class Column:
-    def get_header():
+    """
+        Base class to write columns in a sheet
+    """
+    def get_header(self):
+        """return a header string for the column"""
         raise NotImplementedError()
 
     def get_value(self, record):
+        """ return this column's intended cell value for a record """
         raise NotImplementedError()
 
     def serialize_value(self, value):
@@ -71,6 +88,9 @@ class Column:
 
 
 class ModelColumn(Column):
+    """
+        shorthand for defining a column that writes a scalar model field (non foreign-key)
+    """
     def __init__(self, model_cls, field_name, header_value=None):
         self.header_value = header_value
         self.model_cls = model_cls
@@ -78,6 +98,7 @@ class ModelColumn(Column):
         self.get_val = create_field_val_getter(field_name)
 
     def get_header(self):
+        # pylint: disable=protected-access
         header_value = (
             self.header_value
             or self.model_cls._meta.get_field(self.field_name).verbose_name
@@ -95,6 +116,7 @@ class ChoiceColumn(Column):
         self.field_name = field_name
 
     def get_header(self):
+        # pylint: disable=protected-access
         header_value = (
             self.header_value
             or self.model_cls._meta.get_field(self.field_name).verbose_name
@@ -119,6 +141,7 @@ class CustomColumn(Column):
 
 
 class ManyToManyColumn(Column):
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         model: type,
@@ -133,13 +156,14 @@ class ManyToManyColumn(Column):
         if get_related_str:
             self.get_related_str = get_related_str
         else:
-            self.get_related_str = lambda x: str(x)
+            self.get_related_str = lambda x: str(x) # pylint: disable=unnecessary-lambda
 
         self.delimiter = delimiter
 
     def get_header(self):
         if self.header:
             return self.header
+        # pylint: disable=protected-access
         return self.model._meta.get_field(self.field_name).verbose_name
 
     def get_value(self, record):
@@ -156,6 +180,7 @@ class ModelToSheetWriter:
         self.model = queryset.model
 
     def get_column_configs(self):
+        # pylint: disable=protected-access
         fields_to_write = self.model._meta.fields
         return [
             ModelColumn(self.model, field.name) for field in fields_to_write
@@ -217,5 +242,6 @@ def get_default_sheet_name_for_qs(queryset):
     """
     excel only supports up to 31 characters in a worksheet name
     """
+    # pylint: disable=protected-access
     model_name = queryset.model._meta.verbose_name
     return f"{model_name[:30]}"
