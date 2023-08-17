@@ -50,7 +50,7 @@ def page_queryset(queryset, per_page=1000):
     """
     While in a perfect world you would use queryset.iterator()
     but there is an issue that it fails to
-    load any prefetch_related() fields specified. 
+    load any prefetch_related() fields specified.
     Paginator() can mimic the same functionality
 
     https://github.com/django-import-export/django-import-export/issues/774#issuecomment-449064652
@@ -100,8 +100,7 @@ class ModelColumn(Column):
     def get_header(self):
         # pylint: disable=protected-access
         header_value = (
-            self.header_value
-            or self.model_cls._meta.get_field(self.field_name).verbose_name
+            self.header_value or self.model_cls._meta.get_field(self.field_name).verbose_name
         )
         return escape_for_xlsx(header_value)
 
@@ -156,7 +155,7 @@ class ManyToManyColumn(Column):
         if get_related_str:
             self.get_related_str = get_related_str
         else:
-            self.get_related_str = lambda x: str(x) # pylint: disable=unnecessary-lambda
+            self.get_related_str = lambda x, *args: str(x)
 
         self.delimiter = delimiter
 
