@@ -6,8 +6,8 @@ from collections import defaultdict
 
 def group_by(iterable, key: callable):
     """
-        like builtin groupby, but doesn't require sorted input
-        returns a dict of lists
+    like builtin groupby, but doesn't require sorted input
+    returns a dict of lists
     """
     groups = defaultdict(list)
     for item in iterable:
@@ -16,5 +16,5 @@ def group_by(iterable, key: callable):
 
 
 def flatten(iterable):
-    """ flattens an iterable of iterables into a single list """
+    """flattens an iterable of iterables into a single list"""
     return [item for sublist in iterable for item in sublist]

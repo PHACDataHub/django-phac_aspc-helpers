@@ -5,10 +5,13 @@ utilities for writing excel data using openpyxl
 import re
 
 from django.core.paginator import Paginator
+from django.views import View
+from django.http import HttpResponse
 from django.utils.functional import Promise
 from django.utils.safestring import SafeString
 
 try:
+    import openpyxl
     from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
     from openpyxl.utils import escape as escapeSvc
 except (ImportError, ModuleNotFoundError) as exc:
@@ -22,7 +25,7 @@ GLOBAL_MAX_COL_LEN = 5000
 
 def escape_for_xlsx(text):
     """
-        escape a string for excel
+    escape a string for excel
     """
     # pylint: disable=unidiomatic-typecheck
     return escapeSvc.escape(text) if type(text) == str else text
@@ -70,14 +73,15 @@ def page_queryset(queryset, per_page=1000):
 
 class Column:
     """
-        Base class to write columns in a sheet
+    Base class to write columns in a sheet
     """
+
     def get_header(self):
         """return a header string for the column"""
         raise NotImplementedError()
 
     def get_value(self, record):
-        """ return this column's intended cell value for a record """
+        """return this column's intended cell value for a record"""
         raise NotImplementedError()
 
     def serialize_value(self, value):
@@ -89,8 +93,9 @@ class Column:
 
 class ModelColumn(Column):
     """
-        shorthand for defining a column that writes a scalar model field (non foreign-key)
+    shorthand for defining a column that writes a scalar model field (non foreign-key)
     """
+
     def __init__(self, model_cls, field_name, header_value=None):
         self.header_value = header_value
         self.model_cls = model_cls
@@ -100,7 +105,8 @@ class ModelColumn(Column):
     def get_header(self):
         # pylint: disable=protected-access
         header_value = (
-            self.header_value or self.model_cls._meta.get_field(self.field_name).verbose_name
+            self.header_value
+            or self.model_cls._meta.get_field(self.field_name).verbose_name
         )
         return escape_for_xlsx(header_value)
 
@@ -167,9 +173,7 @@ class ManyToManyColumn(Column):
 
     def get_value(self, record):
         related_records = list(getattr(record, self.field_name).all())
-        return self.delimiter.join(
-            [self.get_related_str(x) for x in related_records]
-        )
+        return self.delimiter.join([self.get_related_str(x) for x in related_records])
 
 
 class ModelToSheetWriter:
@@ -181,19 +185,14 @@ class ModelToSheetWriter:
     def get_column_configs(self):
         # pylint: disable=protected-access
         fields_to_write = self.model._meta.fields
-        return [
-            ModelColumn(self.model, field.name) for field in fields_to_write
-        ]
+        return [ModelColumn(self.model, field.name) for field in fields_to_write]
 
     def get_sheet_name(self):
         return get_default_sheet_name_for_qs(self.queryset)
 
     def get_header_row(self):
         # return [escape_for_xlsx(name) for name, _ in self.get_column_configs()]
-        return [
-            serialize_value(col.get_header())
-            for col in self.get_column_configs()
-        ]
+        return [serialize_value(col.get_header()) for col in self.get_column_configs()]
 
     def write(self):
         worksheet = self.workbook.create_sheet(title=self.get_sheet_name())
@@ -244,3 +243,27 @@ def get_default_sheet_name_for_qs(queryset):
     # pylint: disable=protected-access
     model_name = queryset.model._meta.verbose_name
     return f"{model_name[:30]}"
+
+
+class AbstractExportView(View):
+    def get_filename(self):
+        return "export.xlsx"
+
+    def get_queryset(self):
+        raise NotImplementedError()
+
+    def get_sheetwriter_class(self):
+        raise NotImplementedError()
+
+    def get(self, request, *args, **kwargs):
+        wb = openpyxl.Workbook(write_only=True)
+        WriterCls = self.get_sheetwriter_class()
+        writer = WriterCls(
+            workbook=wb,
+            queryset=self.get_queryset(),
+        )
+        writer.write()
+        response = HttpResponse(headers={"Content-Type": "application/vnd.ms-excel"})
+        response["Content-Disposition"] = f"attachment; filename={self.get_filename()}"
+        wb.save(response)
+        return response
