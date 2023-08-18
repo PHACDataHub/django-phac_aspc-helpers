@@ -1,4 +1,4 @@
-from .vanilla import group_by, flatten
+from phac_aspc.vanilla import group_by, flatten
 
 
 def test_group_by():

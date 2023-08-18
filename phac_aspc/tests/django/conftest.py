@@ -8,7 +8,7 @@ settings.configure(
         "django.contrib.admin",
         "django.contrib.contenttypes",
         "phac_aspc.django.helpers",
-        "phac_aspc.django",
+        "phac_aspc.tests.django",
     ],
     USE_I18N=True,
     LANGUAGE=(
