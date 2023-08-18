@@ -1,11 +1,8 @@
 [MESSAGES CONTROL]
 
 disable=
-    C0304, # final newline
-    C0305, # trailing newlines
     C0111, # docstrings for defs and classes
     C0103, # constant UPPERCASE style convention
-    C0303, # trailing whitespace
     R0903, # too few public methods
     R0913, # Too many arguments
     R0914, # Too many local vars
