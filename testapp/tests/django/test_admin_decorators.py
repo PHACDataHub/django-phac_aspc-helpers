@@ -21,11 +21,10 @@ def test_add_admin_decorator():
 
         name = models.TextField()
 
-    assert len(site._registry) == 0
-
+    num_registered_before = len(site._registry)
     process_ready_hooks()
 
-    assert len(site._registry) == 1
+    assert len(site._registry) == num_registered_before + 1
 
     assert TestModel in site._registry
 
