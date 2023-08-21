@@ -38,8 +38,12 @@ class SearchableFieldMixin:
 class DescriptionMixin:
     def __init__(self, *args, extra_options=None, description="", **kwargs):
         self.extra_options = extra_options or {}
-        self.description = description
+        self.custom_description = description
         super().__init__(*args, **kwargs)
+
+    @property
+    def description(self):
+        return self.custom_description
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
