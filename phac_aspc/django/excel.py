@@ -250,10 +250,20 @@ class AbstractExportView(View):
         return "export.xlsx"
 
     def get_queryset(self):
-        raise NotImplementedError()
+        try:
+            return self.queryset
+        except AttributeError as e:
+            raise NotImplementedError(
+                "Must define queryset attr or override get_queryset()"
+            ) from e
 
     def get_sheetwriter_class(self):
-        raise NotImplementedError()
+        try:
+            return self.sheetwriter_class
+        except AttributeError as e:
+            raise NotImplementedError(
+                "Must define sheetwriter_class attr or override get_sheetwriter_class()"
+            ) from e
 
     def get(self, request, *args, **kwargs):
         wb = openpyxl.Workbook(write_only=True)
