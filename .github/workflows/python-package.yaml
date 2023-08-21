@@ -44,7 +44,7 @@ jobs:
         pylint phac_aspc
     - name: Test
       run: |
-        pytest
+        pytest testapp/tests
 
   coverage:
     runs-on: ubuntu-latest
