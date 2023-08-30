@@ -251,14 +251,11 @@ def test_json_post_handler_logs_own_errors_without_trying_to_rehandle_them(
         )
     )
 
-    # by convention, any logger belonging to server/logging_util.py should be prefixed
-    # by "server.logging_util", so _not_ really relying on an implementation detail here...
-    # but brittle to the module renaming or the convention being broken
     assert (
         len(
             list(
                 filter(
-                    lambda record: not record.name.find("server.logging_util"),
+                    lambda record: not record.name.find(SlackWebhookHandler.__module__),
                     log_capture.records,
                 )
             )

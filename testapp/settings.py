@@ -1,6 +1,7 @@
 from glob import glob
 from pathlib import Path
 
+from phac_aspc.django.settings.logging import *
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -25,6 +26,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -73,3 +75,5 @@ DATABASES = {
         "NAME": "db.sqlite3",
     }
 }
+
+SECRET_KEY = "abcdefg"

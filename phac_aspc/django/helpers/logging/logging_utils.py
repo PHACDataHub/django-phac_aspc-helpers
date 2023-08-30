@@ -1,4 +1,4 @@
-import logging
+import logging.config
 import os
 import sys
 from abc import ABCMeta, abstractmethod
@@ -114,7 +114,7 @@ def get_logging_dict_config(
             },
             "slack": {
                 "level": "ERROR",
-                "class": "server.logging_util.SlackWebhookHandler",
+                "class": f"{SlackWebhookHandler.__module__}.SlackWebhookHandler",
                 "url": slack_webhook_url,
                 "fail_silent": slack_handler_fail_silent,
                 "formatter": "plaintext_formatter",
