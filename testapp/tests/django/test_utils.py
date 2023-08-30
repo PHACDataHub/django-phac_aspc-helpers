@@ -1,4 +1,7 @@
 """Unit tests for utils.py"""
+import os
+import subprocess
+
 from django.core.checks.registry import registry
 
 from phac_aspc.django.settings.utils import (
@@ -7,6 +10,7 @@ from phac_aspc.django.settings.utils import (
     configure_apps,
     configure_authentication_backends,
     configure_middleware,
+    is_running_tests,
 )
 
 
@@ -140,3 +144,33 @@ def test_configure_middleware():
         "b",
     ]
     assert len(registry.get_checks()) == num + 2
+
+
+def test_is_running_tests_returns_true_inside_test_execution_environment():
+    assert is_running_tests()
+
+
+def test_is_running_tests_returns_false_outside_test_execution_environment():
+    # hacky, but because this test needs to assert that is_running_tests() is false
+    # OUTSIDE of the test environment, we need to run a non-test sub-process and read
+    # back the `is_running_tests()` value from there
+
+    manage_py_path = os.path.join(
+        os.getcwd(),
+        "manage.py",
+    )
+    assert os.path.isfile(manage_py_path)
+
+    non_test_execution_process = subprocess.run(
+        [
+            manage_py_path,
+            "shell",
+            "--command",
+            f"from {is_running_tests.__module__} import is_running_tests; print(is_running_tests())",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    assert non_test_execution_process.stdout.strip() == "False"

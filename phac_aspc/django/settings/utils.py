@@ -1,6 +1,7 @@
 """This file contains utilities helpful for settings declarations"""
 import os
 import inspect
+import sys
 
 import environ
 
@@ -71,7 +72,11 @@ def configure_authentication_backends(backend_list):
 def configure_middleware(middleware_list):
     """Return the list of middleware configured for this library"""
     prefix = warn_and_remove(
-        ["axes.middleware.AxesMiddleware", "django.middleware.locale.LocaleMiddleware"],
+        [
+            "axes.middleware.AxesMiddleware",
+            "django.middleware.locale.LocaleMiddleware",
+            "django_structlog.middlewares.RequestMiddleware",
+        ],
         middleware_list,
     )
     return prefix + middleware_list
@@ -156,3 +161,8 @@ def configure_settings_for_tests():
         for x in settings.AUTHENTICATION_BACKENDS
         if x != "axes.backends.AxesStandaloneBackend"
     ]
+
+
+def is_running_tests():
+    """Detect if the app process was launched by a test-runner command"""
+    return "test" in sys.argv or any("pytest" in arg for arg in sys.argv)
