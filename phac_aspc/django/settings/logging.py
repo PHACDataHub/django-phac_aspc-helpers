@@ -1,7 +1,5 @@
-from django.conf import settings
-
 from phac_aspc.django.helpers.logging.logging_utils import configure_logging
-from phac_aspc.django.settings.utils import is_running_tests
+from phac_aspc.django.settings.utils import get_env, get_env_value, is_running_tests
 
 
 # `LOGGING_CONFIG = None` drops the Django default logging config rather than merging
@@ -11,18 +9,29 @@ from phac_aspc.django.settings.utils import is_running_tests
 # the handlers and formatters that will be catching them
 LOGGING_CONFIG = None
 
+logging_config = get_env(
+    LOGGING_LOWEST_LEVEL=(str, "INFO"),
+    LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON=(bool, True),
+    LOGGING_SLACK_WEBHOOK_URL=(str, None),
+    LOGGING_SLACK_WEBHOOK_FAIL_SILENT=(bool, None),
+)
+
+slack_webhook_fail_silent = get_env_value(
+    logging_config, "LOGGING_SLACK_WEBHOOK_FAIL_SILENT"
+)
+if (
+    get_env_value(logging_config, "LOGGING_SLACK_WEBHOOK_URL") is None
+    and slack_webhook_fail_silent is None
+):
+    slack_webhook_fail_silent = True
+
 configure_logging(
-    lowest_level_to_log=getattr(settings, "PHAC_ASPC_LOGGING_LOWEST_LEVEL", "INFO"),
-    format_console_logs_as_json=getattr(
-        settings, "PHAC_ASPC_LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON", True
+    lowest_level_to_log=get_env_value(logging_config, "LOGGING_LOWEST_LEVEL"),
+    format_console_logs_as_json=get_env_value(
+        logging_config, "LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON"
     ),
-    slack_webhook_url=getattr(settings, "PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL", None),
-    slack_webhook_fail_silent=getattr(
-        settings,
-        "PHAC_ASPC_LOGGING_SLACK_WEBHOOK_FAIL_SILENT",
-        # default to failing silent if webhook URL not set, failing loud otherwise
-        bool(getattr(settings, "PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL", None)),
-    ),
+    slack_webhook_url=get_env_value(logging_config, "LOGGING_SLACK_WEBHOOK_URL"),
+    slack_webhook_fail_silent=slack_webhook_fail_silent,
     # Mute console logging output when running tests, because it conflicts with pytests own
     # console output (which captures and reports errors after all tests have finished running)
     mute_console=is_running_tests(),
