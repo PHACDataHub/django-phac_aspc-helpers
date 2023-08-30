@@ -18,3 +18,8 @@ def group_by(iterable, key: callable):
 def flatten(iterable):
     """flattens an iterable of iterables into a single list"""
     return [item for sublist in iterable for item in sublist]
+
+
+class classproperty(property):
+    def __get__(self, cls, owner):
+        return classmethod(self.fget).__get__(None, owner)()
