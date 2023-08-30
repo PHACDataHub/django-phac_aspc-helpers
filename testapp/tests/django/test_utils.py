@@ -115,6 +115,7 @@ def test_configure_middleware():
     assert test == [
         "axes.middleware.AxesMiddleware",
         "django.middleware.locale.LocaleMiddleware",
+        "django_structlog.middlewares.RequestMiddleware",
     ]
     assert len(registry.get_checks()) == num
 
@@ -123,6 +124,7 @@ def test_configure_middleware():
     assert test == [
         "axes.middleware.AxesMiddleware",
         "django.middleware.locale.LocaleMiddleware",
+        "django_structlog.middlewares.RequestMiddleware",
         "a",
         "b",
     ]
@@ -134,6 +136,7 @@ def test_configure_middleware():
             "a",
             "axes.middleware.AxesMiddleware",
             "django.middleware.locale.LocaleMiddleware",
+            "django_structlog.middlewares.RequestMiddleware",
             "b",
         ]
     )
@@ -141,9 +144,10 @@ def test_configure_middleware():
         "a",
         "axes.middleware.AxesMiddleware",
         "django.middleware.locale.LocaleMiddleware",
+        "django_structlog.middlewares.RequestMiddleware",
         "b",
     ]
-    assert len(registry.get_checks()) == num + 2
+    assert len(registry.get_checks()) == num + 3
 
 
 def test_is_running_tests_returns_true_inside_test_execution_environment():
