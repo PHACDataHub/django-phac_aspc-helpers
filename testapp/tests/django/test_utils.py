@@ -1,7 +1,7 @@
 """Unit tests for utils.py"""
 from django.core.checks.registry import registry
 
-from .utils import (
+from phac_aspc.django.settings.utils import (
     trigger_configuration_warning,
     warn_and_remove,
     configure_apps,

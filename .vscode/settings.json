@@ -3,6 +3,10 @@
     "python.linting.pylintEnabled": true,
     "editor.rulers": [80],
     "markdown-preview-github-styles.colorTheme": "light",
-    "python.formatting.provider": "black",
-    "cSpell.language": "en-ca"
+    "python.formatting.provider": "none",
+    "cSpell.language": "en-ca",
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
 }
