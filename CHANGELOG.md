@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.6.0...v0.7.0) (2023-08-31)
+
+
+### Features
+
+* add more utils (excel, vanilla python stuff, custom model fields) ([#33](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/33)) ([8433a60](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/8433a603d6a78a7a9c208b7d88eb031060038228))
+
 ## [0.6.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.5.1...v0.6.0) (2023-07-11)
 
 
