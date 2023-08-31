@@ -10,10 +10,14 @@ import responses
 import structlog
 from testfixtures import LogCapture
 
-from phac_aspc.django.helpers.logging.logging_utils import (
+from phac_aspc.django.helpers.logging.configure_logging import (
+    DEFAULT_SHARED_STRUCTLOG_PROCESSORS,
+)
+from phac_aspc.django.helpers.logging.handlers import (
     AbstractJSONPostHandler,
-    JSONLogFormatter,
     SlackWebhookHandler,
+)
+from phac_aspc.django.helpers.logging.utils import (
     add_metadata_to_all_logs_for_current_request,
 )
 
@@ -65,11 +69,21 @@ def log_capture():
 TEST_URL = "http://testing.notarealtld"
 
 
-def get_log_output_capturing_handler(formatter=JSONLogFormatter()):
+class TestFormatter(structlog.stdlib.ProcessorFormatter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            *args,
+            processor=structlog.processors.JSONRenderer(),
+            foreign_pre_chain=DEFAULT_SHARED_STRUCTLOG_PROCESSORS,
+            **kwargs,
+        )
+
+
+def get_log_output_capturing_handler(formatter=TestFormatter()):
     # specifically want to test the project's logging configuration itself, so can't
     # use log_capture (which clobbers existing logging configuration). Need to do a bit
-    # of extra set up to capture log output, using the logging configuration initialized
-    # in settings.py and, specifically, our JSONLogFormatter
+    # of extra set up to capture log output using the logging configuration initialized
+    # in settings.py
     class CapturingHandler(logging.Handler):
         captured_logs = list()
 
@@ -78,7 +92,7 @@ def get_log_output_capturing_handler(formatter=JSONLogFormatter()):
             self.captured_logs.append(formatted)
 
     capturingHandler = CapturingHandler(level=logging.DEBUG)
-    capturingHandler.setFormatter(JSONLogFormatter())
+    capturingHandler.setFormatter(TestFormatter())
 
     return capturingHandler
 
@@ -86,7 +100,7 @@ def get_log_output_capturing_handler(formatter=JSONLogFormatter()):
 def test_json_logging_consistent_between_standard_logger_and_structlogger(
     logger_factory,
 ):
-    capturingHandler = get_log_output_capturing_handler(JSONLogFormatter())
+    capturingHandler = get_log_output_capturing_handler(TestFormatter())
 
     test_logger, test_structlogger = logger_factory(capturingHandler)
 
@@ -114,7 +128,7 @@ def test_json_logging_consistent_between_standard_logger_and_structlogger(
 def test_add_metadata_to_all_logs_for_current_request(
     logger_factory, vanilla_user_client, settings
 ):
-    capturingHandler = get_log_output_capturing_handler(JSONLogFormatter())
+    capturingHandler = get_log_output_capturing_handler(TestFormatter())
 
     test_logger, _ = logger_factory(capturingHandler)
 
