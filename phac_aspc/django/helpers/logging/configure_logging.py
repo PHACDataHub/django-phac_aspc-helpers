@@ -1,7 +1,7 @@
 import logging.config
 import os
 import sys
-from typing import Dict, Callable, Any, Union, List
+from typing import Dict, Callable, Any, Literal, List
 
 import structlog
 
@@ -38,7 +38,7 @@ is_phac_helper_logging_configuration_being_used = False
 
 
 def configure_uniform_std_lib_and_structlog_logging(
-    lowest_level_to_log: Union[
+    lowest_level_to_log: Literal[
         "NOTSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"
     ] = "INFO",
     format_default_console_logs_as_json: bool = True,
