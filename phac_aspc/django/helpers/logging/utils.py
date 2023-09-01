@@ -1,4 +1,11 @@
+from django.conf import settings
+from django.core.exceptions import MiddlewareNotUsed, ImproperlyConfigured
+
 import structlog
+
+from phac_aspc.django.helpers.logging.configure_logging import (
+    is_phac_helper_logging_configuration_being_used,
+)
 
 
 def add_metadata_to_all_logs_for_current_request(metadata_dict):
@@ -18,5 +25,15 @@ def add_metadata_to_all_logs_for_current_request(metadata_dict):
     # framework-specific structlog wrapper
     # https://www.structlog.org/en/stable/contextvars.html#context-variables
     # https://github.com/jrobichaud/django-structlog/blob/89fdc7d8adb3cb91848f3b2856e01e5d49649d67/django_structlog/middlewares/request.py#L51
+
+    if not "django_structlog.middlewares.RequestMiddleware" in settings.MIDDLEWARE:
+        raise MiddlewareNotUsed(
+            "django_structlog.middlewares.RequestMiddleware is required for this utility"
+        )
+
+    if not is_phac_helper_logging_configuration_being_used:
+        raise ImproperlyConfigured(
+            "The PHAC helper's logging configuration is required for this utility"
+        )
 
     structlog.contextvars.bind_contextvars(**metadata_dict)

@@ -33,6 +33,10 @@ PHAC_HELPER_JSON_FORMATTER_KEY = f"{_default_suffix}json_formatter"
 PHAC_HELPER_PLAIN_STRING_FORMATTER_KEY = f"{_default_suffix}plaintext_formatter"
 
 
+# flag set to true when configuration function called
+is_phac_helper_logging_configuration_being_used = False
+
+
 def configure_uniform_std_lib_and_structlog_logging(
     lowest_level_to_log: Union[
         "NOTSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"
@@ -139,3 +143,6 @@ def configure_uniform_std_lib_and_structlog_logging(
     # outside the logging system (even though logging has its own WARNING category). They can
     # be configured to surface as warning-level logs. No reason not to!
     logging.captureWarnings(True)
+
+    global is_phac_helper_logging_configuration_being_used  # pylint: disable=global-statement
+    is_phac_helper_logging_configuration_being_used = True
