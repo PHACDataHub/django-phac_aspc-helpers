@@ -10,9 +10,6 @@ import responses
 import structlog
 from testfixtures import LogCapture
 
-from phac_aspc.django.helpers.logging.configure_logging import (
-    STRUCTLOG_PRE_PROCESSORS,
-)
 from phac_aspc.django.helpers.logging.handlers import (
     AbstractJSONPostHandler,
     SlackWebhookHandler,
