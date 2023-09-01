@@ -14,7 +14,7 @@ class AbstractJSONPostHandler(logging.Handler, metaclass=ABCMeta):
 
     def emit(self, record):
         is_own_error_log = record.name == self.logger.name and (
-            record.levelname == "ERROR" or record.levelname == "CRITICAL"
+            record.levelname in ("ERROR", "CRITICAL")
         )
 
         if not is_own_error_log:

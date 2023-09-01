@@ -11,7 +11,7 @@ import structlog
 from testfixtures import LogCapture
 
 from phac_aspc.django.helpers.logging.configure_logging import (
-    DEFAULT_SHARED_STRUCTLOG_PROCESSORS,
+    STRUCTLOG_PRE_PROCESSORS,
 )
 from phac_aspc.django.helpers.logging.handlers import (
     AbstractJSONPostHandler,
@@ -69,17 +69,9 @@ def log_capture():
 TEST_URL = "http://testing.notarealtld"
 
 
-class TestFormatter(structlog.stdlib.ProcessorFormatter):
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            *args,
-            processor=structlog.processors.JSONRenderer(),
-            foreign_pre_chain=DEFAULT_SHARED_STRUCTLOG_PROCESSORS,
-            **kwargs,
-        )
-
-
-def get_log_output_capturing_handler(formatter=TestFormatter()):
+def get_log_output_capturing_handler(
+    formatter=logging.getLogger().handlers[0].formatter,
+):
     # specifically want to test the project's logging configuration itself, so can't
     # use log_capture (which clobbers existing logging configuration). Need to do a bit
     # of extra set up to capture log output using the logging configuration initialized
@@ -92,7 +84,7 @@ def get_log_output_capturing_handler(formatter=TestFormatter()):
             self.captured_logs.append(formatted)
 
     capturingHandler = CapturingHandler(level=logging.DEBUG)
-    capturingHandler.setFormatter(TestFormatter())
+    capturingHandler.setFormatter(formatter)
 
     return capturingHandler
 
@@ -100,7 +92,7 @@ def get_log_output_capturing_handler(formatter=TestFormatter()):
 def test_json_logging_consistent_between_standard_logger_and_structlogger(
     logger_factory,
 ):
-    capturingHandler = get_log_output_capturing_handler(TestFormatter())
+    capturingHandler = get_log_output_capturing_handler()
 
     test_logger, test_structlogger = logger_factory(capturingHandler)
 
@@ -128,7 +120,7 @@ def test_json_logging_consistent_between_standard_logger_and_structlogger(
 def test_add_metadata_to_all_logs_for_current_request(
     logger_factory, vanilla_user_client, settings
 ):
-    capturingHandler = get_log_output_capturing_handler(TestFormatter())
+    capturingHandler = get_log_output_capturing_handler()
 
     test_logger, _ = logger_factory(capturingHandler)
 
