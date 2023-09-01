@@ -53,7 +53,7 @@ def configure_uniform_std_lib_and_structlog_logging(
         str,
         Callable[
             [structlog.typing.WrappedLogger, str, structlog.typing.EventDict],
-            str | bytes,
+            str,
         ],
     ] = None,
     structlog_pre_processors: List[
@@ -61,11 +61,11 @@ def configure_uniform_std_lib_and_structlog_logging(
     ] = DEFAULT_STRUCTLOG_PRE_PROCESSORS,
     datefmt: str = DEFAULT_DATE_FORMAT,
 ):
-    # From https://www.structlog.org/en/stable/standard-library.html#rendering-using-structlog-based-formatters-within-logging
-    # Effectively makes structlog a wrapper for the sandard library `logging` module, which makes
-    # our following `logging` configuration the single source of truth on project logging, and means
-    # `logging.getLogger()` and `structlog.get_logger()` produce consistent output (which is very
-    # nice to have when packages might be logging via either)
+    # Structlog configuration to effectively make it a wrapper for the sandard library `logging`
+    # module, which makes our following `logging` configuration the single source of truth on
+    # project logging, and means `logging.getLogger()` and `structlog.get_logger()` produce
+    # consistent output (which is very nice to have when packages might be logging via either). See:
+    # https://www.structlog.org/en/stable/standard-library.html#rendering-using-structlog-based-formatters-within-logging
     structlog.configure(
         processors=[
             structlog.stdlib.filter_by_level,

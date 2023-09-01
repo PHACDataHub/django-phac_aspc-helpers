@@ -24,7 +24,7 @@ additional_handler_configs = {}
 azure_insights_connection_string = get_env_value(
     logging_env, "LOGGING_AZURE_INSIGHTS_CONNECTION_STRING"
 )
-if not azure_insights_connection_string is None:
+if azure_insights_connection_string is not None:
     additional_handler_configs[f"{_default_suffix}azure_handler"] = {
         "level": get_env_value(logging_env, "LOGGING_LOWEST_LEVEL"),
         "class": "opencensus.ext.azure.log_exporter.AzureLogHandler",

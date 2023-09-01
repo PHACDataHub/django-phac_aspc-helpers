@@ -26,7 +26,7 @@ def add_metadata_to_all_logs_for_current_request(metadata_dict):
     # https://www.structlog.org/en/stable/contextvars.html#context-variables
     # https://github.com/jrobichaud/django-structlog/blob/89fdc7d8adb3cb91848f3b2856e01e5d49649d67/django_structlog/middlewares/request.py#L51
 
-    if not "django_structlog.middlewares.RequestMiddleware" in settings.MIDDLEWARE:
+    if "django_structlog.middlewares.RequestMiddleware" not in settings.MIDDLEWARE:
         raise MiddlewareNotUsed(
             "django_structlog.middlewares.RequestMiddleware is required for this utility"
         )
