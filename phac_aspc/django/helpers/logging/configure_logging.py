@@ -33,11 +33,11 @@ PHAC_HELPER_JSON_FORMATTER_KEY = f"{_default_suffix}json_formatter"
 PHAC_HELPER_PLAIN_STRING_FORMATTER_KEY = f"{_default_suffix}plaintext_formatter"
 
 
-def configure_logging(
+def configure_uniform_std_lib_and_structlog_logging(
     lowest_level_to_log: Union[
         "NOTSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"
     ] = "INFO",
-    format_console_logs_as_json: bool = True,
+    format_default_console_logs_as_json: bool = True,
     additional_handler_configs: Dict[
         str,
         Dict[
@@ -114,7 +114,7 @@ def configure_logging(
             ),
             "formatter": (
                 PHAC_HELPER_JSON_FORMATTER_KEY
-                if format_console_logs_as_json
+                if format_default_console_logs_as_json
                 else PHAC_HELPER_CONSOLE_FORMATTER_KEY
             ),
         },
