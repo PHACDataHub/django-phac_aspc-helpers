@@ -1,4 +1,5 @@
 """Configuration API for the PHAC helpers logging configuration"""
+import json
 import logging.config
 import os
 import sys
@@ -30,8 +31,9 @@ DEFAULT_STRUCTLOG_PRE_PROCESSORS = (
 _default_suffix = "phac_helper_"
 
 PHAC_HELPER_CONSOLE_FORMATTER_KEY = f"{_default_suffix}console_formatter"
-PHAC_HELPER_JSON_FORMATTER_KEY = f"{_default_suffix}json_formatter"
 PHAC_HELPER_PLAIN_STRING_FORMATTER_KEY = f"{_default_suffix}plaintext_formatter"
+PHAC_HELPER_JSON_FORMATTER_KEY = f"{_default_suffix}json_formatter"
+PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY = f"{_default_suffix}pretty_json_formatter"
 
 
 # flag set to true when configuration function called
@@ -68,9 +70,9 @@ def configure_uniform_std_lib_and_structlog_logging(
     between the two, and the same set of structlog processors is run on all logs.
 
     The baseline configuration provides a console (stdout) handler and formatters for
-    JSON formatting, console formatting (with coloured text), and plain text formatting.
-    The keys for these default formatters are exposed as PHAC_HELPER_..._FORMATTER_KEY
-    constants.
+    basic JSON string formatting, pretty JSON string formatting, console formatting
+    (with coloured text etc.), and plain text formatting. The keys for these default
+    formatters are exposed as PHAC_HELPER_..._FORMATTER_KEY variables in this module.
 
     `additional_handler_configs` takes standard logging dict config handler definitions.
 
@@ -118,7 +120,15 @@ def configure_uniform_std_lib_and_structlog_logging(
     formatter_functions = {
         PHAC_HELPER_CONSOLE_FORMATTER_KEY: structlog.dev.ConsoleRenderer(),
         PHAC_HELPER_JSON_FORMATTER_KEY: structlog.processors.JSONRenderer(),
-        PHAC_HELPER_PLAIN_STRING_FORMATTER_KEY: structlog.processors.LogfmtRenderer(),
+        PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY: structlog.processors.JSONRenderer(
+            # JSON string with indents, sorting, and newlines inside values preserved
+            serializer=lambda *args, **kwargs: json.dumps(
+                *args, indent=4, sort_keys=True, **kwargs
+            ).replace("\\n", "\n")
+        ),
+        PHAC_HELPER_PLAIN_STRING_FORMATTER_KEY: structlog.processors.LogfmtRenderer(
+            sort_keys=True
+        ),
         **(additional_formatter_functions or {}),
     }
 
