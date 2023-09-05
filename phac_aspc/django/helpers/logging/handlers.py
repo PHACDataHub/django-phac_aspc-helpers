@@ -1,3 +1,4 @@
+"""Handlers for use alongside the PHAC helpers logging configuration"""
 import logging.config
 from abc import ABCMeta, abstractmethod
 
@@ -5,7 +6,19 @@ import requests
 
 
 class AbstractJSONPostHandler(logging.Handler, metaclass=ABCMeta):
-    def __init__(self, url, fail_silent):
+    """
+    Handler for sending JSON formatted logs to an arbitrary endpoints. Subclasses must
+    implement a get_json_from_record method to convert log records to match the target
+    endpoint's API.
+
+    Initialization requires a URL to post to, and also accepts an optional flag to
+    control whether post attempts fail silently.
+
+    Even if not failing silently, the handler will not try to post it's own error
+    logs, to avoid potential failure loops when the target endpoint is unreachable.
+    """
+
+    def __init__(self, url: str, fail_silent: bool = False):
         super().__init__()
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
@@ -42,5 +55,7 @@ class AbstractJSONPostHandler(logging.Handler, metaclass=ABCMeta):
 
 
 class SlackWebhookHandler(AbstractJSONPostHandler):
+    """Trivial Slack Webhook JSON post handler"""
+
     def get_json_from_record(self, record):
         return {"text": self.format(record)}

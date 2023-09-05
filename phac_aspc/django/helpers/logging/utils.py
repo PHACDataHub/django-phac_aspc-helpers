@@ -1,3 +1,6 @@
+"""Utilities for use alongside the PHAC helpers logging configuration"""
+from typing import Dict, Any
+
 from django.conf import settings
 from django.core.exceptions import MiddlewareNotUsed, ImproperlyConfigured
 
@@ -8,7 +11,14 @@ from phac_aspc.django.helpers.logging.configure_logging import (
 )
 
 
-def add_metadata_to_all_logs_for_current_request(metadata_dict):
+def bind_contextvars_to_all_logs_for_current_request(context_dict: Dict[str, Any]):
+    """Binds structlog contextvars to all subsequent logs for the request currently being processed.
+
+    Requires use of the PHAC helper's logging configuration and the django_structlog
+    RequestMiddleware. The PHAC helper's logging configuration ensures these context
+    vars are rendered when logging, and the django_structlog RequestMiddleware handles
+    clearing the structlog contextvars between requests.
+    """
     # fairly trivial implementation, but that's only a side effect of our logging
     # configuration, and use of django_structlog.middlewares.RequestMiddleware
     # Wrapping in a function so I can document this, and write tests against it
@@ -36,4 +46,4 @@ def add_metadata_to_all_logs_for_current_request(metadata_dict):
             "The PHAC helper's logging configuration is required for this utility"
         )
 
-    structlog.contextvars.bind_contextvars(**metadata_dict)
+    structlog.contextvars.bind_contextvars(**context_dict)

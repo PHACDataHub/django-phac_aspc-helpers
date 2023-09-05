@@ -1,3 +1,4 @@
+"""Configuration API for the PHAC helpers logging configuration"""
 import logging.config
 import os
 import sys
@@ -41,7 +42,8 @@ def configure_uniform_std_lib_and_structlog_logging(
     lowest_level_to_log: Literal[
         "NOTSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"
     ] = "INFO",
-    format_default_console_logs_as_json: bool = True,
+    mute_console_handler: bool = is_running_tests(),
+    console_handler_formatter_key: str = PHAC_HELPER_JSON_FORMATTER_KEY,
     additional_handler_configs: Dict[
         str,
         Dict[
@@ -61,6 +63,36 @@ def configure_uniform_std_lib_and_structlog_logging(
     ] = DEFAULT_STRUCTLOG_PRE_PROCESSORS,
     datefmt: str = DEFAULT_DATE_FORMAT,
 ):
+    """Configures both structlog and the standard library logging module, enforcing
+    uniform logging behaviour between the two. Log handler and formatters are shared
+    between the two, and the same set of structlog processors is run on all logs.
+
+    The baseline configuration provides a console (stdout) handler and formatters for
+    JSON formatting, console formatting (with coloured text), and plain text formatting.
+    The keys for these default formatters are exposed as PHAC_HELPER_..._FORMATTER_KEY
+    constants.
+
+    `additional_handler_configs` takes standard logging dict config handler definitions.
+
+    `additional_formatter_functions` takes a dict of callables by (unique) formatter key. These
+    callables are used as structlog "renderer" (end-of-chain) processors, for seralizing the
+    results of the `structlog_pre_processors` list to a string for the handlers to emit. I
+    recommend directly using, or wrapping/subclassing, existing structlog renderers here.
+
+    When providing a non-default `structlog_pre_processors` list, I recommend extending the
+    DEFAULT_STRUCTLOG_PRE_PROCESSORS export. At a minimum, your processor list should include
+    `structlog.contextvars.merge_contextvars`, for django_structlog RequestMiddleware support!
+
+    Log filter configuration is not surfaced in the API, as the logging dict config API
+    accepts in-line callables for the `filterer` key of a handler config (unlike formatters).
+    If you want to filter logs, add an additional handler with it's own filterer (and consider
+    muting the default console handler).
+
+    Note: by default, the built in console handler is muted running tests, because it makes
+    pytest's own console output harder to follow (and pytest captures and reports errors
+    after all tests have finished running anyway). You can over ride this behaviour by
+    explicitly passing a `mute_console_handler` value.
+    """
     # Structlog configuration to effectively make it a wrapper for the sandard library `logging`
     # module, which makes our following `logging` configuration the single source of truth on
     # project logging, and means `logging.getLogger()` and `structlog.get_logger()` produce
@@ -108,19 +140,12 @@ def configure_uniform_std_lib_and_structlog_logging(
             "class": "logging.StreamHandler",
             "level": lowest_level_to_log,
             "stream": (
-                # Muting console logging output when running tests, because it makes
-                # pytests own console output harder to follow (and pytest captures and
-                # reports errors after all tests have finished running anyway)
                 # pylint: disable=consider-using-with
                 open(os.devnull, "w", encoding="UTF-8")
-                if is_running_tests()
+                if mute_console_handler
                 else sys.stdout
             ),
-            "formatter": (
-                PHAC_HELPER_JSON_FORMATTER_KEY
-                if format_default_console_logs_as_json
-                else PHAC_HELPER_CONSOLE_FORMATTER_KEY
-            ),
+            "formatter": console_handler_formatter_key,
         },
         **(additional_handler_configs or {}),
     }
