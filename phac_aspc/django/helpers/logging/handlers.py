@@ -2,7 +2,13 @@
 import logging.config
 from abc import ABCMeta, abstractmethod
 
-import requests
+
+try:
+    import requests
+except (ImportError, ModuleNotFoundError) as exc:
+    raise ImportError(
+        "The `requests` package is required for use of the PHAC helpers JSON post handlers"
+    ) from exc
 
 
 class AbstractJSONPostHandler(logging.Handler, metaclass=ABCMeta):

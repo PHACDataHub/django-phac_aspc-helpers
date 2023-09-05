@@ -1,4 +1,4 @@
-"""Import * in to settings.py for a better default logging configuration"""
+"""From this module import * in your settings.py for a better default logging configuration"""
 from phac_aspc.django.helpers.logging.configure_logging import (
     configure_uniform_std_lib_and_structlog_logging,
     _default_suffix,
