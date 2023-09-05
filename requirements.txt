@@ -1,13 +1,7 @@
 # OPTIONAL packages used by consumers
 Jinja2==3.1.2
 openpyxl==3.0.10
-
-# TODO django-structlog might need to be required and go in setup.cfg, requests 
-# might be optional as only the slack webhook/JSON post log handlers use it?
-# Or maybe both stay optional and we use the excel util approach of checking for them
-# and throwing if they aren't found?
 requests==2.31.0
-django-structlog==5.3.0
 
 # testing, linting, etc.
 pylint==2.17.5
