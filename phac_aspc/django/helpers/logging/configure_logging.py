@@ -84,9 +84,9 @@ def configure_uniform_std_lib_and_structlog_logging(
     `structlog.contextvars.merge_contextvars`, for django_structlog RequestMiddleware support!
 
     Log filter configuration is not surfaced in the API, as the logging dict config API
-    accepts in-line callables for the `filterer` key of a handler config (unlike formatters).
-    If you want to filter logs, add an additional handler with it's own filterer (and consider
-    muting the default console handler).
+    accepts in-line logging.Filter instance for the `filterer` key of a handler config
+    (unlike formatters). If you want to filter logs, add an additional handler with it's
+    own filterer (and consider muting the default console handler).
 
     Note: by default, the built in console handler is muted running tests, because it makes
     pytest's own console output harder to follow (and pytest captures and reports errors
@@ -154,9 +154,14 @@ def configure_uniform_std_lib_and_structlog_logging(
     logging.config.dictConfig(
         {
             "version": 1,
-            "disable_existing_loggers": False,
+            "disable_existing_loggers": True,
             "formatters": formatters,
             "handlers": handlers,
+            "django.request": {
+                # built in django.request logging is redundant to the django_structlog
+                # request middleware, filter them out to avoid messy duplicate logs
+                "filter": NoPassFilter(),
+            },
             "root": {
                 "level": lowest_level_to_log,
                 "handlers": list(handlers.keys()),
@@ -171,3 +176,8 @@ def configure_uniform_std_lib_and_structlog_logging(
 
     global is_phac_helper_logging_configuration_being_used  # pylint: disable=global-statement
     is_phac_helper_logging_configuration_being_used = True
+
+
+class NoPassFilter:
+    def filter(self):
+        return 0
