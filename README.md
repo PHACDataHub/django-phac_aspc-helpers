@@ -556,28 +556,40 @@ You can then use the template tag in your DTL templates:
 
 ### Logging
 
-TODO
-
 #### Default logging configuration
 
-TODO
+A ready-to-use default logging configuration is available from `phac_aspc.django.settings.logging`,
+with an environment variable based API for limited project-specific configuration. To use, just
+import `*` from the module in to your `settings.py`
 
 ```python
 #settings.py
 
 from phac_aspc.django.settings.logging import *
-# OR `from phac_aspc.django.settings import *`
+# OR, along with all the other settings, via `from phac_aspc.django.settings import *`
 ```
+
+For a **local dev** environment, I recommend setting `PHAC_ASPC_LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON=False`,
+to switch from JSON string formatted logs to friendlier console log formatting (coloured text, indentation, etc).
+
+For an **Azure Cloud** environment, I recommend enabling Azure Application Insights, and configuring the app
+for it via `PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING`. This will enable and use a pre-configured
+Azure log handler.
+
+For a **Google Cloud** environment, the default configuration of writing JSON strings to stdout is prod-ready.
+
+In any production environment, you can optionally provide a Slack webhook via `PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL`.
+This will send error and critical level logs to the webhook's slack channel.
 
 ##### Default Logging Configuration environment variables
 
-| Variable                                           | Type | Purpose                                      |
-| -------------------------------------------------- | ---- | -------------------------------------------- |
-| PHAC_ASPC_LOGGING_LOWEST_LEVEL                     | str  | lowest logging level to print                |
-| PHAC_ASPC_LOGGING_MUTE_CONSOLE_HANDLER             | bool | mutes the default console handler output     |
-| PHAC_ASPC_LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON      | bool | console handler format; JSON or text         |
-| PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add and use an Azure log handler     |
-| PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add and use an Slack Webhook handler |
+| Variable                                           | Type | Purpose                                  |
+| -------------------------------------------------- | ---- | ---------------------------------------- |
+| PHAC_ASPC_LOGGING_LOWEST_LEVEL                     | str  | lowest logging level to print            |
+| PHAC_ASPC_LOGGING_MUTE_CONSOLE_HANDLER             | bool | mutes the default console handler output |
+| PHAC_ASPC_LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON      | bool | console handler format; JSON or text     |
+| PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add a Azure log handler          |
+| PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add a Slack Webhook handler      |
 
 Note: these env vars are consumed only within `phac_aspc.django.settings.logging`.
 If using `configure_uniform_std_lib_and_structlog_logging` directly, these env vars

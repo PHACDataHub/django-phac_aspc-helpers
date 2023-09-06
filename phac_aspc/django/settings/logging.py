@@ -50,7 +50,7 @@ if azure_insights_connection_string is not None:
 slack_webhook_url = get_env_value(logging_env, "LOGGING_SLACK_WEBHOOK_URL")
 if slack_webhook_url is not None:
     # pylint: disable=ungrouped-imports
-    from phac_aspc.django.helpers.logging.handlers import SlackWebhookHandler
+    from phac_aspc.django.helpers.logging.json_post_handlers import SlackWebhookHandler
 
     additional_handler_configs[f"{_default_suffix}slack_Webhook_handler"] = (
         {
