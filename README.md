@@ -29,7 +29,8 @@ INSTALLED_APPS = configure_apps([...])
 MIDDLEWARE = configure_middleware([...])
 ```
 
-> Note: Replace [...] above with the corresponding existing configuration from
+> **Note**
+> Replace [...] above with the corresponding existing configuration from
 > your project.
 
 The `configure_apps` and `configure_middleware` utility functions will insert
@@ -47,7 +48,8 @@ urlpatterns = [
 ]
 ```
 
-> Note: Add `*phac_aspc_helper_urls` to the list or `urlpatterns` exported by
+> **Note**
+> Add `*phac_aspc_helper_urls` to the list or `urlpatterns` exported by
 > your project's `urls` module.
 
 ### Jinja
@@ -591,7 +593,8 @@ This will send error and critical level logs to the webhook's slack channel.
 | PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add a Azure log handler          |
 | PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add a Slack Webhook handler      |
 
-> Note: these env vars are consumed only within `phac_aspc.django.settings.logging`.
+> **Note**
+> these env vars are consumed only within `phac_aspc.django.settings.logging`.
 > If using `configure_uniform_std_lib_and_structlog_logging` directly, these env vars
 > won't do anything.
 
@@ -614,7 +617,8 @@ directly calling `phac_aspc.django.helpers.logging.configure_logging.configure_u
 in your settings.py instead. Be aware that this bypasses the `PHAC_ASPC_HELPER_LOGGING_...` env vars, which
 are all only used in the `phac_aspc.django.settings.logging` module.
 
-> Note: `LOGGING_CONFIG = None` must be set in your `settings.py` to drop the Django
+> **Note**
+> `LOGGING_CONFIG = None` must be set in your `settings.py` to drop the Django
 > default logging config. Otherwise, Django will try to merge it's own logging defaults
 > in to any custom configuration you do, leading to all sorts of headaches and maintenance
 > issues. We can't set or assert this for you, so **you** must set `LOGGING_CONFIG = None`
