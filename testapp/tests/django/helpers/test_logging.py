@@ -10,12 +10,12 @@ import responses
 import structlog
 from testfixtures import LogCapture
 
-from phac_aspc.django.helpers.logging.handlers import (
+from phac_aspc.django.helpers.logging.json_post_handlers import (
     AbstractJSONPostHandler,
     SlackWebhookHandler,
 )
 from phac_aspc.django.helpers.logging.utils import (
-    bind_contextvars_to_all_logs_for_current_request,
+    add_fields_to_all_logs_for_current_request,
 )
 
 
@@ -114,7 +114,7 @@ def test_json_logging_consistent_between_standard_logger_and_structlogger(
     )
 
 
-def test_bind_contextvars_to_all_logs_for_current_request(
+def test_add_fields_to_all_logs_for_current_request(
     logger_factory, vanilla_user_client, settings
 ):
     capturingHandler = get_log_output_capturing_handler()
@@ -132,11 +132,11 @@ def test_bind_contextvars_to_all_logs_for_current_request(
         def setup(self, request, *args, **kwargs):
             super().setup(request, *args, **kwargs)
 
-            bind_contextvars_to_all_logs_for_current_request(metadata_1)
+            add_fields_to_all_logs_for_current_request(metadata_1)
             test_logger.info(event_with_metadata_1)
 
         def get(self, request, *args, **kwargs):
-            bind_contextvars_to_all_logs_for_current_request(metadata_2)
+            add_fields_to_all_logs_for_current_request(metadata_2)
 
             test_logger.info(event_with_metadata_1_and_2)
 

@@ -1,4 +1,4 @@
-"""Handlers for use alongside the PHAC helpers logging configuration"""
+"""Handlers for JSON POST requests, for use alongside the PHAC helpers logging configuration"""
 import logging.config
 from abc import ABCMeta, abstractmethod
 
@@ -7,7 +7,8 @@ try:
     import requests
 except (ImportError, ModuleNotFoundError) as exc:
     raise ImportError(
-        "The `requests` package is required for use of the PHAC helpers JSON post handlers"
+        "The `requests` package is required for use of the PHAC helpers JSON post"
+        + "handlers. You must install this dependency your self."
     ) from exc
 
 

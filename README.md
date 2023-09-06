@@ -11,6 +11,7 @@ added to your django project:
 - [django-axes](https://django-axes.readthedocs.io/)
 - [django-environ](https://django-environ.readthedocs.io/)
 - [django-modeltranslation](https://django-modeltranslation.readthedocs.io/)
+- [django-structlog](https://django-structlog.readthedocs.io/en/latest/)
 
 ## Quick start
 
@@ -120,15 +121,7 @@ global_from_env(
 )
 ```
 
-### Environment variable list
-
-All variables are prefixed with `PHAC_ASPC_` to avoid name conflicts.
-
-| Variable                        | Type | Purpose                         |
-| ------------------------------- | ---- | ------------------------------- |
-| PHAC_ASPC_SESSION_COOKIE_AGE    | int  | Session expiry in seconds       |
-| PHAC_ASPC_SESSION_COOKIE_SECURE | bool | Use secure cookies (HTTPS only) |
-| PHAC_ASPC_LANGUAGE_CODE         | str  | Default language                |
+Available `PHAC_ASPC_` env vars are listed under their coresponding "feature" sections below.
 
 ## Features
 
@@ -175,7 +168,7 @@ or if you're using Jinja:
 </html>
 ```
 
-#### Bundled releases
+#### Bundled WET releases
 
 | Product                      | Version   |
 | ---------------------------- | --------- |
@@ -282,7 +275,7 @@ class OAuthBackend(BaseBackend):
 
 ```
 
-#### Environment Variables
+#### Sign-in with Microsoft Environment Variables
 
 | Variable                          | Type | Purpose                                      |
 | --------------------------------- | ---- | -------------------------------------------- |
@@ -307,7 +300,6 @@ e.g. with Jinja, on a login page where the URL ends with `?next=/some-protected-
 ```
 {{ phac_aspc.phac_aspc_auth_signin_microsoft_button(request.GET.urlencode()) }}
 ```
-
 
 #### Handling Errors
 
@@ -438,6 +430,15 @@ or if you're using Jinja
 > For more information on session timeout, visit the
 > [documentation](https://wet-boew.github.io/wet-boew/docs/ref/session-timeout/session-timeout-en.html).
 
+##### Session Timeout Environment variables
+
+All variables are prefixed with `PHAC_ASPC_` to avoid name conflicts.
+
+| Variable                        | Type | Purpose                         |
+| ------------------------------- | ---- | ------------------------------- |
+| PHAC_ASPC_SESSION_COOKIE_AGE    | int  | Session expiry in seconds       |
+| PHAC_ASPC_SESSION_COOKIE_SECURE | bool | Use secure cookies (HTTPS only) |
+
 ### Localization
 
 Django will be configured to support English (en-ca) and French (fr-ca). This
@@ -445,6 +446,12 @@ can be changed in your projects settings using `LANGUAGES` and `LANGUAGE_CODE`.
 
 > For more information on Django's localization, see their
 > [documentation](https://docs.djangoproject.com/en/4.1/topics/i18n/).
+
+#### Localization Environment variables
+
+| Variable                        | Type | Purpose                         |
+| ------------------------------- | ---- | ------------------------------- |
+| PHAC_ASPC_LANGUAGE_CODE         | str  | Default language                |
 
 #### lang template tag
 
@@ -507,13 +514,13 @@ class Signal(models.Model):
     location = models.ManyToManyField("Location", through='SignalLocation')
 ```
 
-### Jinja2 and Django Template Language (DTL) cross-language-includes
+#### Jinja2 and Django Template Language (DTL) cross-language-includes
 
 We provide a Jinja2 utility function and a DTL template tag which allows each to
 "include" from (render inline, using the including template's context) from one
 template language to the other.
 
-#### `include_from_dtl` Jinja2 util
+##### `include_from_dtl` Jinja2 util
 
 Add the util to your jinja environment:
 
@@ -536,7 +543,7 @@ And then use it from a Jinja2 template:
 {{ include_from_dtl("some/dtl/template/path.html") }}
 ```
 
-#### `phac_aspc_include_from_jinja` DTL template tag
+##### `phac_aspc_include_from_jinja` DTL template tag
 
 To register the `phac_aspc_...` template tags, add `phac_aspc.django.helpers`
 to `INSTALLED_APPS` in your `settings.py`.
@@ -546,4 +553,110 @@ You can then use the template tag in your DTL templates:
 ```DTL
 {% load phac_aspc_include_from_jinja %}
 {% phac_aspc_include_from_jinja "some/Jinja2/template/path.jinja2" %}
+
+### Logging
+
+TODO
+
+#### Default logging configuration
+
+TODO
+
+```python
+#settings.py
+
+from phac_aspc.django.settings.logging import *
+# OR `from phac_aspc.django.settings import *`
+```
+
+##### Default Logging Configuration environment variables
+
+| Variable                                           | Type | Purpose                                      |
+| -------------------------------------------------- | ---- | -------------------------------------------- |
+| PHAC_ASPC_LOGGING_LOWEST_LEVEL                     | str  | lowest logging level to print                |
+| PHAC_ASPC_LOGGING_MUTE_CONSOLE_HANDLER             | bool | mutes the default console handler output     |
+| PHAC_ASPC_LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON      | bool | console handler format; JSON or text         |
+| PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add and use an Azure log handler     |
+| PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add and use an Slack Webhook handler |
+
+Note: these env vars are consumed only within `phac_aspc.django.settings.logging`.
+If using `configure_uniform_std_lib_and_structlog_logging` directly, these env vars
+won't do anything.
+
+#### add_fields_to_all_logs_for_current_request
+
+When the server is processing a request, this function adds additional key-value fields to the logging context.
+Added context is will be present in subsequent logs\*. Context is cleared between requests.
+
+\* at least, it will be in the structlog `event_dict` passed to the formatter (rendering processor). All of the
+default PHAC helper formatters will serialize the context in to the final log output. Custom formatters may not.
+
+Requires use of the PHAC helper's logging configuration and the django_structlog RequestMiddleware.
+The PHAC helper's logging configuration ensures these context vars are rendered when logging,
+and the django_structlog RequestMiddleware handles clearing the structlog contextvars between requests.
+
+#### Customized logging configuration via configure_uniform_std_lib_and_structlog_logging
+
+Deeper customization can be achieved by forgoing a `*` import from `phac_aspc.django.settings.logging`,
+directly calling `phac_aspc.django.helpers.logging.configure_logging.configure_uniform_std_lib_and_structlog_logging`
+in your settings.py instead. Be aware that this bypasses the `PHAC_ASPC_HELPER_LOGGING_...` env vars, which
+are all used in
+
+From the doc string:
+> Configures both structlog and the standard library logging module, enforcing uniform logging behaviour between the two. Log handler and formatters are shared between the two, and the same set of structlog processors is run on all logs.
+>
+> The baseline configuration provides a console (stdout) handler and formatters for basic JSON string formatting, pretty JSON string formatting, console formatting (with coloured text etc.), and plain text formatting. The keys for these default formatters are exposed as PHAC_HELPER_..._FORMATTER_KEY variables in this module.
+>
+> `additional_handler_configs` takes standard logging dict config handler definitions.
+> `additional_formatter_functions` takes a dict of callables by (unique) formatter key. These callables are used as structlog "renderer" (end-of-chain) processors, for seralizing the results of the `structlog_pre_processors` list to a string for the handlers to emit. I recommend directly using, or wrapping/subclassing, existing structlog renderers here.
+>
+> When providing a non-default `structlog_pre_processors` list, I recommend extending the DEFAULT_STRUCTLOG_PRE_PROCESSORS export. At a minimum, your processor list should include `structlog.contextvars.merge_contextvars`, for django_structlog RequestMiddleware support!
+>
+> Log filter configuration is not surfaced in the API, as the logging dict config API accepts in-line logging.Filter instance for the `filterer` key of a handler config (unlike formatters). If you want to filter logs, add an additional handler with it's own filterer (and consider muting the default console handler).
+>
+> Note: by default, the built in console handler is muted running tests, because it makes pytest's own console output harder to follow (and pytest captures and reports errors after all tests have finished running anyway). You can over ride this behaviour by explicitly passing a `mute_console_handler` value.
+
+E.g. Muting the default console handler and using a custom file handler with a custom formatter
+
+```python
+#settings.py
+
+import structlog
+
+from phac_aspc.django.helpers.logging.configure_logging import (
+    configure_uniform_std_lib_and_structlog_logging,
+    DEFAULT_STRUCTLOG_PRE_PROCESSORS,
+)
+
+# IMPORTANT: `LOGGING_CONFIG = None` drops the Django default logging config. If not
+# set to `None`, Django will try to merge it's defaults in to any custom configuration
+# you do, leading to all sorts of headaches. Always set this when consuming 
+# `configure_uniform_std_lib_and_structlog_logging` directly
+LOGGING_CONFIG = None
+
+configure_uniform_std_lib_and_structlog_logging(
+    mute_console_handler=True,
+    additional_handler_configs={
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "INFO",
+            "filename": "logs",
+            "mode": "a",
+            "encoding": "utf-8",
+            "maxBytes": 500000,
+            "backupCount": 4
+            "formatter": "custom_formatter",
+        }
+    },
+    additional_formatter_functions={
+        "custom_formatter": (
+            lambda _logging, _name, structlog_event_dict: (
+                f"{structlog_event_dict.timestamp}: {structlog_event_dict.event}"
+            )
+        )
+    }
+    structlog_pre_processors =[**DEFAULT_STRUCTLOG_PRE_PROCESSORS, some_custom_processor],
+    datefmt="%d/%b/%Y %H:%M:%S",
+)
+>>>>>>> cc4fcd5 (Add optional PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL env var, use in a slack webhook handler if it's set)
 ```

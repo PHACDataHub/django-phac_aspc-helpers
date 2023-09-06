@@ -11,7 +11,7 @@ from phac_aspc.django.helpers.logging.configure_logging import (
 )
 
 
-def bind_contextvars_to_all_logs_for_current_request(context_dict: Dict[str, Any]):
+def add_fields_to_all_logs_for_current_request(context_dict: Dict[str, Any]):
     """Binds structlog contextvars to all subsequent logs for the request currently being processed.
 
     Requires use of the PHAC helper's logging configuration and the django_structlog
