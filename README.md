@@ -591,9 +591,9 @@ This will send error and critical level logs to the webhook's slack channel.
 | PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add a Azure log handler          |
 | PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add a Slack Webhook handler      |
 
-Note: these env vars are consumed only within `phac_aspc.django.settings.logging`.
-If using `configure_uniform_std_lib_and_structlog_logging` directly, these env vars
-won't do anything.
+> Note: these env vars are consumed only within `phac_aspc.django.settings.logging`.
+> If using `configure_uniform_std_lib_and_structlog_logging` directly, these env vars
+> won't do anything.
 
 #### add_fields_to_all_logs_for_current_request
 
@@ -612,7 +612,13 @@ and the django_structlog RequestMiddleware handles clearing the structlog contex
 Deeper customization can be achieved by forgoing a `*` import from `phac_aspc.django.settings.logging`,
 directly calling `phac_aspc.django.helpers.logging.configure_logging.configure_uniform_std_lib_and_structlog_logging`
 in your settings.py instead. Be aware that this bypasses the `PHAC_ASPC_HELPER_LOGGING_...` env vars, which
-are all used in
+are all only used in the `phac_aspc.django.settings.logging` module.
+
+> Note: `LOGGING_CONFIG = None` must be set in your `settings.py` to drop the Django
+> default logging config. Otherwise, Django will try to merge it's own logging defaults
+> in to any custom configuration you do, leading to all sorts of headaches and maintenance
+> issues. We can't set or assert this for you, so **you** must set `LOGGING_CONFIG = None`
+> when consuming `configure_uniform_std_lib_and_structlog_logging` directly!
 
 From the doc string:
 > Configures both structlog and the standard library logging module, enforcing uniform logging behaviour between the two. Log handler and formatters are shared between the two, and the same set of structlog processors is run on all logs.
@@ -640,10 +646,6 @@ from phac_aspc.django.helpers.logging.configure_logging import (
     DEFAULT_STRUCTLOG_PRE_PROCESSORS,
 )
 
-# IMPORTANT: `LOGGING_CONFIG = None` drops the Django default logging config. If not
-# set to `None`, Django will try to merge it's defaults in to any custom configuration
-# you do, leading to all sorts of headaches. Always set this when consuming 
-# `configure_uniform_std_lib_and_structlog_logging` directly
 LOGGING_CONFIG = None
 
 configure_uniform_std_lib_and_structlog_logging(
