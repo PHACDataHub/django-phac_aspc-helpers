@@ -8,6 +8,7 @@ from phac_aspc.django.helpers.logging.configure_logging import (
 )
 from phac_aspc.django.settings.utils import get_env, get_env_value, is_running_tests
 
+
 # `LOGGING_CONFIG = None` drops the Django default logging config rather than merging
 # our rules with it. This is prefferable as having to consult the default rules and work out
 # what is or isn't overwritten by the merging just feels like gotcha city for future
