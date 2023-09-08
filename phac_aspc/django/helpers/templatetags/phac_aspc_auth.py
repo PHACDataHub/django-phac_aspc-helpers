@@ -1,7 +1,8 @@
 """Related to Authentication"""
 from django import template
-from django.conf import settings
 from django.template import loader
+
+from phac_aspc.django.settings.security_env import get_oauth_env_value
 
 register = template.Library()
 
@@ -14,6 +15,6 @@ def phac_aspc_auth_signin_microsoft_button(query_params=""):
         loader.get_template("phac_aspc/helpers/auth/buttons/microsoft.html").render(
             {"query_params": query_params}
         )
-        if getattr(settings, "PHAC_ASPC_HELPER_OAUTH_PROVIDER", False)
+        if get_oauth_env_value("PROVIDER")
         else ""
     )

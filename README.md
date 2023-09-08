@@ -77,28 +77,26 @@ For more information, refer to the Jinja
 ## Environment variables
 
 Several settings or behaviours implemented by this library can be controlled via
-environment variables. This is done via the
-[django-environ](https://django-environ.readthedocs.io/en/latest/) library.
-(Refer to their documentation on how to format special data types like lists)
-If your project root has a `.env` file, those values will be used.
+environment variables. By default, these environment variables are read from the
+`.env` file in your project's root. This is done via the [django-environ](https://django-environ.readthedocs.io/en/latest/)
+library; refer to their documentation on how to format special data types like lists.
 
-If you want to use environment variables in your project's configuration, you
-can simply reference django-environ directly as it will automatically be
-installed. For example:
+Alternatively, these environment variables can be declared in your `settings.py`
+itself. There are two important caveats when doing so:
 
-```python
-import environ
+  1) `settings.py` declarations take precedence over any instances of the same
+  env var in your `.env` file
+  2) the declarations must occur **before** either any wildcard (`*`) imports
+  from `phac_aspc` or calls to `phac_aspc` utility functions are made
 
-env = environ.Env(DEBUG=(bool, False))
-environ.Env.read_env()
+All env vars for this library are prefixed with `PHAC_ASPC_`. Available `PHAC_ASPC_`
+env vars are listed under their coresponding "feature" sections below.
 
-DEBUG = env('DEBUG')
+### global_from_env
 
-```
-
-This library also provides a utility that automatically declares a module level
-global while checking the environment. It is particularly useful when declaring
-django settings.
+This library also provides a utility that automatically declares an un-prefixed module
+level global from a prefixed env var. It is particularly useful when declaring
+django settings. The default prefix used is `PHAC_ASPC_`
 
 ```python
 from phac_aspc.django.settings.utils import global_from_env
@@ -108,11 +106,13 @@ global_from_env(
 )
 ```
 
-The example above creates the module level global `SESSION_COOKIE_AGE` with a
-default value of 1200, unless there is an environment variable (or **.env** file
-entry) `PHAC_ASPC_SESSION_COOKIE_AGE`. By default the declared variable name is
-prefixed with `PHAC_ASPC_`. The prefix can be changed by providing a custom
-prefix.
+The example above creates the module level global `SESSION_COOKIE_AGE` taking the
+value of the env var named `PHAC_ASPC_SESSION_COOKIE_AGE`, defaulting to 1200 if no
+env var is found. As with other configuration env vars for this library, the value
+can either come from Django settings or from a `.env` file.
+
+An alternative prefix can also be provided as well, to use this with other env var
+name spaces.
 
 ```python
 from phac_aspc.django.settings.utils import global_from_env
@@ -122,8 +122,6 @@ global_from_env(
     SESSION_COOKIE_AGE=(int, 1200),
 )
 ```
-
-Available `PHAC_ASPC_` env vars are listed under their coresponding "feature" sections below.
 
 ## Features
 

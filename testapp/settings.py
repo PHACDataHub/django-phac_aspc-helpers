@@ -1,6 +1,8 @@
 from glob import glob
 from pathlib import Path
 
+PHAC_ASPC_LOGGING_USE_HELPERS_CONFIG = True
+# pylint: disable=wrong-import-position, wildcard-import, unused-wildcard-import
 from phac_aspc.django.settings.logging import *
 
 INSTALLED_APPS = [

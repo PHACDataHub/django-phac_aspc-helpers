@@ -57,9 +57,12 @@ def configure_authentication_backends(backend_list):
     By default importing the settings will automatically configure the backend,
     however if you want to customize the authentication backend used by your
     project, you can use this method to ensure proper configuration."""
+    # pylint: disable=import-outside-toplevel
+    from .security_env import get_oauth_env_value
+
     oauth_backend = (
-        [getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", "")]
-        if getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", "")
+        [get_oauth_env_value("USE_BACKEND")]
+        if get_oauth_env_value("PROVIDER") and get_oauth_env_value("USE_BACKEND")
         else []
     )
 
@@ -71,20 +74,38 @@ def configure_authentication_backends(backend_list):
 
 def configure_middleware(middleware_list):
     """Return the list of middleware configured for this library"""
+    # pylint: disable=import-outside-toplevel
+    from phac_aspc.django.settings.logging_env import get_logging_env_value
+
+    logging_middleware = (
+        ["django_structlog.middlewares.RequestMiddleware"]
+        if get_logging_env_value("USE_HELPERS_CONFIG")
+        else []
+    )
+
     prefix = warn_and_remove(
         [
             "axes.middleware.AxesMiddleware",
             "django.middleware.locale.LocaleMiddleware",
-            "django_structlog.middlewares.RequestMiddleware",
-        ],
+        ]
+        + logging_middleware,
         middleware_list,
     )
     return prefix + middleware_list
 
 
 def get_env_value(env, key, prefix="PHAC_ASPC_"):
-    """Return prefixed value from environment"""
-    return env(f"{prefix}{key}")
+    """Returns the value for the prefixed key from the provided env, unless that
+    key exists in the Django settings in which case the settings value is used
+    """
+
+    prefixed_key = f"{prefix}{key}"
+
+    return getattr(
+        settings,
+        prefixed_key,
+        env(prefixed_key),
+    )
 
 
 def get_env(prefix="PHAC_ASPC_", **conf):
@@ -137,8 +158,6 @@ def global_from_env(prefix="PHAC_ASPC_", **conf):
     `PHAC_ASPC_`.
 
     conf is a dictionary used to generate the scheme for django-environ.
-
-
     """
 
     mod = inspect.getmodule(inspect.stack()[1][0])
