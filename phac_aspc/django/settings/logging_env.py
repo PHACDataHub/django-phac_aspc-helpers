@@ -4,7 +4,7 @@ from phac_aspc.django.settings.utils.env_utils import (
     get_env,
     get_env_value,
 )
-from phac_aspc.django.settings.utils.test_utils import is_running_tests
+from phac_aspc.django.settings.utils.is_running_tests import is_running_tests
 
 LOGGING_ENV_PREFIX = f"{PHAC_ENV_PREFIX}LOGGING_"
 

@@ -1,8 +1,6 @@
-"""This file contains utilities for detecting and configuring the PHAC helpers'
-testing environment
+"""This file contains a utility for configuring PHAC helpers settings when 
+in a testing environment
 """
-import sys
-
 from django.conf import settings
 
 
@@ -19,8 +17,3 @@ def configure_settings_for_tests():
         for x in settings.AUTHENTICATION_BACKENDS
         if x != "axes.backends.AxesStandaloneBackend"
     ]
-
-
-def is_running_tests():
-    """Detect if the app process was launched by a test-runner command"""
-    return "test" in sys.argv or any("pytest" in arg for arg in sys.argv)
