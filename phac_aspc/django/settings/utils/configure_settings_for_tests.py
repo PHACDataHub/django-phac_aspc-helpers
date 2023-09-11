@@ -1,7 +1,6 @@
 """This file contains a utility for configuring PHAC helpers settings when 
 in a testing environment
 """
-from django.conf import settings
 
 
 def configure_settings_for_tests():
@@ -11,7 +10,12 @@ def configure_settings_for_tests():
         to function.  You could instead modify the request as described here:
         https://django-axes.readthedocs.io/en/latest/3_usage.html#authenticating-users
     """
+
+    # Modules that read global state are best deffered to call time rather than module-load
+    from django.conf import settings  # pylint: disable=import-outside-toplevel
+
     # settings.AXES_ENABLED = False
+
     settings.AUTHENTICATION_BACKENDS = [
         x
         for x in settings.AUTHENTICATION_BACKENDS

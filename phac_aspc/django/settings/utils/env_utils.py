@@ -6,8 +6,6 @@ import inspect
 
 import environ
 
-from django.conf import settings
-
 PHAC_ENV_PREFIX = "PHAC_ASPC_"
 
 
@@ -15,6 +13,8 @@ def get_env_value(env, key, prefix=PHAC_ENV_PREFIX):
     """Returns the value for the prefixed key from the provided env, unless that
     key exists in the Django settings in which case the settings value is used
     """
+    # Modules that read global state are best deffered to call time rather than module-load
+    from django.conf import settings  # pylint: disable=import-outside-toplevel
 
     prefixed_key = f"{prefix}{key}"
 

@@ -54,6 +54,8 @@ def configure_authentication_backends(backend_list):
     By default importing the settings will automatically configure the backend,
     however if you want to customize the authentication backend used by your
     project, you can use this method to ensure proper configuration."""
+
+    # Modules that read global state are best deffered to call time rather than module-load
     # pylint: disable=import-outside-toplevel
     from phac_aspc.django.settings.security_env import get_oauth_env_value
 
@@ -71,6 +73,7 @@ def configure_authentication_backends(backend_list):
 
 def configure_middleware(middleware_list):
     """Return the list of middleware configured for this library"""
+    # Modules that read global state are best deffered to call time rather than module-load
     # pylint: disable=import-outside-toplevel
     from phac_aspc.django.settings.logging_env import get_logging_env_value
 

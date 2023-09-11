@@ -1,14 +1,9 @@
 """Utilities for use alongside the PHAC helpers logging configuration"""
 from typing import Dict, Any
 
-from django.conf import settings
 from django.core.exceptions import MiddlewareNotUsed, ImproperlyConfigured
 
 import structlog
-
-from phac_aspc.django.helpers.logging.configure_logging import (
-    is_phac_helper_logging_configuration_being_used,
-)
 
 
 def add_fields_to_all_logs_for_current_request(context_dict: Dict[str, Any]):
@@ -35,6 +30,14 @@ def add_fields_to_all_logs_for_current_request(context_dict: Dict[str, Any]):
     # framework-specific structlog wrapper
     # https://www.structlog.org/en/stable/contextvars.html#context-variables
     # https://github.com/jrobichaud/django-structlog/blob/89fdc7d8adb3cb91848f3b2856e01e5d49649d67/django_structlog/middlewares/request.py#L51
+
+    # Modules that read global state are best deffered to call time rather than module-load
+    from django.conf import settings  # pylint: disable=import-outside-toplevel
+
+    # pylint: disable=import-outside-toplevel
+    from phac_aspc.django.helpers.logging.configure_logging import (
+        is_phac_helper_logging_configuration_being_used,
+    )
 
     if "django_structlog.middlewares.RequestMiddleware" not in settings.MIDDLEWARE:
         raise MiddlewareNotUsed(
