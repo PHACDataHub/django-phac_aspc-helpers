@@ -560,7 +560,8 @@ You can then use the template tag in your DTL templates:
 
 A ready-to-use default logging configuration is available from `phac_aspc.django.settings.logging`,
 with an environment variable based API for limited project-specific configuration. To use, just
-import `*` from the module in to your `settings.py`
+import `*` from the module in to your `settings.py` and set `PHAC_ASPC_LOGGING_USE_HELPERS_CONFIG=true`
+in either your `.env` file or `settings.py` (before the `phac_aspc` import).
 
 ```python
 #settings.py
