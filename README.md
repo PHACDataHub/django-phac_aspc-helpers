@@ -86,8 +86,17 @@ itself. There are two important caveats when doing so:
 
   1) `settings.py` declarations take precedence over any instances of the same
   env var in your `.env` file
-  2) the declarations must occur **before** either any wildcard (`*`) imports
-  from `phac_aspc` or calls to `phac_aspc` utility functions are made
+  2) any env vars declared in `settings.py` for this library **must** be declared
+  **before** any imports from `phac_aspc` occur!
+     - best case, doing so will result in a lot of obscure Django configuration/
+     start-up-time errors. Worst case it subtly misconfigures `phac_aspc`
+     - similarly, you should not consume`phac_aspc` modules anywhere that executes
+     prior to Django's consumption of your app's settings module (e.g. in `manage.py`)
+     - `phac_aspc` modules that don't, directly or indirectly, depend on these
+     env vars are theoretically safe anywhere, **but** we don't currently identify
+     these modules, or make promises that any given module might won't start depending
+     on env vars in the future. This may change for select utilities that make sense
+     outside of a context with a properly initialized Django settings configuration
 
 All env vars for this library are prefixed with `PHAC_ASPC_`. Available `PHAC_ASPC_`
 env vars are listed under their coresponding "feature" sections below.
@@ -561,7 +570,7 @@ You can then use the template tag in your DTL templates:
 A ready-to-use default logging configuration is available from `phac_aspc.django.settings.logging`,
 with an environment variable based API for limited project-specific configuration. To use, just
 import `*` from the module in to your `settings.py` and set `PHAC_ASPC_LOGGING_USE_HELPERS_CONFIG=true`
-in either your `.env` file or `settings.py` (before the `phac_aspc` import).
+in either your `.env` file or `settings.py` (before the `phac_aspc` imports).
 
 ```python
 #settings.py
