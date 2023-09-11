@@ -1,5 +1,5 @@
 """Security and authentication configuration env var configs and getters"""
-from phac_aspc.django.settings.utils import get_env, get_env_value
+from phac_aspc.django.settings.utils.env_utils import get_env, get_env_value
 
 oauth_env = get_env(
     OAUTH_PROVIDER=(str, ""),

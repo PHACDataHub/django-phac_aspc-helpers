@@ -1,5 +1,9 @@
 """Logging configuration env var configs and getters"""
-from phac_aspc.django.settings.utils import get_env, get_env_value, is_running_tests
+from phac_aspc.django.settings.utils.env_utils import (
+    get_env,
+    get_env_value,
+)
+from phac_aspc.django.settings.utils.test_utils import is_running_tests
 
 logging_env = get_env(
     LOGGING_USE_HELPERS_CONFIG=(bool, False),
