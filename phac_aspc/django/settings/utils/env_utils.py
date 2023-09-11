@@ -8,8 +8,10 @@ import environ
 
 from django.conf import settings
 
+PHAC_ENV_PREFIX = "PHAC_ASPC_"
 
-def get_env_value(env, key, prefix="PHAC_ASPC_"):
+
+def get_env_value(env, key, prefix=PHAC_ENV_PREFIX):
     """Returns the value for the prefixed key from the provided env, unless that
     key exists in the Django settings in which case the settings value is used
     """
@@ -23,7 +25,7 @@ def get_env_value(env, key, prefix="PHAC_ASPC_"):
     )
 
 
-def get_env(prefix="PHAC_ASPC_", **conf):
+def get_env(prefix=PHAC_ENV_PREFIX, **conf):
     """Return django-environ configured with the provided values and
     using the prefix.
 
@@ -62,7 +64,7 @@ def get_env(prefix="PHAC_ASPC_", **conf):
     return env
 
 
-def global_from_env(prefix="PHAC_ASPC_", **conf):
+def global_from_env(prefix=PHAC_ENV_PREFIX, **conf):
     """Create named global variables based on the provided environment variable
     scheme.  Variables defined in the scheme will be inserted into the calling
     module's globals and prefixed with `PHAC_ASPC_` when fetching the
