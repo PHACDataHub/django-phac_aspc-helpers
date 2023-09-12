@@ -1,5 +1,7 @@
+from copy import deepcopy
 import json
 import logging
+
 
 from django.http import HttpResponse
 from django.urls import path, reverse
@@ -17,51 +19,75 @@ from phac_aspc.django.helpers.logging.json_post_handlers import (
 from phac_aspc.django.helpers.logging.utils import (
     add_fields_to_all_logs_for_current_request,
 )
+from phac_aspc.django.helpers.logging.configure_logging import (
+    configure_uniform_std_lib_and_structlog_logging,
+)
 
 
-# found this pattern while looking around at handler libraries on GitHub, specifically from
-# https://github.com/Mulanir/python-elasticsearch-logging/blob/main/tests/conftest.py
-@pytest.fixture()
-def logger_factory():
-    loggers = (
-        logging.getLogger("test_logger"),
-        structlog.getLogger("test_structlogger"),
-    )
+@pytest.fixture(autouse=True)
+def reset_logging_configs_after_test():
+    root_logger = logging.getLogger()
 
-    loggers_init_level = map(lambda logger: logger.level, loggers)
-    loggers_init_handlers = map(lambda logger: logger.handlers, loggers)
+    pre_test_logger_dict = deepcopy(root_logger.manager.loggerDict)
 
-    for logger in loggers:
-        logger.setLevel(logging.DEBUG)
+    logger_config_keys = [
+        "level",
+        "filters",
+        "handlers",
+        "disabled",
+        "propagate",
+    ]
+    pre_test_root_logger_config = {
+        key: getattr(root_logger, key) for key in logger_config_keys
+    }
 
-    def factory(handler=None):
-        if handler:
-            for logger in loggers:
-                logger.addHandler(handler)
+    pre_test_structlog_config = structlog.get_config()
 
-        return loggers
+    yield
 
-    yield factory
+    root_logger.manager.loggerDict = pre_test_logger_dict
 
-    for logger, init_level, init_handlers in zip(
-        loggers, loggers_init_level, loggers_init_handlers
-    ):
-        logger.setLevel(init_level)
+    for key, value in pre_test_root_logger_config.items():
+        if key == "level":
+            root_logger.setLevel(value)
+        else:
+            setattr(root_logger, key, value)
 
-        logger.handlers.clear()
-        for handler in init_handlers:
-            logger.Handler(handler)
+    structlog.configure(**pre_test_structlog_config)
 
 
-# IMPORTANT: while active, logCapture clobbers any existing logging configuration.
-# This is reverted when it's `uninstall()` method is called, but that means it is
-# only useful for testing config-agnostic things and properties
 @pytest.fixture()
 def log_capture():
     capture = LogCapture()
     yield capture
     capture.uninstall()
 
+
+logger_factory_incrementor = 0
+
+
+class LoggerFactory:
+    _id_incrementor = 0
+
+    def __call__(self, handler):
+        loggers = (
+            # loggers might cache by name on creation, avoid that with incrementing ids
+            logging.getLogger(f"test_logger_{self._id_incrementor}"),
+            structlog.getLogger(f"test_structlogger_{self._id_incrementor}"),
+        )
+
+        for logger in loggers:
+            logger.setLevel(logging.DEBUG)
+
+            if handler:
+                logger.addHandler(handler)
+
+        self._id_incrementor += 1
+
+        return loggers
+
+
+logger_factory = LoggerFactory()
 
 TEST_URL = "http://testing.notarealtld"
 
@@ -86,9 +112,7 @@ def get_log_output_capturing_handler(
     return capturingHandler
 
 
-def test_json_logging_consistent_between_standard_logger_and_structlogger(
-    logger_factory,
-):
+def test_json_logging_consistent_between_standard_logger_and_structlogger():
     capturingHandler = get_log_output_capturing_handler()
 
     test_logger, test_structlogger = logger_factory(capturingHandler)
@@ -114,9 +138,7 @@ def test_json_logging_consistent_between_standard_logger_and_structlogger(
     )
 
 
-def test_add_fields_to_all_logs_for_current_request(
-    logger_factory, vanilla_user_client, settings
-):
+def test_add_fields_to_all_logs_for_current_request(vanilla_user_client, settings):
     capturingHandler = get_log_output_capturing_handler()
 
     test_logger, _ = logger_factory(capturingHandler)
@@ -192,7 +214,7 @@ def test_add_fields_to_all_logs_for_current_request(
 # handle it's _own_ exceptions/log calls, which would result in an ugly loop
 @pytest.mark.timeout(3)
 def test_json_post_handler_posts_json_containing_logged_text_to_provided_url(
-    logger_factory, log_capture
+    log_capture,
 ):
     # can't test properties of AbstractJSONPostHandler directly, need to do so via an
     # implementing class; asserting this relationship as a pre-requisite
@@ -236,9 +258,7 @@ def test_json_post_handler_posts_json_containing_logged_text_to_provided_url(
 
 @responses.activate
 @pytest.mark.timeout(3)
-def test_json_post_handler_logs_own_errors_without_trying_to_rehandle_them(
-    logger_factory, log_capture
-):
+def test_json_post_handler_logs_own_errors_without_trying_to_rehandle_them(log_capture):
     assert issubclass(SlackWebhookHandler, AbstractJSONPostHandler)
 
     responses.post(TEST_URL, status=500)
@@ -269,9 +289,7 @@ def test_json_post_handler_logs_own_errors_without_trying_to_rehandle_them(
 
 @responses.activate
 @pytest.mark.timeout(3)
-def test_json_post_handler_emits_no_error_logs_in_fail_silent_mode(
-    logger_factory, log_capture
-):
+def test_json_post_handler_emits_no_error_logs_in_fail_silent_mode(log_capture):
     assert issubclass(SlackWebhookHandler, AbstractJSONPostHandler)
 
     responses.post(TEST_URL, status=500)
