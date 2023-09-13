@@ -35,6 +35,7 @@ PHAC_HELPER_PLAIN_STRING_FORMATTER_KEY = f"{_default_suffix}plaintext_formatter"
 PHAC_HELPER_JSON_FORMATTER_KEY = f"{_default_suffix}json_formatter"
 PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY = f"{_default_suffix}pretty_json_formatter"
 
+PHAC_HELPER_CONSOLE_HANDLER_KEY = f"{_default_suffix}console_handler"
 
 # flag set to true when configuration function called
 is_phac_helper_logging_configuration_being_used = False
@@ -146,7 +147,7 @@ def configure_uniform_std_lib_and_structlog_logging(
     }
 
     handlers = {
-        f"{_default_suffix}console_handler": {
+        PHAC_HELPER_CONSOLE_HANDLER_KEY: {
             "class": "logging.StreamHandler",
             "level": lowest_level_to_log,
             "stream": (
