@@ -3,15 +3,15 @@ import json
 import logging.config
 import os
 import sys
-from typing import Dict, Callable, Any, Literal, List
+from typing import Dict, Callable, Any, Literal
 
 import structlog
 
 from phac_aspc.django.settings.utils import is_running_tests
 
-DEFAULT_DATE_FORMAT = "%d/%b/%Y %H:%M:%S"
+DATE_FORMAT = "%d/%b/%Y %H:%M:%S"
 
-DEFAULT_STRUCTLOG_PRE_PROCESSORS = (
+STRUCTLOG_PRE_PROCESSORS = (
     structlog.contextvars.merge_contextvars,
     structlog.processors.TimeStamper(fmt="iso"),
     structlog.stdlib.add_logger_name,
@@ -61,10 +61,6 @@ def configure_uniform_std_lib_and_structlog_logging(
             str,
         ],
     ] = None,
-    structlog_pre_processors: List[
-        structlog.typing.Processor
-    ] = DEFAULT_STRUCTLOG_PRE_PROCESSORS,
-    datefmt: str = DEFAULT_DATE_FORMAT,
 ):
     """Configures both structlog and the standard library logging module, enforcing
     uniform logging behaviour between the two. Log handler and formatters are shared
@@ -79,17 +75,14 @@ def configure_uniform_std_lib_and_structlog_logging(
 
     `additional_formatter_functions` takes a dict of callables by (unique) formatter key. These
     callables are used as structlog "renderer" (end-of-chain) processors, for seralizing the
-    results of the `structlog_pre_processors` list to a string for the handlers to emit. I
-    recommend directly using, or wrapping/subclassing, existing structlog renderers here.
+    structlog event-dict object in to a string for the handlers to emit. I recommend directly using,
+    or wrapping/subclassing, existing structlog renderers here.
 
-    When providing a non-default `structlog_pre_processors` list, I recommend extending the
-    DEFAULT_STRUCTLOG_PRE_PROCESSORS export. At a minimum, your processor list should include
-    `structlog.contextvars.merge_contextvars`, for django_structlog RequestMiddleware support!
-
-    Log filter configuration is not surfaced in the API, as the logging dict config API
-    accepts in-line logging.Filter instance for the `filterer` key of a handler config
-    (unlike formatters). If you want to filter logs, add an additional handler with it's
-    own filterer (and consider muting the default console handler).
+    Log filter configuration isn't directly surfaced in the current API, but the logging
+    dict config API accepts in-line `logging.Filter` instances for the `filterer` key of
+    any handler config. If you want to filter logs, add a custome handler with a filter
+    via `additional_handler_configs` (and consider muting the default console handler,
+    since you can't directly filter it)
 
     Note: by default, the built in console handler is muted running tests, because it makes
     pytest's own console output harder to follow (and pytest captures and reports errors
@@ -104,7 +97,7 @@ def configure_uniform_std_lib_and_structlog_logging(
     structlog.configure(
         processors=[
             structlog.stdlib.filter_by_level,
-            *structlog_pre_processors,
+            *STRUCTLOG_PRE_PROCESSORS,
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
         # `wrapper_class` is the bound logger that you get back from
@@ -136,8 +129,8 @@ def configure_uniform_std_lib_and_structlog_logging(
     def formatter_function_to_formatter_config(formatter_function):
         return {
             "()": structlog.stdlib.ProcessorFormatter,
-            "foreign_pre_chain": structlog_pre_processors,
-            "datefmt": datefmt,
+            "foreign_pre_chain": STRUCTLOG_PRE_PROCESSORS,
+            "datefmt": DATE_FORMAT,
             "processor": formatter_function,
         }
 

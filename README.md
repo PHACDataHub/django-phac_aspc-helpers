@@ -643,18 +643,32 @@ are all only used in the `phac_aspc.django.settings.logging` module.
 > when consuming `configure_uniform_std_lib_and_structlog_logging` directly!
 
 From the doc string:
-> Configures both structlog and the standard library logging module, enforcing uniform logging behaviour between the two. Log handler and formatters are shared between the two, and the same set of structlog processors is run on all logs.
+> Configures both structlog and the standard library logging module, enforcing
+> uniform logging behaviour between the two. Log handler and formatters are shared
+> between the two, and the same set of structlog processors is run on all logs.
 >
-> The baseline configuration provides a console (stdout) handler and formatters for basic JSON string formatting, pretty JSON string formatting, console formatting (with coloured text etc.), and plain text formatting. The keys for these default formatters are exposed as PHAC_HELPER_..._FORMATTER_KEY variables in this module.
+> The baseline configuration provides a console (stdout) handler and formatters for
+> basic JSON string formatting, pretty JSON string formatting, console formatting
+> (with coloured text etc.), and plain text formatting. The keys for these default
+> formatters are exposed as PHAC_HELPER_..._FORMATTER_KEY variables in this module.
 >
 > `additional_handler_configs` takes standard logging dict config handler definitions.
-> `additional_formatter_functions` takes a dict of callables by (unique) formatter key. These callables are used as structlog "renderer" (end-of-chain) processors, for seralizing the results of the `structlog_pre_processors` list to a string for the handlers to emit. I recommend directly using, or wrapping/subclassing, existing structlog renderers here.
 >
-> When providing a non-default `structlog_pre_processors` list, I recommend extending the DEFAULT_STRUCTLOG_PRE_PROCESSORS export. At a minimum, your processor list should include `structlog.contextvars.merge_contextvars`, for django_structlog RequestMiddleware support!
+> `additional_formatter_functions` takes a dict of callables by (unique) formatter key. These
+> callables are used as structlog "renderer" (end-of-chain) processors, for seralizing the
+> structlog event-dict object in to a string for the handlers to emit. I recommend directly using,
+> or wrapping/subclassing, existing structlog renderers here.
 >
-> Log filter configuration is not surfaced in the API, as the logging dict config API accepts in-line logging.Filter instance for the `filterer` key of a handler config (unlike formatters). If you want to filter logs, add an additional handler with it's own filterer (and consider muting the default console handler).
+> Log filter configuration isn't directly surfaced in the current API, but the logging
+> dict config API accepts in-line `logging.Filter` instances for the `filterer` key of
+> any handler config. If you want to filter logs, add a custome handler with a filter
+> via `additional_handler_configs` (and consider muting the default console handler,
+> since you can't directly filter it)
 >
-> Note: by default, the built in console handler is muted running tests, because it makes pytest's own console output harder to follow (and pytest captures and reports errors after all tests have finished running anyway). You can over ride this behaviour by explicitly passing a `mute_console_handler` value.
+> Note: by default, the built in console handler is muted running tests, because it makes
+> pytest's own console output harder to follow (and pytest captures and reports errors
+> after all tests have finished running anyway). You can over ride this behaviour by
+> explicitly passing a `mute_console_handler` value.
 
 E.g. Muting the default console handler and using a custom file handler with a custom formatter
 
@@ -691,8 +705,6 @@ configure_uniform_std_lib_and_structlog_logging(
             )
         )
     }
-    structlog_pre_processors =[**DEFAULT_STRUCTLOG_PRE_PROCESSORS, some_custom_processor],
-    datefmt="%d/%b/%Y %H:%M:%S",
 )
 >>>>>>> cc4fcd5 (Add optional PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL env var, use in a slack webhook handler if it's set)
 ```
