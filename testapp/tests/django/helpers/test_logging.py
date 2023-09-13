@@ -1,7 +1,6 @@
 from copy import deepcopy
 import json
 import logging
-from types import MethodType
 
 
 from django.http import HttpResponse
@@ -28,6 +27,8 @@ from phac_aspc.django.helpers.logging.configure_logging import (
 
 @pytest.fixture(autouse=True)
 def reset_logging_configs_after_test():
+    # approach based on the strategy used by testfixtures's `LogCapture` class
+
     root_logger = logging.getLogger()
 
     pre_test_logger_dict = deepcopy(root_logger.manager.loggerDict)
@@ -67,6 +68,11 @@ def get_configured_logging_handler_by_name(name):
     return handler
 
 
+testapp_config_json_console_handler = get_configured_logging_handler_by_name(
+    PHAC_HELPER_CONSOLE_HANDLER_KEY
+)
+
+
 class CapturingHandlerWrapper(object):
     def __init__(self, handler_instance):
         self.__dict__["__class__"] = handler_instance.__class__
@@ -96,9 +102,7 @@ class CapturingHandlerWrapper(object):
 _logger_factory_id_incrementor = 0
 
 
-def make_capturing_loggers(
-    handler=get_configured_logging_handler_by_name(PHAC_HELPER_CONSOLE_HANDLER_KEY),
-):
+def make_capturing_loggers(handler):
     # pylint: disable=global-statement
     global _logger_factory_id_incrementor
 
@@ -120,9 +124,15 @@ def make_capturing_loggers(
     return (*loggers, capturing_handler.captured_logs)
 
 
-# Note: while in use, LogCapture clobers all
+# `capture_all_log_records` serves a different, sometimes complementary, purpose to
+# `make_capturing_loggers`. `capture_all_log_records` over-rides the configuration of
+# the root level logger, meaning it can see and capture the log records from ALL logging
+# calls, but it also clobers the root level's configured formatter, handler, filter,
+# etc while in use. Use it to assert the existence of, and inspect, log record values
+# from any logging source. Use `make_capturing_loggers` to assert things about
+# the formatted output of specific logging handler + formatter configurations
 @pytest.fixture()
-def log_capture():
+def capture_all_log_records():
     capture = LogCapture()
     yield capture
     capture.uninstall()
@@ -136,7 +146,7 @@ def test_json_logging_consistent_between_standard_logger_and_structlogger():
         logger,
         structlogger,
         captured_logs,
-    ) = make_capturing_loggers()
+    ) = make_capturing_loggers(testapp_config_json_console_handler)
 
     test_log_content = "Original error should be present in captured logs"
 
@@ -165,7 +175,7 @@ def test_add_fields_to_all_logs_for_current_request(vanilla_user_client, setting
         logger,
         _structlogger,
         captured_logs,
-    ) = make_capturing_loggers()
+    ) = make_capturing_loggers(testapp_config_json_console_handler)
 
     metadata_1 = {"metadata_key_1": "metadata_value_1"}
     metadata_2 = {"metadata_key_2": "metadata_value_2"}
@@ -270,13 +280,13 @@ def test_json_post_handler_posts_json_containing_logged_text_to_provided_url():
     # doesn't have a JSON body containing the logged message
     unexpected_endpoint = responses.post(TEST_URL)
 
-    handler = SlackWebhookHandler(url=TEST_URL, fail_silent=False)
+    slack_handler = SlackWebhookHandler(url=TEST_URL, fail_silent=False)
 
     (
         logger,
         _structlogger,
         _captured_logs,
-    ) = make_capturing_loggers(handler)
+    ) = make_capturing_loggers(slack_handler)
 
     logger.error(error_message)
 
@@ -286,41 +296,42 @@ def test_json_post_handler_posts_json_containing_logged_text_to_provided_url():
 
 @responses.activate
 @pytest.mark.timeout(3)
-def test_json_post_handler_logs_own_errors_without_trying_to_rehandle_them(log_capture):
+def test_json_post_handler_logs_own_errors_without_trying_to_rehandle_them(
+    capture_all_log_records,
+):
     assert issubclass(SlackWebhookHandler, AbstractJSONPostHandler)
 
     failing_endpoint = responses.post(TEST_URL, status=500)
-    handler = SlackWebhookHandler(url=TEST_URL, fail_silent=False)
+    slack_handler = SlackWebhookHandler(url=TEST_URL, fail_silent=False)
 
     (
         logger,
         _structlogger,
         _captured_logs,
-    ) = make_capturing_loggers(handler)
+    ) = make_capturing_loggers(slack_handler)
 
-    logger.error("Original error should be present in captured logs")
+    message = "Original error"
+    logger.error(message)
 
+    # only attempted to POST once
     assert failing_endpoint.call_count == 1
 
-    log_capture.check_present(
+    # original error log was seen by the root logger
+    capture_all_log_records.check_present(
         (
             logger.name,
             "ERROR",
-            "Original error should be present in captured logs",
+            message,
         )
     )
 
-    breakpoint()
-    pass
-
-    # assert that at least one log was generated from inside the SlackWebhookHandler, based
-    # on the convention that the logging handler used should be named after it's module
+    # ... as well as some additional error log from the SlackWebhookHandler module itself
     assert (
         len(
             list(
                 filter(
                     lambda record: SlackWebhookHandler.__module__ not in record.name,
-                    log_capture.records,
+                    capture_all_log_records.records,
                 )
             )
         )
@@ -330,26 +341,32 @@ def test_json_post_handler_logs_own_errors_without_trying_to_rehandle_them(log_c
 
 @responses.activate
 @pytest.mark.timeout(3)
-def test_json_post_handler_emits_no_error_logs_in_fail_silent_mode(log_capture):
+def test_json_post_handler_emits_no_error_logs_in_fail_silent_mode(
+    capture_all_log_records,
+):
     assert issubclass(SlackWebhookHandler, AbstractJSONPostHandler)
 
     failing_endpoint = responses.post(TEST_URL, status=500)
-    handler = SlackWebhookHandler(url=TEST_URL, fail_silent=True)
+    slack_handler = SlackWebhookHandler(url=TEST_URL, fail_silent=True)
 
     (
         logger,
         _structlogger,
         _captured_logs,
-    ) = make_capturing_loggers(handler)
+    ) = make_capturing_loggers(slack_handler)
 
-    logger.error("Original error should be the only captured log")
+    message = "Original error"
+    logger.error(message)
 
     assert failing_endpoint.call_count == 1
 
-    log_capture.check(
+    capture_all_log_records.check(
         (
             logger.name,
             "ERROR",
-            "Original error should be the only captured log",
+            message,
         )
     )
+
+    # no other logs were seen by the root logger
+    assert len(capture_all_log_records.records) == 1
