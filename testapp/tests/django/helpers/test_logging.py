@@ -21,6 +21,7 @@ from phac_aspc.django.helpers.logging.utils import (
 )
 from phac_aspc.django.helpers.logging.configure_logging import (
     configure_uniform_std_lib_and_structlog_logging,
+    PHAC_HELPER_JSON_FORMATTER_KEY,
     PHAC_HELPER_CONSOLE_HANDLER_KEY,
 )
 
@@ -66,11 +67,6 @@ def get_configured_logging_handler_by_name(name):
         raise ValueError(f'No handler with name "{name}" found on current root logger')
 
     return handler
-
-
-testapp_config_json_console_handler = get_configured_logging_handler_by_name(
-    PHAC_HELPER_CONSOLE_HANDLER_KEY
-)
 
 
 class CapturingHandlerWrapper(object):
@@ -142,11 +138,18 @@ TEST_URL = "http://testing.notarealtld"
 
 
 def test_json_logging_consistent_between_standard_logger_and_structlogger():
+    configure_uniform_std_lib_and_structlog_logging(
+        console_handler_formatter_key=PHAC_HELPER_JSON_FORMATTER_KEY
+    )
+    json_console_handler = get_configured_logging_handler_by_name(
+        PHAC_HELPER_CONSOLE_HANDLER_KEY
+    )
+
     (
         logger,
         structlogger,
         captured_logs,
-    ) = make_capturing_loggers(testapp_config_json_console_handler)
+    ) = make_capturing_loggers(json_console_handler)
 
     test_log_content = "Original error should be present in captured logs"
 
@@ -171,11 +174,18 @@ def test_json_logging_consistent_between_standard_logger_and_structlogger():
 
 
 def test_add_fields_to_all_logs_for_current_request(vanilla_user_client, settings):
+    configure_uniform_std_lib_and_structlog_logging(
+        console_handler_formatter_key=PHAC_HELPER_JSON_FORMATTER_KEY
+    )
+    json_console_handler = get_configured_logging_handler_by_name(
+        PHAC_HELPER_CONSOLE_HANDLER_KEY
+    )
+
     (
         logger,
         _structlogger,
         captured_logs,
-    ) = make_capturing_loggers(testapp_config_json_console_handler)
+    ) = make_capturing_loggers(json_console_handler)
 
     metadata_1 = {"metadata_key_1": "metadata_value_1"}
     metadata_2 = {"metadata_key_2": "metadata_value_2"}
