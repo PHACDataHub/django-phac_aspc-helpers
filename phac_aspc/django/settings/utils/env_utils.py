@@ -3,6 +3,7 @@ to configure PHAC helpers' behaviour
 """
 import os
 import inspect
+from importlib.util import find_spec
 
 import environ
 
@@ -25,42 +26,61 @@ def get_env_value(env, key, prefix=PHAC_ENV_PREFIX):
     )
 
 
+def find_env_file(path):
+    """Traverse directories backwards starting at `path`, returns the path of the
+    first .env file found, or `None` otherwise.
+    """
+
+    # look for .env file in provided path
+    filename = os.path.join(path, ".env")
+    if os.path.isfile(filename):
+        return filename
+
+    # when called on the root dir, os.path.dirname returns the root dir2
+    parent = os.path.dirname(path)
+
+    # recurse backwards till we reach the root
+    # (doesn't sit right, but there's no non-hacky way to know where the
+    # consuming repo's root is; other env packages like dotenv also
+    # default to searching backwards till they hit root)
+    if parent and parent != path:
+        return find_env_file(parent)
+
+    return None
+
+
 def get_env(prefix=PHAC_ENV_PREFIX, **conf):
     """Return django-environ configured with the provided values and
     using the prefix.
 
-    prefix can be used to change the environment variable prefix that is added
-    to the beginning on the variables defined in conf.  By default this value is
+    `prefix` can be used to change the environment variable prefix that is added
+    to the beginning on the variables defined in conf. By default this value is
     `PHAC_ASPC_`.
 
-    conf is a dictionary used to generate the scheme for django-environ.
+    `conf` is a dictionary used to generate the scheme for django-environ.
+
+    Will attempt to find and load from a .env, starting in the directory of the consuming
+    application's `DJANGO_SETTINGS_MODULE` and traveling back towards root. Continues
+    even if no .env is found, with every env var taking it's default from `conf`
+    instead.
 
     See https://django-environ.readthedocs.io/en/latest/api.html#environ.Env for
     additional information on the scheme.
     """
-
-    def _find_env_file(path):
-        # look for .env file in provided path
-        filename = os.path.join(path, ".env")
-        if os.path.isfile(filename):
-            return filename
-
-        # search the parent
-        parent = os.path.dirname(path)
-        if parent and os.path.normcase(parent) != os.path.normcase(
-            os.path.abspath(os.sep)
-        ):
-            return _find_env_file(parent)
-
-        # Not found
-        return ""
 
     scheme = {}
     for name, values in conf.items():
         scheme[f"{prefix}{name}"] = values
 
     env = environ.Env(**scheme)
-    environ.Env.read_env(_find_env_file(os.path.abspath(os.path.dirname(__name__))))
+
+    settings_path_of_consuming_app = os.path.dirname(
+        find_spec(os.getenv("DJANGO_SETTINGS_MODULE")).origin
+    )
+    nearest_ancestor_dot_env = find_env_file(settings_path_of_consuming_app)
+    if nearest_ancestor_dot_env and os.path.isfile(nearest_ancestor_dot_env):
+        environ.Env.read_env(nearest_ancestor_dot_env)
+
     return env
 
 
