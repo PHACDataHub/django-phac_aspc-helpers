@@ -101,4 +101,4 @@ def global_from_env(prefix=PHAC_ENV_PREFIX, **conf):
     env = get_env(prefix, **conf)
 
     for name in conf:
-        setattr(mod, name, get_env_value(env, name))
+        setattr(mod, name, get_env_value(env, name, prefix))
