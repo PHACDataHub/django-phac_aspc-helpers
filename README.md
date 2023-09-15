@@ -586,17 +586,7 @@ For a **Google Cloud** environment, the default configuration of writing JSON st
 
 For an **Azure Cloud** environment, I recommend creating an Azure Monitor resource, getting your azure insights connection
 string for it, and configuring the app to log to it via the `PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING` env var.
-This will enable and use a pre-configured Azure log handler.
-
-> **Note**
-> The Azure log handler in this config uses a log message formatter that returns stringified JSON. This message field contains all
-> the additional log data inserted by the structlog processors, including the request level context vars added by `django_structlog`
-> and any added via the `add_fields_to_all_logs_for_current_request` utility. Ideally the extra structlog data would be coverted in
-> to Azure `custom_field` values instead, but the rigidity of the current structlog and Azure Log Handler APIs means achieving this
-> would take a very hacky workaround.
->
-> The Azure log analytics interface won't parse this JSON message field out automatically the way Google Cloud does, but the log query
-> language Azure uses can via its [parse_json()](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/query/parsejsonfunction) function.
+This will enable and use a pre-configured Azure log handler, outputing logs with JSON formatted message fields.
 
 In any production environment, you can optionally provide a Slack webhook via `PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL`.
 This will send error and critical level logs to the webhook's slack channel.
