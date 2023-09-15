@@ -29,7 +29,7 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
             from opencensus.ext.azure.log_exporter import AzureLogHandler
         except (ImportError, ModuleNotFoundError) as exc:
             raise ImportError(
-                "The `opencensus-ext-azure` package is required for use of PHAC helper's"
+                "The `opencensus-ext-azure` package is required for use of PHAC helper's "
                 + "Azure Insights logging. You must install this dependency your self."
             ) from exc
 

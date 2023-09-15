@@ -183,5 +183,5 @@ def configure_uniform_std_lib_and_structlog_logging(
 
 
 class NoPassFilter:
-    def filter(self):
+    def filter(self, *args, **kwargs):
         return 0
