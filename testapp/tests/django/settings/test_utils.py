@@ -1,11 +1,11 @@
 """Unit tests for utils.py"""
+from copy import deepcopy
 import os
-import random
-import string
 import subprocess
 from unittest.mock import patch
 
 from django.core.checks.registry import registry
+import pytest
 
 from phac_aspc.django.settings.utils import (
     trigger_configuration_warning,
@@ -19,6 +19,24 @@ from phac_aspc.django.settings.utils import (
     get_env_value,
     global_from_env,
 )
+
+
+@pytest.fixture()
+def freeze_environ():
+    """The environ package hoists values from .env files in to env vars, can be
+    a source of cross-test contamination. This fixture rolls back any changes made
+    made to os.environ during a test.
+
+    Note: as per https://docs.python.org/3/library/os.html?highlight=environ#os.environ,
+    modifying the os.environ mapping directly is actually the correct way to manage env vars
+    """
+    pre_test_environ = deepcopy(os.environ)
+    yield
+    for key, value in os.environ.items():
+        if not key in pre_test_environ:
+            del os.environ[key]
+        else:
+            os.environ[key] = value
 
 
 def test_trigger_configuration_warning():
@@ -177,6 +195,7 @@ def test_is_running_tests_returns_false_outside_test_execution_environment():
             manage_py_path,
             "shell",
             "--command",
+            # pylint: disable=line-too-long
             f"from {is_running_tests.__module__} import is_running_tests; print(is_running_tests())",
         ],
         capture_output=True,
@@ -188,6 +207,9 @@ def test_is_running_tests_returns_false_outside_test_execution_environment():
 
 
 def test_find_env_file_returns_none_when_no_dot_env_found(tmp_path):
+    # WARNING: this test might fail, on the slim chance that some other
+    # .env file is found between the temp file location and the system root...
+    # but that should be highly unlikely
     assert find_env_file(tmp_path) is None
 
 
@@ -207,8 +229,8 @@ def test_find_env_file_returns_ancestor_env_path(tmp_path):
     assert find_env_file(sub_sub_dir) == env_path
 
 
-def test_get_env(tmp_path):
-    prefix = "".join(random.choice(string.ascii_lowercase) for i in range(5))
+def test_get_env(tmp_path, freeze_environ):
+    prefix = "ENV_VAR_"
 
     env_var = f"{prefix}FROM_FILE"
 
@@ -230,8 +252,8 @@ def test_get_env(tmp_path):
         assert env(env_var) is True
 
 
-def test_get_env_value(tmp_path, settings):
-    prefix = "".join(random.choice(string.ascii_lowercase) for i in range(5))
+def test_get_env_value(tmp_path, settings, freeze_environ):
+    prefix = "ENV_VAR_"
 
     default = "default"
     not_default = "not default"
@@ -260,7 +282,7 @@ def test_get_env_value(tmp_path, settings):
         assert get_env_value(env, "FROM_DEFAULT", prefix=prefix) == default
 
 
-def test_global_from_env(tmp_path, settings):
+def test_global_from_env(tmp_path, settings, freeze_environ):
     default = "default"
     not_default = "not default"
 
