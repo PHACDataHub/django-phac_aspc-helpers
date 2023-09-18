@@ -88,15 +88,12 @@ itself. There are two important caveats when doing so:
   env var in your `.env` file
   2) any env vars declared in `settings.py` for this library **must** be declared
   **before** any imports from `phac_aspc` occur!
-     - best case, doing so will result in a lot of obscure Django configuration/
-     start-up-time errors. Worst case it subtly misconfigures `phac_aspc`
      - similarly, you should not consume`phac_aspc` modules anywhere that executes
      prior to Django's consumption of your app's settings module (e.g. in `manage.py`)
      - `phac_aspc` modules that don't, directly or indirectly, depend on these
      env vars are theoretically safe anywhere, **but** we don't currently identify
-     these modules, or make promises that any given module might won't start depending
-     on env vars in the future. This may change for select utilities that make sense
-     outside of a context with a properly initialized Django settings configuration
+     these modules, or make promises that any given module won't start depending
+     on env vars in the future
 
 All env vars for this library are prefixed with `PHAC_ASPC_`. Available `PHAC_ASPC_`
 env vars are listed under their coresponding "feature" sections below.
@@ -579,7 +576,7 @@ from phac_aspc.django.settings.logging import *
 # OR, along with all the other settings, via `from phac_aspc.django.settings import *`
 ```
 
-For a **local dev** environment, I recommend setting `PHAC_ASPC_LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON=False`,
+For a **local dev** environment, I recommend setting `PHAC_ASPC_LOGGING_PRETTY_FORMAT_CONSOLE_LOGS=True`,
 to switch from JSON string formatted logs to friendlier console log formatting (coloured text, indentation, etc).
 
 For a **Google Cloud** environment, the default configuration of writing JSON strings to stdout is prod-ready.
@@ -593,13 +590,13 @@ This will send error and critical level logs to the webhook's slack channel.
 
 ##### Default Logging Configuration environment variables
 
-| Variable                                           | Type | Purpose                                  |
-| -------------------------------------------------- | ---- | ---------------------------------------- |
-| PHAC_ASPC_LOGGING_LOWEST_LEVEL                     | str  | lowest logging level to print            |
-| PHAC_ASPC_LOGGING_MUTE_CONSOLE_HANDLER             | bool | mutes the default console handler output |
-| PHAC_ASPC_LOGGING_FORMAT_CONSOLE_LOGS_AS_JSON      | bool | console handler format; JSON or text     |
-| PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add a Azure log handler          |
-| PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add a Slack Webhook handler      |
+| Variable                                           | Type | Purpose                                    |
+| -------------------------------------------------- | ---- | ------------------------------------------ |
+| PHAC_ASPC_LOGGING_LOWEST_LEVEL                     | str  | lowest logging level to print              |
+| PHAC_ASPC_LOGGING_MUTE_CONSOLE_HANDLER             | bool | mutes the default console handler output   |
+| PHAC_ASPC_LOGGING_PRETTY_FORMAT_CONSOLE_LOGS       | bool | pretty format console logs (coloured text) |
+| PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add a Azure log handler            |
+| PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add a Slack Webhook handler        |
 
 > **Note**
 > these env vars are consumed only within `phac_aspc.django.settings.logging`.

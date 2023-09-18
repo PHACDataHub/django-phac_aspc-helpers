@@ -13,7 +13,7 @@ logging_env = get_env(
     USE_HELPERS_CONFIG=(bool, False),
     LOWEST_LEVEL=(str, "INFO"),
     MUTE_CONSOLE_HANDLER=(bool, is_running_tests()),
-    FORMAT_CONSOLE_LOGS_AS_JSON=(bool, True),
+    PRETTY_FORMAT_CONSOLE_LOGS=(bool, False),
     AZURE_INSIGHTS_CONNECTION_STRING=(str, None),
     SLACK_WEBHOOK_URL=(str, None),
 )

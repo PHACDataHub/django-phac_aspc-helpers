@@ -60,9 +60,9 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
         lowest_level_to_log=lowest_level_to_log,
         mute_console_handler=get_logging_env_value("MUTE_CONSOLE_HANDLER"),
         console_handler_formatter_key=(
-            PHAC_HELPER_JSON_FORMATTER_KEY
-            if get_logging_env_value("FORMAT_CONSOLE_LOGS_AS_JSON")
-            else PHAC_HELPER_CONSOLE_FORMATTER_KEY
+            PHAC_HELPER_CONSOLE_FORMATTER_KEY
+            if get_logging_env_value("PRETTY_FORMAT_CONSOLE_LOGS")
+            else PHAC_HELPER_JSON_FORMATTER_KEY
         ),
         additional_handler_configs=additional_handler_configs,
     )
