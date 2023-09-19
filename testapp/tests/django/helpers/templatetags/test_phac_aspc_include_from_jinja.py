@@ -12,16 +12,18 @@ def dtl_template_get_source(dtl_template):
     return dtl_template.template.source
 
 
-def test_phac_aspc_jinja_include_renders_jinja_inside_a_django_template():
+def test_phac_aspc_include_from_jinja_renders_jinja_inside_a_django_template():
     # no good way to create new template content at test run-time, far as I can tell,
     # so the necessary templates for this test are on disk, outside of this test file.
     # Asserting assumptions about these templates as part of this test, to make that
     # less risky
 
-    included_jinja_name = "test_phac_aspc_jinja_include__included_jinja_basic.jinja2"
+    included_jinja_name = (
+        "test_phac_aspc_include_from_jinja__included_jinja_basic.jinja2"
+    )
     expected_jinja_content = "some jinja content"
 
-    including_dtl_name = "test_phac_aspc_jinja_include__including_dtl_basic.html"
+    including_dtl_name = "test_phac_aspc_include_from_jinja__including_dtl_basic.html"
     expected_dtl_content = "some dtl content"
 
     included_jinja_source = jinja_template_get_source(get_template(included_jinja_name))
@@ -33,7 +35,7 @@ def test_phac_aspc_jinja_include_renders_jinja_inside_a_django_template():
     assert expected_jinja_content not in including_dtl_source
     assert expected_dtl_content in including_dtl_source
     assert (
-        f'{{% phac_aspc_jinja_include "{included_jinja_name}" %}}'
+        f'{{% phac_aspc_include_from_jinja "{included_jinja_name}" %}}'
         in including_dtl_source
     )
 
@@ -42,13 +44,13 @@ def test_phac_aspc_jinja_include_renders_jinja_inside_a_django_template():
     assert expected_dtl_content in rendered_dtl_template
 
 
-def test_phac_aspc_jinja_include_passes_context_to_the_rendered_jinja():
+def test_phac_aspc_include_from_jinja_passes_context_to_the_rendered_jinja():
     included_jinja_name = (
-        "test_phac_aspc_jinja_include__included_jinja_context_consuming.jinja2"
+        "test_phac_aspc_include_from_jinja__included_jinja_context_consuming.jinja2"
     )
 
     including_dtl_name = (
-        "test_phac_aspc_jinja_include__including_dtl_context_consuming.html"
+        "test_phac_aspc_include_from_jinja__including_dtl_context_consuming.html"
     )
 
     context_key = "passed_context"

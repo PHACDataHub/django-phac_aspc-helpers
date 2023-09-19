@@ -20,7 +20,7 @@ is_django_templates_and_jinja_both_configured = map(
 
 
 @register.simple_tag(takes_context=True)
-def phac_aspc_jinja_include(context, template_name):
+def phac_aspc_include_from_jinja(context, template_name):
     """Used to render a Jinja template inside a standard Django template.
 
     Requires your app to have both DjangoTemplates and Jinja2 template backends
