@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "test",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "test"
+      ],
+      "django": true,
+      "justMyCode": false
+    }
+  ]
+}
