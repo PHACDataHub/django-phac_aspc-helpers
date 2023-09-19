@@ -24,14 +24,15 @@ def phac_aspc_jinja_include(context, template_name):
     """Used to render a Jinja template inside a standard Django template.
 
     Requires your app to have both DjangoTemplates and Jinja2 template backends
-    installed and configured.
+    installed and configured for use.
     """
 
     if not is_django_templates_and_jinja_both_configured:
         raise ImproperlyConfigured(
-            "settings.TEMPLATES must configure both the DjangoTemplate and Jinja2 "
-            + "backends for this tag to function"
+            "settings.TEMPLATES must include both the DjangoTemplate and Jinja2 "
+            + "backends for this tag to function!"
         )
 
     jinja_template = get_template(template_name)
+
     return jinja_template.render(context.flatten())
