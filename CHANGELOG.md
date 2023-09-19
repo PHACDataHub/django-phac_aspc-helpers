@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.7.0...v1.0.0) (2023-09-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Drop python 3.8 and 3.9 support, unify github action jobs ([#44](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/44))
+
+### Miscellaneous Chores
+
+* **deps:** Drop python 3.8 and 3.9 support, unify github action jobs ([#44](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/44)) ([1874608](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/18746087532ce48779d1791c5fcfa55d013ea0de))
+
 ## [0.7.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.6.0...v0.7.0) (2023-08-31)
 
 
