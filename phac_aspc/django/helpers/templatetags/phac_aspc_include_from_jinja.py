@@ -1,37 +1,19 @@
-from django.template.loader import get_template
 from django import template
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.template.loader import get_template
+
+from phac_aspc.django.helpers.jinja_dtl_interop_utils import (
+    assert_both_dtl_and_jinja_configured,
+)
 
 register = template.Library()
-
-is_django_templates_and_jinja_both_configured = map(
-    lambda template_backend: next(
-        filter(
-            lambda tempalte_config: tempalte_config["BACKEND"].endswith(
-                template_backend
-            ),
-            settings.TEMPLATES,
-        ),
-        False,
-    ),
-    ["DjangoTemplates", "Jinja2"],
-)
 
 
 @register.simple_tag(takes_context=True)
 def phac_aspc_include_from_jinja(context, template_name):
-    """Used to render a Jinja template inside a standard Django template.
-
-    Requires your app to have both DjangoTemplates and Jinja2 template backends
-    installed and configured for use.
     """
-
-    if not is_django_templates_and_jinja_both_configured:
-        raise ImproperlyConfigured(
-            "settings.TEMPLATES must include both the DjangoTemplate and Jinja2 "
-            + "backends for this tag to function!"
-        )
+    Renders a Jinja2 template inside a DTL template, using the DTL template's context.
+    """
+    assert_both_dtl_and_jinja_configured()
 
     jinja_template = get_template(template_name)
 

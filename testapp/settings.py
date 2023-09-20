@@ -60,6 +60,7 @@ TEMPLATES = [
         ),
         "APP_DIRS": True,
         "OPTIONS": {
+            "environment": "testapp.jinja2.environment",
             "context_processors": context_processors,
         },
     },
