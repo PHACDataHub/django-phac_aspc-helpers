@@ -51,16 +51,19 @@ urlpatterns = [
 
 ### Jinja
 
-If you are using jinja you can use django template tags by adding
-them to the global environment like this:
+If you are using jinja, you can use the phac_aspc jinja utils and django
+templatetags by adding them to the global environment like this:
 
 ```python
 import phac_aspc.django.helpers.templatetags as phac_aspc
+import phac_aspc.django.helpers.jinja_utils as include_from_dtl
+
 
 def environment(**options):
     env = Environment(**options)
     env.globals.update({
        "phac_aspc": phac_aspc,
+       "include_from_dtl": include_from_dtl,
     })
     return env
 ```
@@ -502,4 +505,45 @@ class SignalLocation(models.Model):
 class Signal(models.Model):
     title = models.CharField(max_length=400)
     location = models.ManyToManyField("Location", through='SignalLocation')
+```
+
+### Jinja2 and Django Template Language (DTL) cross-language-includes
+
+We provide a Jinja2 utility function and a DTL template tag which allows each to
+"include" from (render inline, using the including template's context) from one
+template language to the other.
+
+#### `include_from_dtl` Jinja2 util
+
+Add the util to your jinja environment:
+
+```python
+import phac_aspc.django.helpers.jinja_utils as include_from_dtl
+
+
+def environment(**options):
+    env = Environment(**options)
+    env.globals.update({
+       ..., # other utils and constants 
+       "include_from_dtl": include_from_dtl,
+    })
+    return env
+```
+
+And then use it from a Jinja2 template:
+
+```Jinja2
+{{ include_from_dtl("some/dtl/template/path.html") }}
+```
+
+#### `phac_aspc_include_from_jinja` DTL template tag
+
+To register the `phac_aspc_...` template tags, add `phac_aspc.django.helpers`
+to `INSTALLED_APPS` in your `settings.py`.
+
+You can then use the template tag in your DTL templates:
+
+```DTL
+{% load phac_aspc_include_from_jinja %}
+{% phac_aspc_include_from_jinja "some/Jinja2/template/path.jinja2" %}
 ```
