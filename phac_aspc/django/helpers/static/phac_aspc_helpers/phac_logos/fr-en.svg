@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1933.68 174.97">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1933.68 174.97">
   <defs>
-    <style>
+     <style>
       .cls-1 {
         font-family: Helvetica, Helvetica;
         font-size: 83px;
@@ -9,10 +9,6 @@
 
       .cls-2 {
         fill: #f00;
-      }
-
-      .cls-2, .cls-3, .cls-4 {
-        stroke-width: 0px;
       }
 
       .cls-3 {
