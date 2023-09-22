@@ -1,3 +1,7 @@
+from glob import glob
+from pathlib import Path
+
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -35,9 +39,14 @@ context_processors = [
     "django.contrib.messages.context_processors.messages",
 ]
 
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": glob(
+            str(Path(__file__).parent.joinpath("**/templates")),
+            recursive=True,
+        ),
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": context_processors,
@@ -45,8 +54,13 @@ TEMPLATES = [
     },
     {
         "BACKEND": "django.template.backends.jinja2.Jinja2",
+        "DIRS": glob(
+            str(Path(__file__).parent.joinpath("**/jinja2")),
+            recursive=True,
+        ),
         "APP_DIRS": True,
         "OPTIONS": {
+            "environment": "testapp.jinja2.environment",
             "context_processors": context_processors,
         },
     },

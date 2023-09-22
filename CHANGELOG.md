@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.0.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.0...v1.0.1) (2023-09-20)
+
+
+### Features
+
+* DTL template tag and Jinja2 util func for rendering a template from one language inside another  ([#43](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/43)) ([8bde55f](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/8bde55f544e11e6e80bcbd7f0aed9d210e130017))
+
+## [1.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.7.0...v1.0.0) (2023-09-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Drop python 3.8 and 3.9 support, unify github action jobs ([#44](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/44))
+
+### Miscellaneous Chores
+
+* **deps:** Drop python 3.8 and 3.9 support, unify github action jobs ([#44](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/44)) ([1874608](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/18746087532ce48779d1791c5fcfa55d013ea0de))
+
+## [0.7.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.6.0...v0.7.0) (2023-08-31)
+
+
+### Features
+
+* add more utils (excel, vanilla python stuff, custom model fields) ([#33](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/33)) ([8433a60](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/8433a603d6a78a7a9c208b7d88eb031060038228))
+
 ## [0.6.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.5.1...v0.6.0) (2023-07-11)
 
 
