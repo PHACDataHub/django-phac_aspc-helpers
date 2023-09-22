@@ -1,6 +1,6 @@
 # OPTIONAL packages used by consumers
 Jinja2==3.1.2
-openpyxl==3.0.10
+openpyxl==3.1.2
 
 # testing, linting, etc.
 pylint==2.17.5
