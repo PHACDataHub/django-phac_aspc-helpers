@@ -8,7 +8,7 @@
       }
 
       .cls-2 {
-        fill: #ea2d37;
+        fill: #f00;
       }
 
       .cls-2, .cls-3, .cls-4 {
@@ -18,16 +18,12 @@
       .cls-3 {
         fill: #fff;
       }
-
-      .cls-4 {
-        fill: #ef3f36;
-      }
     </style>
   </defs>
   <g>
     <rect class="cls-3" x="0" y="14.33" width="282.75" height="143.12"/>
-    <rect class="cls-4" x="211.48" y="14.33" width="71.27" height="143.12"/>
-    <rect class="cls-4" x="0" y="14.33" width="70.07" height="143.11"/>
+    <rect class="cls-2" x="211.48" y="14.33" width="71.27" height="143.12"/>
+    <rect class="cls-2" x="0" y="14.33" width="70.07" height="143.11"/>
   </g>
   <text class="cls-1" transform="translate(397.89 73.46)"><tspan x="0" y="0">Public Health</tspan><tspan x="0" y="83">Agency of Canada</tspan></text>
   <text class="cls-1" transform="translate(1190.09 74.25)"><tspan x="0" y="0">Agence de la santé</tspan><tspan x="0" y="83">publique du Canada</tspan></text>
