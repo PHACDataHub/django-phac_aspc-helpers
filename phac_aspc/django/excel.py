@@ -28,7 +28,7 @@ def escape_for_xlsx(text):
     escape a string for excel
     """
     # pylint: disable=unidiomatic-typecheck
-    return escapeSvc.escape(text) if type(text) == str else text
+    return escapeSvc.escape(text) if isinstance(text, str) else text
 
 
 def create_field_val_getter(field_name):
