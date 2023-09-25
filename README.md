@@ -586,7 +586,8 @@ string for it, and configuring the app to log to it via the `PHAC_ASPC_LOGGING_A
 This will enable and use a pre-configured Azure log handler, outputing logs with JSON formatted message fields.
 
 In any production environment, you can optionally provide a Slack webhook via `PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL`.
-This will send error and critical level logs to the webhook's slack channel.
+This will send error and critical level logs to the webhook's slack channel. Note: this slack logging handler filters
+out `django.security.DisallowedHost` logs, as they are a constant background noise. Other handlers still capture them.
 
 ##### Default Logging Configuration environment variables
 
@@ -693,5 +694,4 @@ configure_uniform_std_lib_and_structlog_logging(
         )
     }
 )
->>>>>>> cc4fcd5 (Add optional PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL env var, use in a slack webhook handler if it's set)
 ```

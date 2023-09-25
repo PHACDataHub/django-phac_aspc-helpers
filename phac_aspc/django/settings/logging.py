@@ -47,12 +47,20 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
             SlackWebhookHandler,
         )
 
+        def noisy_logger_filter(record):
+            noisy_loggers = ["django.security.DisallowedHost"]
+            if record.module in noisy_loggers:
+                return 0
+            else:
+                return 1
+
         additional_handler_configs[f"{_default_suffix}slack_Webhook_handler"] = (
             {
                 "level": "ERROR",
                 "class": f"{SlackWebhookHandler.__module__}.{SlackWebhookHandler.__name__}",
                 "url": slack_webhook_url,
                 "formatter": PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY,
+                "filters": [noisy_logger_filter],
             },
         )
 
