@@ -55,13 +55,13 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
 
             return 1
 
-        noisy_logger_key = f"{_default_suffix}slack_Webhook_handler_filter"
+        noisy_logger_key = f"{_default_suffix}slack_webhook_handler_filter"
 
         additional_filter_configs[noisy_logger_key] = {
-            (): NoisyLoggerFilter,
+            "()": NoisyLoggerFilter,
         }
 
-        additional_handler_configs[f"{_default_suffix}slack_Webhook_handler"] = (
+        additional_handler_configs[f"{_default_suffix}slack_webhook_handler"] = (
             {
                 "level": "ERROR",
                 "class": f"{SlackWebhookHandler.__module__}.{SlackWebhookHandler.__name__}",
