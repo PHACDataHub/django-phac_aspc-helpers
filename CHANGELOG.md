@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.3...v1.0.4) (2023-09-26)
+
+
+### Bug Fixes
+
+* ... second hotfix for the slack logging webhook's noisy logger filter, I forgot to convert it to the correct class syntax when I refactored additional_filter_configs pattern. I'll follow up with a proper PR to make sure the tests actually cover this ([d931cb1](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/d931cb13b719a2e2a22458376b4ccb7cd6f1857e))
+
 ## [1.0.3](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.2...v1.0.3) (2023-09-26)
 
 
