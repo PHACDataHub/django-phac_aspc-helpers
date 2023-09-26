@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.0...v1.0.1) (2023-09-20)
+
+
+### Features
+
+* DTL template tag and Jinja2 util func for rendering a template from one language inside another  ([#43](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/43)) ([8bde55f](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/8bde55f544e11e6e80bcbd7f0aed9d210e130017))
+
 ## [1.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v0.7.0...v1.0.0) (2023-09-19)
 
 

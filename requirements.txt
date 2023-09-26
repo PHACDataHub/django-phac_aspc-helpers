@@ -1,18 +1,18 @@
 # OPTIONAL packages used by consumers
 Jinja2==3.1.2
-openpyxl==3.0.10
+openpyxl==3.1.2
 requests==2.31.0
 opencensus-ext-azure==1.1.9
 
 # testing, linting, etc.
 pylint==2.17.5
-pytest==7.4.0
-pytest-cov==4.0.0
+pytest==7.4.2
+pytest-cov==4.1.0
 pytest-django===4.5.2
 pytest-timeout===2.1.0
 responses===0.22.0
 testfixtures===7.1.0
-flake8==6.0.0
+flake8==6.1.0
 factory-boy===3.2.1
 
 # publishing
