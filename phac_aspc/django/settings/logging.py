@@ -52,8 +52,8 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
             noisy_loggers = ["django.security.DisallowedHost"]
             if record.module in noisy_loggers:
                 return 0
-            else:
-                return 1
+
+            return 1
 
         noisy_logger_key = f"{_default_suffix}slack_Webhook_handler_filter"
 
