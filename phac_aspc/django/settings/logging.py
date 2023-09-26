@@ -49,7 +49,7 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
         )
 
         class NoisyLoggerFilter:
-            def filter(self, record, *args, **kwargs):
+            def filter(self, record):
                 noisy_loggers = ["django.security.DisallowedHost"]
 
                 if record.module in noisy_loggers:
@@ -63,15 +63,13 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
             "()": NoisyLoggerFilter,
         }
 
-        additional_handler_configs[f"{_default_suffix}slack_webhook_handler"] = (
-            {
-                "level": "ERROR",
-                "class": f"{SlackWebhookHandler.__module__}.{SlackWebhookHandler.__name__}",
-                "url": slack_webhook_url,
-                "formatter": PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY,
-                "filters": [noisy_logger_key],
-            },
-        )
+        additional_handler_configs[f"{_default_suffix}slack_webhook_handler"] = {
+            "level": "ERROR",
+            "class": f"{SlackWebhookHandler.__module__}.{SlackWebhookHandler.__name__}",
+            "url": slack_webhook_url,
+            "formatter": PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY,
+            "filters": [noisy_logger_key],
+        }
 
     configure_uniform_std_lib_and_structlog_logging(
         lowest_level_to_log=lowest_level_to_log,
