@@ -592,13 +592,18 @@ out `django.security.DisallowedHost` logs, as they are a constant background noi
 
 ##### Default Logging Configuration environment variables
 
-| Variable                                           | Type | Purpose                                    |
-| -------------------------------------------------- | ---- | ------------------------------------------ |
-| PHAC_ASPC_LOGGING_LOWEST_LEVEL                     | str  | lowest logging level to print              |
-| PHAC_ASPC_LOGGING_MUTE_CONSOLE_HANDLER             | bool | mutes the default console handler output   |
-| PHAC_ASPC_LOGGING_PRETTY_FORMAT_CONSOLE_LOGS       | bool | pretty format console logs (coloured text) |
-| PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add a Azure log handler            |
-| PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add a Slack Webhook handler        |
+These env vars configure the default logging configuration provided by `phac_aspc.django.settings.logging`. If you don't both
+set `PHAC_ASPC_LOGGING_USE_HELPERS_CONFIG=True` and import those import those settings in your own `settings.py`, then the other
+env vars here won't do anything.
+
+| Variable                                           | Type | Purpose                                                           |
+| -------------------------------------------------- | ---- | ----------------------------------------------------------------- |
+| PHAC_ASPC_LOGGING_USE_HELPERS_CONFIG               | bool | set to true to use the PHAC helper provided logging configuration |
+| PHAC_ASPC_LOGGING_LOWEST_LEVEL                     | str  | lowest logging level to print                                     |
+| PHAC_ASPC_LOGGING_MUTE_CONSOLE_HANDLER             | bool | mutes the default console handler output                          |
+| PHAC_ASPC_LOGGING_PRETTY_FORMAT_CONSOLE_LOGS       | bool | pretty format console logs (coloured text)                        |
+| PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add a Azure log handler                                   |
+| PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add a Slack Webhook handler                               |
 
 > **Note**
 > these env vars are consumed only within `phac_aspc.django.settings.logging`.
