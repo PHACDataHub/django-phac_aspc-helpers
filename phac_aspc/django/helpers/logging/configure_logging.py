@@ -37,6 +37,8 @@ PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY = f"{_default_suffix}pretty_json_formatter
 
 PHAC_HELPER_CONSOLE_HANDLER_KEY = f"{_default_suffix}console_handler"
 
+PHAC_HELPER_NO_PASS_FILTER_KEY = f"{_default_suffix}no_pass_filter"
+
 # flag set to true when configuration function called
 is_phac_helper_logging_configuration_being_used = False
 
@@ -61,6 +63,13 @@ def configure_uniform_std_lib_and_structlog_logging(
             str,
         ],
     ] = None,
+    additional_filter_configs: Dict[
+        str,
+        Dict[
+            str,
+            Any,
+        ],
+    ] = None,
 ):
     """Configures both structlog and the standard library logging module, enforcing
     uniform logging behaviour between the two. Log handler and formatters are shared
@@ -78,11 +87,10 @@ def configure_uniform_std_lib_and_structlog_logging(
     structlog event-dict object in to a string for the handlers to emit. I recommend directly using,
     or wrapping/subclassing, existing structlog renderers here.
 
-    Log filter configuration isn't directly surfaced in the current API, but the logging
-    dict config API accepts in-line `logging.Filter` instances for the `filterer` key of
-    any handler config. If you want to filter logs, add a custome handler with a filter
-    via `additional_handler_configs` (and consider muting the default console handler,
-    since you can't directly filter it)
+    `additional_filter_configs` takes standard logging dict config filter definitions.
+    In Python 3.11 and above, you can instead directly provide filter functions/instances in your
+    handler configs. In prior versions, you configure them separetly and reference them by key
+    in your handler configs.
 
     Note: by default, the built in console handler is muted running tests, because it makes
     pytest's own console output harder to follow (and pytest captures and reports errors
@@ -110,6 +118,15 @@ def configure_uniform_std_lib_and_structlog_logging(
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
     )
+
+    class NoPassFilter:
+        def filter(self, *args, **kwargs):
+            return 0
+
+    filters = {
+        PHAC_HELPER_NO_PASS_FILTER_KEY: {"()": NoPassFilter},
+        **(additional_filter_configs or {}),
+    }
 
     formatter_functions = {
         PHAC_HELPER_CONSOLE_FORMATTER_KEY: structlog.dev.ConsoleRenderer(),
@@ -159,12 +176,13 @@ def configure_uniform_std_lib_and_structlog_logging(
         {
             "version": 1,
             "disable_existing_loggers": True,
+            "filters": filters,
             "formatters": formatters,
             "handlers": handlers,
             "django.request": {
                 # built in django.request logging is redundant to the django_structlog
                 # request middleware, filter them out to avoid messy duplicate logs
-                "filter": NoPassFilter(),
+                "filter": PHAC_HELPER_NO_PASS_FILTER_KEY
             },
             "root": {
                 "level": lowest_level_to_log,
@@ -180,8 +198,3 @@ def configure_uniform_std_lib_and_structlog_logging(
 
     global is_phac_helper_logging_configuration_being_used  # pylint: disable=global-statement
     is_phac_helper_logging_configuration_being_used = True
-
-
-class NoPassFilter:
-    def filter(self, *args, **kwargs):
-        return 0

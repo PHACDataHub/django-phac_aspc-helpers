@@ -559,6 +559,7 @@ You can then use the template tag in your DTL templates:
 ```DTL
 {% load phac_aspc_include_from_jinja %}
 {% phac_aspc_include_from_jinja "some/Jinja2/template/path.jinja2" %}
+```
 
 ### Logging
 
@@ -623,40 +624,7 @@ directly calling `phac_aspc.django.helpers.logging.configure_logging.configure_u
 in your settings.py instead. Be aware that this bypasses the `PHAC_ASPC_HELPER_LOGGING_...` env vars, which
 are all only used in the `phac_aspc.django.settings.logging` module.
 
-> **Note**
-> `LOGGING_CONFIG = None` must be set in your `settings.py` to drop the Django
-> default logging config. Otherwise, Django will try to merge it's own logging defaults
-> in to any custom configuration you do, leading to all sorts of headaches and maintenance
-> issues. We can't set or assert this for you, so **you** must set `LOGGING_CONFIG = None`
-> when consuming `configure_uniform_std_lib_and_structlog_logging` directly!
-
-From the doc string:
-> Configures both structlog and the standard library logging module, enforcing
-> uniform logging behaviour between the two. Log handler and formatters are shared
-> between the two, and the same set of structlog processors is run on all logs.
->
-> The baseline configuration provides a console (stdout) handler and formatters for
-> basic JSON string formatting, pretty JSON string formatting, console formatting
-> (with coloured text etc.), and plain text formatting. The keys for these default
-> formatters are exposed as PHAC_HELPER_..._FORMATTER_KEY variables in this module.
->
-> `additional_handler_configs` takes standard logging dict config handler definitions.
->
-> `additional_formatter_functions` takes a dict of callables by (unique) formatter key. These
-> callables are used as structlog "renderer" (end-of-chain) processors, for seralizing the
-> structlog event-dict object in to a string for the handlers to emit. I recommend directly using,
-> or wrapping/subclassing, existing structlog renderers here.
->
-> Log filter configuration isn't directly surfaced in the current API, but the logging
-> dict config API accepts in-line `logging.Filter` instances for the `filterer` key of
-> any handler config. If you want to filter logs, add a custome handler with a filter
-> via `additional_handler_configs` (and consider muting the default console handler,
-> since you can't directly filter it)
->
-> Note: by default, the built in console handler is muted running tests, because it makes
-> pytest's own console output harder to follow (and pytest captures and reports errors
-> after all tests have finished running anyway). You can over ride this behaviour by
-> explicitly passing a `mute_console_handler` value.
+See the `configure_uniform_std_lib_and_structlog_logging` doc string for further details.
 
 E.g. Muting the default console handler and using a custom file handler with a custom formatter
 

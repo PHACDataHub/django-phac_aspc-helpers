@@ -20,6 +20,7 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
     lowest_level_to_log = get_logging_env_value("LOWEST_LEVEL")
 
     additional_handler_configs = {}
+    additional_filter_configs = {}
 
     azure_insights_connection_string = get_logging_env_value(
         "AZURE_INSIGHTS_CONNECTION_STRING"
@@ -47,12 +48,18 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
             SlackWebhookHandler,
         )
 
-        def noisy_logger_filter(record):
+        def NoisyLoggerFilter(record):
             noisy_loggers = ["django.security.DisallowedHost"]
             if record.module in noisy_loggers:
                 return 0
             else:
                 return 1
+
+        noisy_logger_key = f"{_default_suffix}slack_Webhook_handler_filter"
+
+        additional_filter_configs[noisy_logger_key] = {
+            (): NoisyLoggerFilter,
+        }
 
         additional_handler_configs[f"{_default_suffix}slack_Webhook_handler"] = (
             {
@@ -60,17 +67,18 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
                 "class": f"{SlackWebhookHandler.__module__}.{SlackWebhookHandler.__name__}",
                 "url": slack_webhook_url,
                 "formatter": PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY,
-                "filters": [noisy_logger_filter],
+                "filters": [noisy_logger_key],
             },
         )
 
     configure_uniform_std_lib_and_structlog_logging(
         lowest_level_to_log=lowest_level_to_log,
         mute_console_handler=get_logging_env_value("MUTE_CONSOLE_HANDLER"),
+        additional_handler_configs=additional_handler_configs,
         console_handler_formatter_key=(
             PHAC_HELPER_CONSOLE_FORMATTER_KEY
             if get_logging_env_value("PRETTY_FORMAT_CONSOLE_LOGS")
             else PHAC_HELPER_JSON_FORMATTER_KEY
         ),
-        additional_handler_configs=additional_handler_configs,
+        additional_filter_configs=additional_filter_configs,
     )

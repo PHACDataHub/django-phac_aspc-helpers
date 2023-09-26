@@ -202,8 +202,16 @@ def test_configured_console_handler_formatter_is_used():
 
 def test_configured_additional_handlers_are_used():
     custom_handler_with_custom_formatter_key = "custom_handler_with_custom_formatter"
+
     custom_formatter_key = "custom_formatter"
     custom_formatter_func = Mock(return_value="foo")
+
+    custom_filter_key = "custom_filter"
+    custom_filter_func = Mock(return_value="1")
+
+    class CustomFilterClass:
+        def filter(self, *args, **kwargs):
+            return custom_filter_func()
 
     configure_uniform_std_lib_and_structlog_logging(
         console_handler_formatter_key=PHAC_HELPER_JSON_FORMATTER_KEY,
@@ -216,9 +224,11 @@ def test_configured_additional_handlers_are_used():
                     open(os.devnull, "w", encoding="UTF-8")
                 ),
                 "formatter": custom_formatter_key,
+                "filters": [custom_filter_key],
             },
         },
         additional_formatter_functions={custom_formatter_key: custom_formatter_func},
+        additional_filter_configs={custom_filter_key: {"()": CustomFilterClass}},
     )
 
     logger = logging.getLogger("logger_test_configured_additional_handlers_are_used")
@@ -229,12 +239,15 @@ def test_configured_additional_handlers_are_used():
     test_log_message = "arbitrary log message"
 
     logger.error(test_log_message)
-    assert custom_formatter_func.assert_called_once
+    custom_formatter_func.assert_called_once()
+    custom_filter_func.assert_called_once()
 
     custom_formatter_func.reset_mock()
+    custom_filter_func.reset_mock()
 
     structlogger.error(test_log_message)
-    assert custom_formatter_func.assert_called_once
+    custom_formatter_func.assert_called_once()
+    custom_filter_func.assert_called_once()
 
 
 def test_configured_json_logging_consistent_between_standard_logger_and_structlogger():
