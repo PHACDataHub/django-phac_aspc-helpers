@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.4...v1.0.5) (2023-09-26)
+
+
+### Bug Fixes
+
+* for real, final fix to the slack logging filter code. Another dumb code typo that slipped through ([1cf4c11](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/1cf4c11f8f27864def1ac95ade8215eada918f11))
+
 ## [1.0.4](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.3...v1.0.4) (2023-09-26)
 
 
