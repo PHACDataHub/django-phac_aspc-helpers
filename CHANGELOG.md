@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.1...v1.0.2) (2023-09-26)
+
+
+### Features
+
+* logging utilities and (opt-in) default logging configuration ([#38](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/38)) ([1776952](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/1776952abb8ac274196263e8c2ef927051bc4e0a))
+
 ## [1.0.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.0...v1.0.1) (2023-09-20)
 
 
