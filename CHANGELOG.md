@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.3](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.2...v1.0.3) (2023-09-26)
+
+
+### Features
+
+* PHAC logo SVGs ([#48](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/48)) ([2bcc37f](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/2bcc37fd1d3ffadcce33a8636b7112463cb40beb))
+
+
+### Bug Fixes
+
+* fix typo in the default logging config, only reachable when a slack webhook url is provided ([2ef56b1](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/2ef56b1d8f9ba1dadbb9e84478c100ae6d2cede2))
+
 ## [1.0.2](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.1...v1.0.2) (2023-09-26)
 
 
