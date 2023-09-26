@@ -1,13 +1,12 @@
 """Recommended values related to security controls"""
 from django.core.exceptions import ImproperlyConfigured
-from django.conf import settings
 
 from .utils import (
     global_from_env,
-    get_env,
-    get_env_value,
     configure_authentication_backends,
 )
+
+from .security_env import get_oauth_env_value, security_env_config
 
 # Lockout users based on their (username, IP address) combinations
 AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
@@ -30,18 +29,12 @@ AXES_IPWARE_META_PRECEDENCE_ORDER = [
 
 # Configure the identity provider if the `{PREFIX}OAUTH_PROVIDER`
 # `environment variable is set.
-auth_config = get_env(
-    OAUTH_PROVIDER=(str, ""),
-    OAUTH_APP_CLIENT_ID=(str, ""),
-    OAUTH_APP_CLIENT_SECRET=(str, ""),
-    OAUTH_MICROSOFT_TENANT=(str, "common"),
-)
 
-if get_env_value(auth_config, "OAUTH_PROVIDER") == "microsoft":
-    provider = get_env_value(auth_config, "OAUTH_PROVIDER")
-    client_id = get_env_value(auth_config, "OAUTH_APP_CLIENT_ID")
-    client_secret = get_env_value(auth_config, "OAUTH_APP_CLIENT_SECRET")
-    tenant = get_env_value(auth_config, "OAUTH_MICROSOFT_TENANT")
+if get_oauth_env_value("PROVIDER") == "microsoft":
+    provider = get_oauth_env_value("PROVIDER")
+    client_id = get_oauth_env_value("APP_CLIENT_ID")
+    client_secret = get_oauth_env_value("APP_CLIENT_SECRET")
+    tenant = get_oauth_env_value("MICROSOFT_TENANT")
 
     if client_id == "":
         raise ImproperlyConfigured("settings.OAUTH_APP_CLIENT_ID is required.")
@@ -60,14 +53,6 @@ if get_env_value(auth_config, "OAUTH_PROVIDER") == "microsoft":
         }
     }
 
-    PHAC_ASPC_OAUTH_USE_BACKEND = getattr(
-        settings,
-        "PHAC_ASPC_OAUTH_USE_BACKEND",
-        "phac_aspc.django.helpers.auth.backend.PhacAspcOAuthBackend",
-    )
-    settings.PHAC_ASPC_OAUTH_USE_BACKEND = PHAC_ASPC_OAUTH_USE_BACKEND
-    PHAC_ASPC_HELPER_OAUTH_PROVIDER = provider
-
 #  AC-7 Automatic lockout of users after invalid login attempts
 AUTHENTICATION_BACKENDS = configure_authentication_backends(
     [
@@ -75,15 +60,5 @@ AUTHENTICATION_BACKENDS = configure_authentication_backends(
     ]
 )
 
-#  AC-11 - Session controls
-global_from_env(
-    # Sessions expire in 20 minutes
-    SESSION_COOKIE_AGE=(int, 1200),
-    # Use HTTPS for session cookie
-    SESSION_COOKIE_SECURE=(bool, True),
-    # Sessions close when browser is closed
-    SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, True),
-    # Every requests extends the session (This is required for the WET session
-    # plugin to function properly.)
-    SESSION_SAVE_EVERY_REQUEST=(bool, True),
-)
+#  AC-11 - Session controls set via security_env_config
+global_from_env(**security_env_config)

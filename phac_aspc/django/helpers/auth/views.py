@@ -1,7 +1,6 @@
 """OAuth authentication related views"""
 from urllib import parse
 
-from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.core.exceptions import ImproperlyConfigured
@@ -11,11 +10,13 @@ from django.urls import reverse
 
 from authlib.integrations.django_client import OAuth, OAuthError
 
+from phac_aspc.django.settings.security_env import get_oauth_env_value
+
 oauth = OAuth()
 
-PROVIDER = getattr(settings, "PHAC_ASPC_HELPER_OAUTH_PROVIDER", False)
-BACKEND = getattr(settings, "PHAC_ASPC_OAUTH_USE_BACKEND", False)
-REDIRECT_LOGIN = getattr(settings, "PHAC_ASPC_OAUTH_REDIRECT_ON_LOGIN", "")
+PROVIDER = get_oauth_env_value("PROVIDER")
+BACKEND = get_oauth_env_value("USE_BACKEND")
+REDIRECT_LOGIN = get_oauth_env_value("REDIRECT_ON_LOGIN")
 
 if PROVIDER:
     oauth.register(PROVIDER)
@@ -23,7 +24,7 @@ if PROVIDER:
 
 def validate_iss(claims, value):
     """Validate the iss claim"""
-    tenant = getattr(settings, "OAUTH_MICROSOFT_TENANT", "common")
+    tenant = get_oauth_env_value("MICROSOFT_TENANT")
     use_tenant = tenant if tenant != "common" else claims["tid"]
     # iss = "https://login.microsoftonline.com/{}/v2.0".format(use_tenant)
     return use_tenant in value

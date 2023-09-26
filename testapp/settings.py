@@ -1,6 +1,9 @@
 from glob import glob
 from pathlib import Path
 
+PHAC_ASPC_LOGGING_USE_HELPERS_CONFIG = True
+# pylint: disable=wrong-import-position, wildcard-import, unused-wildcard-import
+from phac_aspc.django.settings.logging import *
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -25,6 +28,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -73,3 +77,5 @@ DATABASES = {
         "NAME": "db.sqlite3",
     }
 }
+
+SECRET_KEY = "abcdefg"

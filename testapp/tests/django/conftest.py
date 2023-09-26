@@ -1,5 +1,9 @@
 import pytest
+
 from django.db import transaction
+from django.test.client import Client
+
+from testapp.models import User
 
 
 @pytest.fixture(autouse=True)
@@ -22,3 +26,15 @@ def globally_scoped_fixture_helper(django_db_setup, django_db_blocker):
                 raise Exception
         except Exception:
             pass
+
+
+@pytest.fixture
+def vanilla_user():
+    return User.objects.create(username="vanilla_user")
+
+
+@pytest.fixture
+def vanilla_user_client(vanilla_user):
+    client = Client()
+    client.force_login(vanilla_user)
+    return client

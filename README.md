@@ -11,6 +11,7 @@ added to your django project:
 - [django-axes](https://django-axes.readthedocs.io/)
 - [django-environ](https://django-environ.readthedocs.io/)
 - [django-modeltranslation](https://django-modeltranslation.readthedocs.io/)
+- [django-structlog](https://django-structlog.readthedocs.io/en/latest/)
 
 ## Quick start
 
@@ -28,7 +29,8 @@ INSTALLED_APPS = configure_apps([...])
 MIDDLEWARE = configure_middleware([...])
 ```
 
-> Note: Replace [...] above with the corresponding existing configuration from
+> **Note**
+> Replace [...] above with the corresponding existing configuration from
 > your project.
 
 The `configure_apps` and `configure_middleware` utility functions will insert
@@ -46,7 +48,8 @@ urlpatterns = [
 ]
 ```
 
-> Note: Add `*phac_aspc_helper_urls` to the list or `urlpatterns` exported by
+> **Note**
+> Add `*phac_aspc_helper_urls` to the list or `urlpatterns` exported by
 > your project's `urls` module.
 
 ### Jinja
@@ -74,28 +77,32 @@ For more information, refer to the Jinja
 ## Environment variables
 
 Several settings or behaviours implemented by this library can be controlled via
-environment variables. This is done via the
-[django-environ](https://django-environ.readthedocs.io/en/latest/) library.
-(Refer to their documentation on how to format special data types like lists)
-If your project root has a `.env` file, those values will be used.
+environment variables. By default, these environment variables are read from the
+`.env` file in your project's root. This is done via the [django-environ](https://django-environ.readthedocs.io/en/latest/)
+library; refer to their documentation on how to format special data types like lists.
 
-If you want to use environment variables in your project's configuration, you
-can simply reference django-environ directly as it will automatically be
-installed. For example:
+Alternatively, these environment variables can be declared in your `settings.py`
+itself. There are two important caveats when doing so:
 
-```python
-import environ
+  1) `settings.py` declarations take precedence over any instances of the same
+  env var in your `.env` file
+  2) any env vars declared in `settings.py` for this library **must** be declared
+  **before** any imports from `phac_aspc` occur!
+     - similarly, you should not consume`phac_aspc` modules anywhere that executes
+     prior to Django's consumption of your app's settings module (e.g. in `manage.py`)
+     - `phac_aspc` modules that don't, directly or indirectly, depend on these
+     env vars are theoretically safe anywhere, **but** we don't currently identify
+     these modules, or make promises that any given module won't start depending
+     on env vars in the future
 
-env = environ.Env(DEBUG=(bool, False))
-environ.Env.read_env()
+All env vars for this library are prefixed with `PHAC_ASPC_`. Available `PHAC_ASPC_`
+env vars are listed under their coresponding "feature" sections below.
 
-DEBUG = env('DEBUG')
+### global_from_env
 
-```
-
-This library also provides a utility that automatically declares a module level
-global while checking the environment. It is particularly useful when declaring
-django settings.
+This library also provides a utility that automatically declares an un-prefixed module
+level global from a prefixed env var. It is particularly useful when declaring
+django settings. The default prefix used is `PHAC_ASPC_`
 
 ```python
 from phac_aspc.django.settings.utils import global_from_env
@@ -105,11 +112,13 @@ global_from_env(
 )
 ```
 
-The example above creates the module level global `SESSION_COOKIE_AGE` with a
-default value of 1200, unless there is an environment variable (or **.env** file
-entry) `PHAC_ASPC_SESSION_COOKIE_AGE`. By default the declared variable name is
-prefixed with `PHAC_ASPC_`. The prefix can be changed by providing a custom
-prefix.
+The example above creates the module level global `SESSION_COOKIE_AGE` taking the
+value of the env var named `PHAC_ASPC_SESSION_COOKIE_AGE`, defaulting to 1200 if no
+env var is found. As with other configuration env vars for this library, the value
+can either come from Django settings or from a `.env` file.
+
+An alternative prefix can also be provided as well, to use this with other env var
+name spaces.
 
 ```python
 from phac_aspc.django.settings.utils import global_from_env
@@ -119,16 +128,6 @@ global_from_env(
     SESSION_COOKIE_AGE=(int, 1200),
 )
 ```
-
-### Environment variable list
-
-All variables are prefixed with `PHAC_ASPC_` to avoid name conflicts.
-
-| Variable                        | Type | Purpose                         |
-| ------------------------------- | ---- | ------------------------------- |
-| PHAC_ASPC_SESSION_COOKIE_AGE    | int  | Session expiry in seconds       |
-| PHAC_ASPC_SESSION_COOKIE_SECURE | bool | Use secure cookies (HTTPS only) |
-| PHAC_ASPC_LANGUAGE_CODE         | str  | Default language                |
 
 ## Features
 
@@ -175,7 +174,7 @@ or if you're using Jinja:
 </html>
 ```
 
-#### Bundled releases
+#### Bundled WET releases
 
 | Product                      | Version   |
 | ---------------------------- | --------- |
@@ -282,7 +281,7 @@ class OAuthBackend(BaseBackend):
 
 ```
 
-#### Environment Variables
+#### Sign-in with Microsoft Environment Variables
 
 | Variable                          | Type | Purpose                                      |
 | --------------------------------- | ---- | -------------------------------------------- |
@@ -307,7 +306,6 @@ e.g. with Jinja, on a login page where the URL ends with `?next=/some-protected-
 ```
 {{ phac_aspc.phac_aspc_auth_signin_microsoft_button(request.GET.urlencode()) }}
 ```
-
 
 #### Handling Errors
 
@@ -438,6 +436,15 @@ or if you're using Jinja
 > For more information on session timeout, visit the
 > [documentation](https://wet-boew.github.io/wet-boew/docs/ref/session-timeout/session-timeout-en.html).
 
+##### Session Timeout Environment variables
+
+All variables are prefixed with `PHAC_ASPC_` to avoid name conflicts.
+
+| Variable                        | Type | Purpose                         |
+| ------------------------------- | ---- | ------------------------------- |
+| PHAC_ASPC_SESSION_COOKIE_AGE    | int  | Session expiry in seconds       |
+| PHAC_ASPC_SESSION_COOKIE_SECURE | bool | Use secure cookies (HTTPS only) |
+
 ### Localization
 
 Django will be configured to support English (en-ca) and French (fr-ca). This
@@ -445,6 +452,12 @@ can be changed in your projects settings using `LANGUAGES` and `LANGUAGE_CODE`.
 
 > For more information on Django's localization, see their
 > [documentation](https://docs.djangoproject.com/en/4.1/topics/i18n/).
+
+#### Localization Environment variables
+
+| Variable                        | Type | Purpose                         |
+| ------------------------------- | ---- | ------------------------------- |
+| PHAC_ASPC_LANGUAGE_CODE         | str  | Default language                |
 
 #### lang template tag
 
@@ -507,13 +520,13 @@ class Signal(models.Model):
     location = models.ManyToManyField("Location", through='SignalLocation')
 ```
 
-### Jinja2 and Django Template Language (DTL) cross-language-includes
+#### Jinja2 and Django Template Language (DTL) cross-language-includes
 
 We provide a Jinja2 utility function and a DTL template tag which allows each to
 "include" from (render inline, using the including template's context) from one
 template language to the other.
 
-#### `include_from_dtl` Jinja2 util
+##### `include_from_dtl` Jinja2 util
 
 Add the util to your jinja environment:
 
@@ -536,7 +549,7 @@ And then use it from a Jinja2 template:
 {{ include_from_dtl("some/dtl/template/path.html") }}
 ```
 
-#### `phac_aspc_include_from_jinja` DTL template tag
+##### `phac_aspc_include_from_jinja` DTL template tag
 
 To register the `phac_aspc_...` template tags, add `phac_aspc.django.helpers`
 to `INSTALLED_APPS` in your `settings.py`.
@@ -546,4 +559,107 @@ You can then use the template tag in your DTL templates:
 ```DTL
 {% load phac_aspc_include_from_jinja %}
 {% phac_aspc_include_from_jinja "some/Jinja2/template/path.jinja2" %}
+```
+
+### Logging
+
+#### Default logging configuration
+
+A ready-to-use default logging configuration is available from `phac_aspc.django.settings.logging`,
+with an environment variable based API for limited project-specific configuration. To use, just
+import `*` from the module in to your `settings.py` and set `PHAC_ASPC_LOGGING_USE_HELPERS_CONFIG=true`
+in either your `.env` file or `settings.py` (before the `phac_aspc` imports).
+
+```python
+#settings.py
+
+from phac_aspc.django.settings.logging import *
+# OR, along with all the other settings, via `from phac_aspc.django.settings import *`
+```
+
+For a **local dev** environment, I recommend setting `PHAC_ASPC_LOGGING_PRETTY_FORMAT_CONSOLE_LOGS=True`,
+to switch from JSON string formatted logs to friendlier console log formatting (coloured text, indentation, etc).
+
+For a **Google Cloud** environment, the default configuration of writing JSON strings to stdout is prod-ready.
+
+For an **Azure Cloud** environment, I recommend creating an Azure Monitor resource, getting your azure insights connection
+string for it, and configuring the app to log to it via the `PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING` env var.
+This will enable and use a pre-configured Azure log handler, outputing logs with JSON formatted message fields.
+
+In any production environment, you can optionally provide a Slack webhook via `PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL`.
+This will send error and critical level logs to the webhook's slack channel. Note: this slack logging handler filters
+out `django.security.DisallowedHost` logs, as they are a constant background noise. Other handlers still capture them.
+
+##### Default Logging Configuration environment variables
+
+| Variable                                           | Type | Purpose                                    |
+| -------------------------------------------------- | ---- | ------------------------------------------ |
+| PHAC_ASPC_LOGGING_LOWEST_LEVEL                     | str  | lowest logging level to print              |
+| PHAC_ASPC_LOGGING_MUTE_CONSOLE_HANDLER             | bool | mutes the default console handler output   |
+| PHAC_ASPC_LOGGING_PRETTY_FORMAT_CONSOLE_LOGS       | bool | pretty format console logs (coloured text) |
+| PHAC_ASPC_LOGGING_AZURE_INSIGHTS_CONNECTION_STRING | str  | if set, add a Azure log handler            |
+| PHAC_ASPC_LOGGING_SLACK_WEBHOOK_URL                | str  | if set, add a Slack Webhook handler        |
+
+> **Note**
+> these env vars are consumed only within `phac_aspc.django.settings.logging`.
+> If using `configure_uniform_std_lib_and_structlog_logging` directly, these env vars
+> won't do anything.
+
+#### add_fields_to_all_logs_for_current_request
+
+When the server is processing a request, this function adds additional key-value fields to the logging context.
+Added context is will be present in subsequent logs\*. Context is cleared between requests.
+
+\* at least, it will be in the structlog `event_dict` passed to the formatter (rendering processor). All of the
+default PHAC helper formatters will serialize the context in to the final log output. Custom formatters may not.
+
+Requires use of the PHAC helper's logging configuration and the django_structlog RequestMiddleware.
+The PHAC helper's logging configuration ensures these context vars are rendered when logging,
+and the django_structlog RequestMiddleware handles clearing the structlog contextvars between requests.
+
+#### Customized logging configuration via configure_uniform_std_lib_and_structlog_logging
+
+Deeper customization can be achieved by forgoing a `*` import from `phac_aspc.django.settings.logging`,
+directly calling `phac_aspc.django.helpers.logging.configure_logging.configure_uniform_std_lib_and_structlog_logging`
+in your settings.py instead. Be aware that this bypasses the `PHAC_ASPC_HELPER_LOGGING_...` env vars, which
+are all only used in the `phac_aspc.django.settings.logging` module.
+
+See the `configure_uniform_std_lib_and_structlog_logging` doc string for further details.
+
+E.g. Muting the default console handler and using a custom file handler with a custom formatter
+
+```python
+#settings.py
+
+import structlog
+
+from phac_aspc.django.helpers.logging.configure_logging import (
+    configure_uniform_std_lib_and_structlog_logging,
+    DEFAULT_STRUCTLOG_PRE_PROCESSORS,
+)
+
+LOGGING_CONFIG = None
+
+configure_uniform_std_lib_and_structlog_logging(
+    mute_console_handler=True,
+    additional_handler_configs={
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "INFO",
+            "filename": "logs",
+            "mode": "a",
+            "encoding": "utf-8",
+            "maxBytes": 500000,
+            "backupCount": 4
+            "formatter": "custom_formatter",
+        }
+    },
+    additional_formatter_functions={
+        "custom_formatter": (
+            lambda _logging, _name, structlog_event_dict: (
+                f"{structlog_event_dict.timestamp}: {structlog_event_dict.event}"
+            )
+        )
+    }
+)
 ```
