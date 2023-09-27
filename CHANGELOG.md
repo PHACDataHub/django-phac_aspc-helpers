@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.5...v1.0.6) (2023-09-27)
+
+
+### Bug Fixes
+
+* Fixes session timeout dialog accuracy ([2cc4038](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/2cc403898bebae29549692fcfe24ab2ff0258ca1)), closes [#53](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/53)
+
 ## [1.0.5](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.4...v1.0.5) (2023-09-26)
 
 
