@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.6...v1.1.0) (2023-10-03)
+
+
+### Features
+
+* templatetag for inlining the content of an svg from an app's static files in to a template ([#59](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/59)) ([238799d](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/238799dbf72022fa3ca5b61bba46724cdcc2665d))
+
 ## [1.0.6](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.5...v1.0.6) (2023-09-27)
 
 
