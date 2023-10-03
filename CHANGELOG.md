@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.1.0...v1.1.1) (2023-10-03)
+
+
+### Miscellaneous Chores
+
+* release 1.1.1 ([b7562b2](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/b7562b2a7f80bbd88e9456aa1ce1c336eae29667))
+
 ## [1.1.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.0.6...v1.1.0) (2023-10-03)
 
 
