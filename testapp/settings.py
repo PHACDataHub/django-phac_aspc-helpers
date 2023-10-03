@@ -70,6 +70,11 @@ TEMPLATES = [
     },
 ]
 
+STATICFILES_DIRS = glob(
+    str(Path(__file__).parent.joinpath("**/static")),
+    recursive=True,
+)
+
 
 DATABASES = {
     "default": {
