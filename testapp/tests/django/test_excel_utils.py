@@ -1,4 +1,6 @@
 import io
+from unittest.mock import Mock
+from unittest.mock import patch
 from phac_aspc.django.excel import (
     ModelToSheetWriter,
     ModelColumn,
@@ -89,22 +91,12 @@ def test_csv_writer():
             ]
 
     # test view response
-    class BookExportView(AbstractCsvExportView):
-        writer_class = BookCsvWriter
-        queryset = Book.objects.all().prefetch_related("author", "tags")
-
     t1 = TagFactory(name="t1")
     t2 = TagFactory(name="t2")
     a1 = AuthorFactory(first_name="bôb", last_name="l'ébob")
     b1 = BookFactory(title="b1", author=a1)
     b1.tags.set([t1, t2])
     b2 = BookFactory(title="b2 çûèêëcks", author=a1)
-
-    view_func = BookExportView.as_view()
-    req_factory = RequestFactory()
-    request = req_factory.get("/fake-url", headers={"Accept": "text/csv"})
-    response = view_func(request)
-    assert response.status_code == 200
 
     # test serialization
     # TODO: figure out why testing response content directly fails
@@ -117,3 +109,48 @@ def test_csv_writer():
         as_str
         == "title,Author,tags\r\nb1,bôb l'ébob,t1|t2\r\nb2 çûèêëcks,bôb l'ébob,\r\n"
     )
+
+
+def test_abstract_csv_view():
+    writerInstanceMock = Mock()
+    WriterClassMock = Mock(return_value=writerInstanceMock)
+
+    qs = Book.objects.all().prefetch_related("author", "tags")
+
+    class CsvExportView(AbstractCsvExportView):
+        writer_class = WriterClassMock
+        queryset = qs
+
+    view_func = CsvExportView.as_view()
+    req_factory = RequestFactory()
+    request = req_factory.get("/fake-url", headers={"Accept": "text/csv"})
+    response = view_func(request)
+    assert response.status_code == 200
+    WriterClassMock.assert_called_with(queryset=qs, buffer=response)
+    writerInstanceMock.write.assert_called_once()
+
+
+def test_abstract_excel_view():
+    writerInstanceMock = Mock()
+    ClassMock = Mock(return_value=writerInstanceMock)
+    wbInstanceMock = Mock()
+
+    qs = Book.objects.all().prefetch_related("author", "tags")
+
+    class CsvExportView(AbstractExportView):
+        sheetwriter_class = ClassMock
+        queryset = qs
+
+    view_func = CsvExportView.as_view()
+    req_factory = RequestFactory()
+    request = req_factory.get("/fake-url")
+
+    with patch("openpyxl.Workbook", return_value=wbInstanceMock):
+        response = view_func(request)
+
+    assert response.status_code == 200
+
+    ClassMock.assert_called_with(queryset=qs, workbook=wbInstanceMock)
+    writerInstanceMock.write.assert_called_once()
+    wbInstanceMock.save.assert_called_once()
+    wbInstanceMock.save.assert_called_with(response)
