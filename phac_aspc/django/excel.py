@@ -3,7 +3,7 @@
 utilities for writing excel data using openpyxl 
 """
 import re
-
+import csv
 from django.core.paginator import Paginator
 from django.views import View
 from django.http import HttpResponse
@@ -176,9 +176,8 @@ class ManyToManyColumn(Column):
         return self.delimiter.join([self.get_related_str(x) for x in related_records])
 
 
-class ModelToSheetWriter:
-    def __init__(self, workbook, queryset):
-        self.workbook = workbook
+class AbstractModelWriter:
+    def __init__(self, queryset):
         self.queryset = queryset
         self.model = queryset.model
 
@@ -187,12 +186,40 @@ class ModelToSheetWriter:
         fields_to_write = self.model._meta.fields
         return [ModelColumn(self.model, field.name) for field in fields_to_write]
 
-    def get_sheet_name(self):
-        return get_default_sheet_name_for_qs(self.queryset)
-
     def get_header_row(self):
         # return [escape_for_xlsx(name) for name, _ in self.get_column_configs()]
         return [serialize_value(col.get_header()) for col in self.get_column_configs()]
+
+    def write(self):
+        raise NotImplementedError()
+
+
+class ModelToCsvWriter(AbstractModelWriter):
+    def __init__(self, buffer, queryset):
+        super().__init__(queryset)
+        self.buffer = buffer
+
+    def write(self):
+        writer = csv.writer(self.buffer)
+        writer.writerow(self.get_header_row())
+
+        iterator = page_queryset(self.queryset)
+        for record in iterator:
+            csv_row = []
+            for col in self.get_column_configs():
+                csv_val = col.get_serialized_value(record)
+                csv_row.append(csv_val)
+
+            writer.writerow(csv_row)
+
+
+class ModelToSheetWriter(AbstractModelWriter):
+    def __init__(self, workbook, queryset):
+        super().__init__(queryset)
+        self.workbook = workbook
+
+    def get_sheet_name(self):
+        return get_default_sheet_name_for_qs(self.queryset)
 
     def write(self):
         worksheet = self.workbook.create_sheet(title=self.get_sheet_name())
@@ -207,6 +234,9 @@ class ModelToSheetWriter:
                 xl_row.append(xl_val)
 
             worksheet.append(xl_row)
+
+    def serialize_value(self, value):
+        return serialize_value(value)
 
 
 def serialize_value(value):
@@ -276,4 +306,40 @@ class AbstractExportView(View):
         response = HttpResponse(headers={"Content-Type": "application/vnd.ms-excel"})
         response["Content-Disposition"] = f"attachment; filename={self.get_filename()}"
         wb.save(response)
+        return response
+
+
+class AbstractCsvExportView(View):
+    def get_filename(self):
+        return "export.xlsx"
+
+    def get_queryset(self):
+        try:
+            return self.queryset
+        except AttributeError as e:
+            raise NotImplementedError(
+                "Must define queryset attr or override get_queryset()"
+            ) from e
+
+    def get_writer_class(self):
+        try:
+            return self.writer_class
+        except AttributeError as e:
+            raise NotImplementedError(
+                "Must define writer_class attr or override get_writer_class()"
+            ) from e
+
+    def get(self, request, *args, **kwargs):
+        response = HttpResponse(
+            content_type="text/csv; charset=utf-8",
+            headers={
+                "Content-Disposition": f"attachment; filename={self.get_filename()}.csv"
+            },
+        )
+        WriterCls = self.get_writer_class()
+        writer = WriterCls(
+            queryset=self.get_queryset(),
+            buffer=response,
+        )
+        writer.write()
         return response
