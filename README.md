@@ -668,3 +668,13 @@ configure_uniform_std_lib_and_structlog_logging(
     }
 )
 ```
+
+## Contributing
+
+### Local development
+
+You can consume the helpers project locally by installing it in editable mode. This is useful for extracting project features into this library. In your requirements.txt, comment out the line with django-phac_aspc-helpers, and add the following line with the file path to this repo, then re-install. Make sure to first uninstall the package if it was already installed, e.g. `pip uninstall -y django-phac_aspc-helpers`
+
+```ini
+-e file:///absolute_path/to/django-phac_aspc-helpers
+```
