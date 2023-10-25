@@ -92,22 +92,47 @@ def test_configure_apps():
     """Test that the configure apps utility adds the correct apps"""
     num = len(registry.get_checks())
     test = configure_apps([])
-    assert test == ["modeltranslation", "axes", "phac_aspc.django.helpers"]
+    assert test == [
+        "modeltranslation",
+        "axes",
+        "phac_aspc.django.helpers",
+        "rules.apps.AutodiscoverRulesConfig",
+    ]
     assert len(registry.get_checks()) == num
 
     num = len(registry.get_checks())
     test = configure_apps(["a", "b"])
-    assert test == ["modeltranslation", "axes", "a", "b", "phac_aspc.django.helpers"]
+    assert test == [
+        "modeltranslation",
+        "axes",
+        "a",
+        "b",
+        "phac_aspc.django.helpers",
+        "rules.apps.AutodiscoverRulesConfig",
+    ]
     assert len(registry.get_checks()) == num
 
     num = len(registry.get_checks())
     test = configure_apps(["a", "axes", "b"])
-    assert test == ["modeltranslation", "a", "axes", "b", "phac_aspc.django.helpers"]
+    assert test == [
+        "modeltranslation",
+        "a",
+        "axes",
+        "b",
+        "phac_aspc.django.helpers",
+        "rules.apps.AutodiscoverRulesConfig",
+    ]
     assert len(registry.get_checks()) == num + 1
 
     num = len(registry.get_checks())
     test = configure_apps(["phac_aspc.django.helpers", "axes", "b"])
-    assert test == ["modeltranslation", "phac_aspc.django.helpers", "axes", "b"]
+    assert test == [
+        "modeltranslation",
+        "phac_aspc.django.helpers",
+        "axes",
+        "b",
+        "rules.apps.AutodiscoverRulesConfig",
+    ]
     assert len(registry.get_checks()) == num + 2
 
 

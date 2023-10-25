@@ -42,7 +42,13 @@ def configure_apps(app_list):
     library"""
 
     prefix_list = warn_and_remove(["modeltranslation", "axes"], app_list)
-    suffix_list = warn_and_remove(["phac_aspc.django.helpers"], app_list)
+    suffix_list = warn_and_remove(
+        [
+            "phac_aspc.django.helpers",
+            "rules.apps.AutodiscoverRulesConfig",
+        ],
+        app_list,
+    )
 
     return prefix_list + app_list + suffix_list
 
