@@ -13,8 +13,8 @@ class NonExistentRuleException(Exception):
 def _test_rule(name, user=None, obj=None):
     if not rules.rule_exists(name):
         raise NonExistentRuleException(f"rule {name} does not exist")
-    else:
-        return rules.test_rule(name, user, obj)
+
+    return rules.test_rule(name, user, obj)
 
 
 def test_rule(*args, **kwargs):
@@ -50,8 +50,8 @@ class patch_rules:
         def exec_rule(rule_name, user=None, obj=None):
             if rule_name in rule_stubs:
                 return rule_stubs[rule_name]
-            else:
-                return self.actual_rule_func(rule_name, user, obj)
+
+            return self.actual_rule_func(rule_name, user, obj)
 
         return exec_rule
 
