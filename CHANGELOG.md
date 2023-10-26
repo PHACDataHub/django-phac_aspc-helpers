@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.1.1...v1.2.0) (2023-10-25)
+
+
+### Features
+
+* add csv export utils ([#70](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/70)) ([e9fb3e5](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/e9fb3e5308a2be64c9dcf7243b9f47c506e87132))
+* add rules utility ([#74](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/74)) ([322f5a2](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/322f5a2ed7ac142df7e40d447794e4602fabb430))
+
 ## [1.1.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.1.0...v1.1.1) (2023-10-03)
 
 
