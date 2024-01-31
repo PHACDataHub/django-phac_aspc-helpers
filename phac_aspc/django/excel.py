@@ -374,7 +374,7 @@ class AbstractExportView(BaseAbstractExportView):
 
 class AbstractCsvExportView(AbstractExportView):
     def get_filename(self):
-        return "export.csv"
+        return "export"
 
     def get_writer_class(self):
         try:
