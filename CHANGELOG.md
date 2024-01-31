@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.2.0...v1.3.0) (2024-01-31)
+
+
+### Features
+
+* fix csv name issue ([#85](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/85)) ([8738958](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/873895841a2712e7e3d2710a0100842c15f382b0))
+
 ## [1.2.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.1.1...v1.2.0) (2023-10-25)
 
 
