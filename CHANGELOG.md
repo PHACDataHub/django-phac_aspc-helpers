@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.3.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.2.0...v1.3.0) (2024-01-31)
+## [2.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.2.0...v3.0.0) (2024-01-31)
 
 ### Features
 
