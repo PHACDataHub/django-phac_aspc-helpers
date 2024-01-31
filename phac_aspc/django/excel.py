@@ -198,6 +198,8 @@ class AbstractWriter:
 
 
 class AbstractModelWriter(AbstractWriter):
+    # pylint: disable=W0223
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert isinstance(
@@ -221,7 +223,9 @@ class AbstractModelWriter(AbstractWriter):
         return [ModelColumn(model, field.name) for field in fields_to_write]
 
 
-class ModelToCsvWriter(AbstractModelWriter):
+class AbstractCsvWriter(AbstractWriter):
+    # pylint: disable=W0223
+
     def __init__(self, buffer, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.buffer = buffer
@@ -240,7 +244,13 @@ class ModelToCsvWriter(AbstractModelWriter):
             writer.writerow(csv_row)
 
 
+class ModelToCsvWriter(AbstractModelWriter, AbstractCsvWriter):
+    pass
+
+
 class AbstractSheetWriter(AbstractWriter):
+    # pylint: disable=W0223
+
     sheet_name = None
 
     def __init__(self, *args, workbook=None, sheet_name=None, **kwargs):
