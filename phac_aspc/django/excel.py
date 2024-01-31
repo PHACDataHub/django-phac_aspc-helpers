@@ -374,7 +374,7 @@ class AbstractExportView(BaseAbstractExportView):
 
 class AbstractCsvExportView(AbstractExportView):
     def get_filename(self):
-        return "export"
+        return "export.csv"
 
     def get_writer_class(self):
         try:
@@ -388,7 +388,7 @@ class AbstractCsvExportView(AbstractExportView):
         response = HttpResponse(
             content_type="text/csv; charset=utf-8",
             headers={
-                "Content-Disposition": f"attachment; filename={self.get_filename()}.csv"
+                "Content-Disposition": f"attachment; filename={self.get_filename()}"
             },
         )
         WriterCls = self.get_writer_class()
