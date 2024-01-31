@@ -9,6 +9,7 @@ from phac_aspc.django.excel import (
     AbstractExportView,
     ModelToCsvWriter,
     AbstractCsvExportView,
+    AbstractSheetWriter,
 )
 from django.test import RequestFactory
 import random
@@ -45,7 +46,9 @@ def test_model_to_sheet_writer(django_assert_max_num_queries):
     with django_assert_max_num_queries(4):
         wb = Workbook()
         writer = BookSheetWriter(
-            workbook=wb, queryset=Book.objects.all().prefetch_related("author", "tags")
+            workbook=wb,
+            iterator=Book.objects.all().prefetch_related("author", "tags"),
+            sheet_name="books",
         )
         writer.write()
 
@@ -55,6 +58,24 @@ def test_abstract_view():
 
     class BookSheetWriter(ModelToSheetWriter):
         model = Book
+
+        # use 'default' column configs
+
+    class BookExportView(AbstractExportView):
+        sheetwriter_class = BookSheetWriter
+        queryset = Book.objects.all().prefetch_related("author", "tags")
+
+    view_func = BookExportView.as_view()
+    req_factory = RequestFactory()
+    request = req_factory.get("/fake-url")
+
+    response = view_func(request)
+    assert response.status_code == 200
+
+
+def test_abstract_view_with_non_qs_writer():
+    class BookSheetWriter(AbstractSheetWriter):
+        sheet_name = "Books"
 
         def get_column_configs(self):
             return [
@@ -66,8 +87,11 @@ def test_abstract_view():
             ]
 
     class BookExportView(AbstractExportView):
-        sheetwriter_class = BookSheetWriter
-        queryset = Book.objects.all().prefetch_related("author", "tags")
+        def get_sheetwriter_class(self):
+            return BookSheetWriter
+
+        def get_iterator(self):
+            return list(Book.objects.all().prefetch_related("author", "tags"))
 
     view_func = BookExportView.as_view()
     req_factory = RequestFactory()
@@ -126,7 +150,7 @@ def test_abstract_csv_view():
     request = req_factory.get("/fake-url", headers={"Accept": "text/csv"})
     response = view_func(request)
     assert response.status_code == 200
-    WriterClassMock.assert_called_with(queryset=qs, buffer=response)
+    WriterClassMock.assert_called_with(iterator=qs, buffer=response)
     writerInstanceMock.write.assert_called_once()
 
 
@@ -150,7 +174,7 @@ def test_abstract_excel_view():
 
     assert response.status_code == 200
 
-    ClassMock.assert_called_with(queryset=qs, workbook=wbInstanceMock)
+    ClassMock.assert_called_with(iterator=qs, workbook=wbInstanceMock)
     writerInstanceMock.write.assert_called_once()
     wbInstanceMock.save.assert_called_once()
     wbInstanceMock.save.assert_called_with(response)
