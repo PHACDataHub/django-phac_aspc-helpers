@@ -5,6 +5,7 @@ utilities for writing excel data using openpyxl
 import re
 import csv
 from django.core.paginator import Paginator
+from django.db.models import QuerySet
 from django.views import View
 from django.http import HttpResponse
 from django.utils.functional import Promise
@@ -46,7 +47,7 @@ def write_queryset_to_sheet(workbook, queryset):
     - warning: uses queryset.iterator, prefetches are ignored
     """
 
-    ModelToSheetWriter(workbook=workbook, queryset=queryset).write()
+    ModelToSheetWriter(workbook=workbook, iterator=queryset).write()
 
 
 def page_queryset(queryset, per_page=1000):
@@ -176,34 +177,64 @@ class ManyToManyColumn(Column):
         return self.delimiter.join([self.get_related_str(x) for x in related_records])
 
 
-class AbstractModelWriter:
-    def __init__(self, queryset):
-        self.queryset = queryset
-        self.model = queryset.model
+class AbstractWriter:
+    iterator = None
 
-    def get_column_configs(self):
-        # pylint: disable=protected-access
-        fields_to_write = self.model._meta.fields
-        return [ModelColumn(self.model, field.name) for field in fields_to_write]
+    def __init__(self, iterator=None):
+        self.iterator = iterator
+
+    def get_iterator(self):
+        return self.iterator
 
     def get_header_row(self):
         # return [escape_for_xlsx(name) for name, _ in self.get_column_configs()]
         return [serialize_value(col.get_header()) for col in self.get_column_configs()]
 
+    def get_column_configs(self):
+        raise NotImplementedError()
+
     def write(self):
         raise NotImplementedError()
 
 
-class ModelToCsvWriter(AbstractModelWriter):
-    def __init__(self, buffer, queryset):
-        super().__init__(queryset)
+class AbstractModelWriter(AbstractWriter):
+    # pylint: disable=W0223
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert isinstance(
+            self.iterator, QuerySet
+        ), "iterator must be queryset, otherwise use AbstracWriter"
+
+    def get_iterator(self):
+        return self.get_queryset()
+
+    def get_queryset(self):
+        """
+        This is just here for legacy sake,
+        some consumer subclasses have overriden this method
+        """
+        return page_queryset(self.iterator)
+
+    def get_column_configs(self):
+        model = self.iterator.model
+
+        fields_to_write = model._meta.fields
+        return [ModelColumn(model, field.name) for field in fields_to_write]
+
+
+class AbstractCsvWriter(AbstractWriter):
+    # pylint: disable=W0223
+
+    def __init__(self, buffer, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.buffer = buffer
 
     def write(self):
         writer = csv.writer(self.buffer)
         writer.writerow(self.get_header_row())
 
-        iterator = page_queryset(self.queryset)
+        iterator = self.get_iterator()
         for record in iterator:
             csv_row = []
             for col in self.get_column_configs():
@@ -213,20 +244,37 @@ class ModelToCsvWriter(AbstractModelWriter):
             writer.writerow(csv_row)
 
 
-class ModelToSheetWriter(AbstractModelWriter):
-    def __init__(self, workbook, queryset):
-        super().__init__(queryset)
+class ModelToCsvWriter(AbstractModelWriter, AbstractCsvWriter):
+    pass
+
+
+class AbstractSheetWriter(AbstractWriter):
+    # pylint: disable=W0223
+
+    sheet_name = None
+
+    def __init__(self, *args, workbook=None, sheet_name=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.workbook = workbook
 
+        if sheet_name:
+            self.sheet_name = sheet_name
+
     def get_sheet_name(self):
-        return get_default_sheet_name_for_qs(self.queryset)
+        if not self.sheet_name:
+            raise NotImplementedError(
+                "must override get_sheet_name() or pass a sheet_name"
+            )
+
+        return self.sheet_name
 
     def write(self):
         worksheet = self.workbook.create_sheet(title=self.get_sheet_name())
 
         worksheet.append(self.get_header_row())
 
-        iterator = page_queryset(self.queryset)
+        iterator = self.get_iterator()
         for record in iterator:
             xl_row = []
             for col in self.get_column_configs():
@@ -235,8 +283,13 @@ class ModelToSheetWriter(AbstractModelWriter):
 
             worksheet.append(xl_row)
 
-    def serialize_value(self, value):
-        return serialize_value(value)
+
+class ModelToSheetWriter(AbstractSheetWriter, AbstractModelWriter):
+    def get_sheet_name(self):
+        try:
+            return super().get_sheet_name()
+        except NotImplementedError:
+            return get_default_sheet_name_for_qs(self.iterator)
 
 
 def serialize_value(value):
@@ -262,10 +315,6 @@ def serialize_value(value):
     return xl_val
 
 
-def get_manager_for_export(model):
-    return getattr(model, "no_fakes", model.objects)
-
-
 def get_default_sheet_name_for_qs(queryset):
     """
     excel only supports up to 31 characters in a worksheet name
@@ -275,11 +324,20 @@ def get_default_sheet_name_for_qs(queryset):
     return f"{model_name[:30]}"
 
 
-class AbstractExportView(View):
-    def get_filename(self):
-        return "export.xlsx"
+class BaseAbstractExportView(View):
+    """
+    Must implement get_iterator(), get_queryset() OR assign self.queryset
+
+    """
+
+    def get_iterator(self):
+        return self.get_queryset()
 
     def get_queryset(self):
+        """
+        This is just here for legacy sake,
+        some consumer subclasses have overriden this method
+        """
         try:
             return self.queryset
         except AttributeError as e:
@@ -295,12 +353,17 @@ class AbstractExportView(View):
                 "Must define sheetwriter_class attr or override get_sheetwriter_class()"
             ) from e
 
+
+class AbstractExportView(BaseAbstractExportView):
+    def get_filename(self):
+        return "export.xlsx"
+
     def get(self, request, *args, **kwargs):
         wb = openpyxl.Workbook(write_only=True)
         WriterCls = self.get_sheetwriter_class()
         writer = WriterCls(
             workbook=wb,
-            queryset=self.get_queryset(),
+            iterator=self.get_iterator(),
         )
         writer.write()
         response = HttpResponse(headers={"Content-Type": "application/vnd.ms-excel"})
@@ -309,17 +372,9 @@ class AbstractExportView(View):
         return response
 
 
-class AbstractCsvExportView(View):
+class AbstractCsvExportView(AbstractExportView):
     def get_filename(self):
-        return "export.xlsx"
-
-    def get_queryset(self):
-        try:
-            return self.queryset
-        except AttributeError as e:
-            raise NotImplementedError(
-                "Must define queryset attr or override get_queryset()"
-            ) from e
+        return "export.csv"
 
     def get_writer_class(self):
         try:
@@ -338,7 +393,7 @@ class AbstractCsvExportView(View):
         )
         WriterCls = self.get_writer_class()
         writer = WriterCls(
-            queryset=self.get_queryset(),
+            iterator=self.get_iterator(),
             buffer=response,
         )
         writer.write()
