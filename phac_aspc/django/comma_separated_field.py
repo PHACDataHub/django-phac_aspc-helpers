@@ -9,7 +9,7 @@ from django.utils.hashable import make_hashable
 from django.utils.text import capfirst
 
 
-class Creator(object):
+class Creator:
     """
     A placeholder class that provides a way to set the attribute on the model.
     """
@@ -17,6 +17,7 @@ class Creator(object):
     def __init__(self, field):
         self.field = field
 
+    # pylint: disable=redefined-builtin
     def __get__(self, obj, type=None):
         if obj is None:
             return self
@@ -32,7 +33,7 @@ class BaseSeparatedValuesField(models.Field):
         self.cast = kwargs.pop("cast", str)
 
         if kwargs.get("null", False):
-            raise Exception(
+            raise exceptions.ImproperlyConfigured(
                 "null is not supported for CommaSeparatedTextField, forcing it to False "
             )
 
@@ -43,11 +44,11 @@ class BaseSeparatedValuesField(models.Field):
 
         super().__init__(*args, **kwargs)
 
-    def contribute_to_class(self, cls, name, **kwargs):
+    def contribute_to_class(self, cls, name, *args, **kwargs):
         # super() assigns this method, we want to know
         # if the class already had a custom display method before this
         has_display_overide = hasattr(cls, f"get_{self.name}_display")
-        super().contribute_to_class(cls, name, **kwargs)
+        super().contribute_to_class(cls, name, *args, **kwargs)
 
         setattr(cls, self.name, Creator(self))
 
@@ -82,7 +83,7 @@ class BaseSeparatedValuesField(models.Field):
                 if isinstance(option_value, (list, tuple)):
                     # This is an optgroup, so look inside the group for
                     # options.
-                    for optgroup_key, optgroup_value in option_value:
+                    for optgroup_key, _optgroup_value in option_value:
                         choices.append(optgroup_key)
                 else:
                     choices.append(option_key)
@@ -114,19 +115,19 @@ class BaseSeparatedValuesField(models.Field):
         return [self.cast(v) for v in values]
 
     def get_db_prep_value(self, value, *args, **kwargs):
-        if isinstance(value, list) or isinstance(value, tuple):
-            return self.token.join(["%s" % s for s in value])
+        if isinstance(value, (list, tuple)):
+            return self.token.join([s + "" for s in value])
 
         if not value:
             return value
 
-        raise Exception(f"Unexpected value type: {type(value)}, {value}")
+        raise ValueError(f"Unexpected value type: {type(value)}, {value}")
 
     def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
+        value = self.value_from_object(obj)
         return self.get_db_prep_value(value)
 
-    def formfield(self, form_class=MultipleChoiceField, **kwargs):
+    def formfield(self, *args, form_class=MultipleChoiceField, **kwargs):
         defaults = {
             "required": not self.blank,
             "label": capfirst(self.verbose_name),
