@@ -12,6 +12,7 @@ so we don't get extra migrations when we change verbose names or related_names
 """
 
 from django.db import models
+from . import comma_separated_field
 
 
 migration_ignored_attrs = [
@@ -185,4 +186,16 @@ class ImageField(DescriptionMixin, models.ImageField):
 
 
 class FileField(DescriptionMixin, models.FileField):
+    pass
+
+
+class CommaSeparatedCharField(
+    DescriptionMixin, comma_separated_field.CommaSeparatedCharField
+):
+    pass
+
+
+class CommaSeparatedTextField(
+    DescriptionMixin, comma_separated_field.CommaSeparatedTextField
+):
     pass
