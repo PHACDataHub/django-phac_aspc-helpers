@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v2.0.0...v2.1.0) (2024-02-22)
+
+
+### Features
+
+* add comma-separated field ([#87](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/87)) ([118036e](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/118036e7059c25c5091856bd7b888edae36eb864))
+
 ## [2.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.2.0...v3.0.0) (2024-01-31)
 
 ### Features
