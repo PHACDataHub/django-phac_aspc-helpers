@@ -9,8 +9,8 @@ def test_csv_field_on_create():
         tag_categories=["fiction", "biography"],
         tag_categories_text=["fiction", "history"],
     )
-    assert tag.tag_categories == ["fiction", "biography"]
-    assert tag.tag_categories_text == ["fiction", "history"]
+    assert tag.tag_categories == ("fiction", "biography")
+    assert tag.tag_categories_text == ("fiction", "history")
     assert Tag.objects.filter(
         tag_categories="fiction,biography", tag_categories_text="fiction,history"
     ).exists()
@@ -19,7 +19,7 @@ def test_csv_field_on_create():
 def test_csv_char_field():
     tag = Tag.objects.create()
 
-    assert tag.tag_categories == []
+    assert tag.tag_categories == tuple()
     tag.tag_categories = [
         "fiction",
         "history",
@@ -27,10 +27,10 @@ def test_csv_char_field():
     tag.save()
 
     tag.refresh_from_db()
-    assert tag.tag_categories == [
+    assert tag.tag_categories == (
         "fiction",
         "history",
-    ]
+    )
     assert Tag.objects.filter(tag_categories="fiction,history").exists()
 
     # test forms work too
@@ -40,10 +40,10 @@ def test_csv_char_field():
             fields = ["tag_categories"]
 
     read_form = SystemOverviewForm(instance=tag)
-    assert read_form.initial["tag_categories"] == [
+    assert read_form.initial["tag_categories"] == (
         "fiction",
         "history",
-    ]
+    )
     assert read_form.fields["tag_categories"].choices[0][0] == "fiction"
 
     bad_form = SystemOverviewForm(
@@ -70,10 +70,10 @@ def test_csv_char_field():
     write_form.save()
 
     tag.refresh_from_db()
-    assert tag.tag_categories == [
+    assert tag.tag_categories == (
         "fiction",
         "history",
-    ]
+    )
 
     # now check the raw DB value is "" if we set it to []
     tag.tag_categories = []
@@ -90,7 +90,7 @@ def test_csv_char_field():
 def test_csv_text_field():
     tag = Tag.objects.create()
 
-    assert tag.tag_categories_text == []
+    assert tag.tag_categories_text == tuple()
     tag.tag_categories_text = [
         "fiction",
         "history",
@@ -98,10 +98,10 @@ def test_csv_text_field():
     tag.save()
 
     tag.refresh_from_db()
-    assert tag.tag_categories_text == [
+    assert tag.tag_categories_text == (
         "fiction",
         "history",
-    ]
+    )
     assert Tag.objects.filter(tag_categories_text="fiction,history").exists()
 
     # test forms work too
@@ -111,10 +111,10 @@ def test_csv_text_field():
             fields = ["tag_categories_text"]
 
     read_form = SystemOverviewForm(instance=tag)
-    assert read_form.initial["tag_categories_text"] == [
+    assert read_form.initial["tag_categories_text"] == (
         "fiction",
         "history",
-    ]
+    )
     assert read_form.fields["tag_categories_text"].choices[0][0] == "fiction"
 
     bad_form = SystemOverviewForm(
@@ -141,13 +141,13 @@ def test_csv_text_field():
     write_form.save()
 
     tag.refresh_from_db()
-    assert tag.tag_categories_text == [
+    assert tag.tag_categories_text == (
         "fiction",
         "history",
-    ]
+    )
 
     # now check the raw DB value is "" if we set it to []
-    tag.tag_categories_text = []
+    tag.tag_categories_text = tuple()
     tag.save()
 
     # perform a raw query

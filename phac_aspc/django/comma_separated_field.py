@@ -106,13 +106,13 @@ class BaseSeparatedValuesField(models.Field):
 
     def to_python(self, value):
         if not value:
-            return []
+            return tuple()
 
         values = value
         if isinstance(value, str):
             values = value.split(self.token)
 
-        return [self.cast(v) for v in values]
+        return tuple(self.cast(v) for v in values)
 
     def get_db_prep_value(self, value, *args, **kwargs):
         if isinstance(value, (list, tuple)):
