@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v2.1.0...v2.1.1) (2024-03-09)
+
+
+### Bug Fixes
+
+* replace comma-separated fields' tuples with lists ([#89](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/89)) ([e554406](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/e5544062c744c2011e9c7af1879a9b8e1672647f))
+
 ## [2.1.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v2.0.0...v2.1.0) (2024-02-22)
 
 
