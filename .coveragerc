@@ -1,0 +1,9 @@
+[run]
+omit =
+    venv/*
+    env/*
+    */migrations/*
+    */scripts/*
+    tests/*
+    htmlcov/
+    test_.*py
