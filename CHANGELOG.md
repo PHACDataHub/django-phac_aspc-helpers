@@ -1,7 +1,10 @@
 # Changelog
 
-## [2.1.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v2.1.0...v2.1.1) (2024-03-09)
+### Features
 
+* Writer api improvements ([#91](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/91)) ([dcde15a](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/dcde15aaf99b1392ab9c5b145c746533cff1d093))
+
+## 3.0.0 (2024-03-09)
 
 ### Bug Fixes
 
