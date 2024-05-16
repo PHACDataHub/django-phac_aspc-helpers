@@ -16,8 +16,23 @@ class Author(models.Model):
     last_name = fields.CharField(max_length=100)
 
 
+TAG_CATEGORIES = [
+    ("fiction", "Fiction"),
+    ("non-fiction", "Non-Fiction"),
+    ("biography", "Biography"),
+    ("history", "History"),
+]
+
+
 class Tag(models.Model):
     name = fields.CharField(max_length=250)
+
+    tag_categories = fields.CommaSeparatedCharField(
+        max_length=250, blank=True, choices=TAG_CATEGORIES
+    )
+    tag_categories_text = fields.CommaSeparatedTextField(
+        blank=True, choices=TAG_CATEGORIES
+    )
 
     def __str__(self):
         return self.name

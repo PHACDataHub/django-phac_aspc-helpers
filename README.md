@@ -84,13 +84,13 @@ library; refer to their documentation on how to format special data types like l
 Alternatively, these environment variables can be declared in your `settings.py`
 itself. There are two important caveats when doing so:
 
-  1) `settings.py` declarations take precedence over any instances of the same
-  env var in your `.env` file
-  2) any env vars declared in `settings.py` for this library **must** be declared
-  **before** any imports from `phac_aspc` occur!
-     - similarly, you should not consume`phac_aspc` modules anywhere that executes
+1. `settings.py` declarations take precedence over any instances of the same
+   env var in your `.env` file
+2. any env vars declared in `settings.py` for this library **must** be declared
+   **before** any imports from `phac_aspc` occur!
+   - similarly, you should not consume`phac_aspc` modules anywhere that executes
      prior to Django's consumption of your app's settings module (e.g. in `manage.py`)
-     - `phac_aspc` modules that don't, directly or indirectly, depend on these
+   - `phac_aspc` modules that don't, directly or indirectly, depend on these
      env vars are theoretically safe anywhere, **but** we don't currently identify
      these modules, or make promises that any given module won't start depending
      on env vars in the future
@@ -203,11 +203,11 @@ the redirect route named `phac_aspc_authorize` along with a token containing
 information about the user.
 
 By default, the authentication backend will look for a user who's username is
-the user's uuid from Microsoft - if not found a new user is created.  To
+the user's uuid from Microsoft - if not found a new user is created. To
 customize this behaviour, a custom authentication backend class can be specified
 via `PHAC_ASPC_OAUTH_USE_BACKEND` in `settings.py`.
 
-After successful authentication, the user is redirected to `/`.  To customize
+After successful authentication, the user is redirected to `/`. To customize
 this behaviour, set `PHAC_ASPC_OAUTH_REDIRECT_ON_LOGIN` in `settings.py` to the
 name of the desired route.
 
@@ -311,15 +311,15 @@ e.g. with Jinja, on a login page where the URL ends with `?next=/some-protected-
 
 If there are any errors during the authentication flow, they are displayed to
 the user via the [error.html](phac_aspc/django/helpers/templates/phac_aspc/helpers/auth/error.html)
-template.  The template can be extended using standard django templating by
+template. The template can be extended using standard django templating by
 creating a `templates/phac_aspc/helpers/auth/error.html` file in the host
 project.
 
 #### Strings and locales
 
 Strings displayed to the user during the authentication flow are available in
-Canada's both official languages.  These strings can be customized by creating
-templates in the host project.  Here is a list of strings and templates used by
+Canada's both official languages. These strings can be customized by creating
+templates in the host project. Here is a list of strings and templates used by
 the authentication flow:
 
 | Template                    | Context                                              |
@@ -455,9 +455,9 @@ can be changed in your projects settings using `LANGUAGES` and `LANGUAGE_CODE`.
 
 #### Localization Environment variables
 
-| Variable                        | Type | Purpose                         |
-| ------------------------------- | ---- | ------------------------------- |
-| PHAC_ASPC_LANGUAGE_CODE         | str  | Default language                |
+| Variable                | Type | Purpose          |
+| ----------------------- | ---- | ---------------- |
+| PHAC_ASPC_LANGUAGE_CODE | str  | Default language |
 
 #### lang template tag
 
@@ -537,7 +537,7 @@ import phac_aspc.django.helpers.jinja_utils as include_from_dtl
 def environment(**options):
     env = Environment(**options)
     env.globals.update({
-       ..., # other utils and constants 
+       ..., # other utils and constants
        "include_from_dtl": include_from_dtl,
     })
     return env
@@ -678,3 +678,10 @@ You can consume the helpers project locally by installing it in editable mode. T
 ```ini
 -e file:///absolute_path/to/django-phac_aspc-helpers
 ```
+
+### Generating test coverage
+
+1. `coverage run --source=. ./manage.py test`
+2. `coverage html`
+3. `python -m http.server 1337`
+4. visit `http://localhost:1337/htmlcov/` and dig into modules to see which individual line coverage
