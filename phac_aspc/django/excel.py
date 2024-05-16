@@ -212,7 +212,8 @@ class AbstractModelWriter(AbstractWriter):
     def __init__(self, **kwargs):
         if "iterator" in kwargs:
             raise WriterConfigException(
-                "don't use iterator kwarg, use the queryset kwarg, class attr or override get_queryset()"
+                "don't use iterator kwarg, use the queryset kwarg, "
+                "class attr or override get_queryset()"
             )
         if "queryset" in kwargs:
             self.queryset = kwargs.pop("queryset")
@@ -374,7 +375,7 @@ class BaseAbstractExportView(View):
 
         return None
 
-    def get_sheetwriter_class(self):
+    def get_sheetwriter_class(self) -> type:
         if not self.sheetwriter_class:
             raise NotImplementedError(
                 "Must define sheetwriter_class attr or override get_sheetwriter_class()"
