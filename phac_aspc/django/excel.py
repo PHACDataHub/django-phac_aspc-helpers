@@ -177,13 +177,22 @@ class ManyToManyColumn(Column):
         return self.delimiter.join([self.get_related_str(x) for x in related_records])
 
 
+class WriterConfigException(Exception):
+    pass
+
+
 class AbstractWriter:
     iterator = None
 
     def __init__(self, iterator=None):
-        self.iterator = iterator
+        if iterator is not None:
+            self.iterator = iterator
 
     def get_iterator(self):
+        if self.iterator is None:
+            raise NotImplementedError(
+                "must set iterator in init, class or override get_iterator()"
+            )
         return self.iterator
 
     def get_header_row(self):
@@ -200,24 +209,34 @@ class AbstractWriter:
 class AbstractModelWriter(AbstractWriter):
     # pylint: disable=W0223
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        assert isinstance(
-            self.iterator, QuerySet
-        ), "iterator must be queryset, otherwise use AbstracWriter"
+    def __init__(self, **kwargs):
+        if "iterator" in kwargs:
+            raise WriterConfigException(
+                "don't use iterator kwarg, use the queryset kwarg, "
+                "class attr or override get_queryset()"
+            )
+        if "queryset" in kwargs:
+            self.queryset = kwargs.pop("queryset")
+
+        super().__init__(**kwargs)
 
     def get_iterator(self):
-        return self.get_queryset()
+        return page_queryset(self.get_queryset())
 
     def get_queryset(self):
         """
         This is just here for legacy sake,
         some consumer subclasses have overriden this method
         """
-        return page_queryset(self.iterator)
+        try:
+            return self.queryset
+        except AttributeError as e:
+            raise WriterConfigException(
+                "Must define queryset attr, kwarg or override get_queryset()"
+            ) from e
 
     def get_column_configs(self):
-        model = self.iterator.model
+        model = self.get_queryset().model
 
         fields_to_write = model._meta.fields
         return [ModelColumn(model, field.name) for field in fields_to_write]
@@ -244,7 +263,7 @@ class AbstractCsvWriter(AbstractWriter):
             writer.writerow(csv_row)
 
 
-class ModelToCsvWriter(AbstractModelWriter, AbstractCsvWriter):
+class ModelToCsvWriter(AbstractCsvWriter, AbstractModelWriter):
     pass
 
 
@@ -289,7 +308,7 @@ class ModelToSheetWriter(AbstractSheetWriter, AbstractModelWriter):
         try:
             return super().get_sheet_name()
         except NotImplementedError:
-            return get_default_sheet_name_for_qs(self.iterator)
+            return get_default_sheet_name_for_qs(self.get_queryset())
 
 
 def serialize_value(value):
@@ -330,41 +349,60 @@ class BaseAbstractExportView(View):
 
     """
 
-    def get_iterator(self):
-        return self.get_queryset()
+    filename = None
+    sheetwriter_class = None
 
-    def get_queryset(self):
-        """
-        This is just here for legacy sake,
-        some consumer subclasses have overriden this method
-        """
-        try:
-            return self.queryset
-        except AttributeError as e:
+    def get_filename(self):
+        if not getattr(self, "filename", None):
             raise NotImplementedError(
-                "Must define queryset attr or override get_queryset()"
-            ) from e
+                "Must define filename attr or override get_filename()"
+            )
 
-    def get_sheetwriter_class(self):
-        try:
-            return self.sheetwriter_class
-        except AttributeError as e:
+    def _get_iterable(self):
+        if hasattr(self, "queryset"):
+            assert isinstance(self.queryset, QuerySet), "queryset must be a QuerySet"
+            return self.queryset
+        if hasattr(self, "iterator"):
+            return self.iterator
+
+        if hasattr(self, "get_queryset"):
+            qs = self.get_queryset()
+            assert isinstance(qs, QuerySet), "queryset must be a QuerySet"
+            return qs
+
+        if hasattr(self, "get_iterator"):
+            return self.get_iterator()
+
+        return None
+
+    def get_sheetwriter_class(self) -> type:
+        if not self.sheetwriter_class:
             raise NotImplementedError(
                 "Must define sheetwriter_class attr or override get_sheetwriter_class()"
-            ) from e
+            )
+        return self.sheetwriter_class
 
 
 class AbstractExportView(BaseAbstractExportView):
-    def get_filename(self):
-        return "export.xlsx"
+    filename = "export.xlsx"
 
     def get(self, request, *args, **kwargs):
         wb = openpyxl.Workbook(write_only=True)
         WriterCls = self.get_sheetwriter_class()
-        writer = WriterCls(
-            workbook=wb,
-            iterator=self.get_iterator(),
-        )
+
+        iterable = self._get_iterable()
+        if iterable is None:
+            writer = WriterCls(workbook=wb)
+        elif issubclass(WriterCls, AbstractModelWriter):
+            if not isinstance(iterable, QuerySet):
+                raise WriterConfigException("iterable must be a QuerySet")
+            writer = WriterCls(
+                workbook=wb,
+                queryset=iterable,
+            )
+        else:
+            writer = WriterCls(workbook=wb, iterator=iterable)
+
         writer.write()
         response = HttpResponse(headers={"Content-Type": "application/vnd.ms-excel"})
         response["Content-Disposition"] = f"attachment; filename={self.get_filename()}"
@@ -373,8 +411,7 @@ class AbstractExportView(BaseAbstractExportView):
 
 
 class AbstractCsvExportView(AbstractExportView):
-    def get_filename(self):
-        return "export.csv"
+    filename = "export.csv"
 
     def get_writer_class(self):
         try:
@@ -391,10 +428,21 @@ class AbstractCsvExportView(AbstractExportView):
                 "Content-Disposition": f"attachment; filename={self.get_filename()}"
             },
         )
+
         WriterCls = self.get_writer_class()
-        writer = WriterCls(
-            iterator=self.get_iterator(),
-            buffer=response,
-        )
+        iterable = self._get_iterable()
+        if iterable is None:
+            writer = WriterCls(buffer=response)
+
+        elif issubclass(WriterCls, AbstractModelWriter):
+            if not isinstance(iterable, QuerySet):
+                raise WriterConfigException("iterable must be a QuerySet")
+            writer = WriterCls(
+                queryset=iterable,
+                buffer=response,
+            )
+        else:
+            writer = WriterCls(buffer=response, iterator=iterable)
+
         writer.write()
         return response

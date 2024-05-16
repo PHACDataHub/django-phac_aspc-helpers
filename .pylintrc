@@ -7,6 +7,7 @@ disable=
     R0913, # Too many arguments
     R0914, # Too many local vars
     R0901, # too many ancestors (max 7)
+    E1102, # not callable (per-line disable wouldn't work)
 
 [CLASSES]
 # pylint complains when you access 'protected' attributes (anything that starts with _), here are exceptions we support

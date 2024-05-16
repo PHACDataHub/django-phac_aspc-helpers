@@ -1,3 +1,4 @@
+import pytest
 import io
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -10,13 +11,32 @@ from phac_aspc.django.excel import (
     ModelToCsvWriter,
     AbstractCsvExportView,
     AbstractSheetWriter,
+    WriterConfigException,
 )
 from django.test import RequestFactory
 import random
 
 from openpyxl import Workbook
-from testapp.models import Book
+from testapp.models import Book, Author
 from testapp.model_factories import TagFactory, BookFactory, AuthorFactory
+
+
+def make_request():
+    req_factory = RequestFactory()
+    return req_factory.get("/fake-url")
+
+
+def instantiate_view(ViewClass):
+    request = make_request()
+    view_instance = ViewClass()
+    view_instance.setup(request)
+    return view_instance
+
+
+def get_response(ViewClass):
+    request = make_request()
+    view_func = ViewClass.as_view()
+    return view_func(request)
 
 
 def create_data():
@@ -38,7 +58,6 @@ def test_model_to_sheet_writer(django_assert_max_num_queries):
     ]
 
     class BookSheetWriter(ModelToSheetWriter):
-        model = Book
 
         def get_column_configs(self):
             return columns
@@ -47,7 +66,7 @@ def test_model_to_sheet_writer(django_assert_max_num_queries):
         wb = Workbook()
         writer = BookSheetWriter(
             workbook=wb,
-            iterator=Book.objects.all().prefetch_related("author", "tags"),
+            queryset=Book.objects.all().prefetch_related("author", "tags"),
             sheet_name="books",
         )
         writer.write()
@@ -56,21 +75,67 @@ def test_model_to_sheet_writer(django_assert_max_num_queries):
 def test_abstract_view():
     create_data()
 
-    class BookSheetWriter(ModelToSheetWriter):
-        model = Book
-
-        # use 'default' column configs
+    qs = Book.objects.all().prefetch_related("author", "tags")
 
     class BookExportView(AbstractExportView):
-        sheetwriter_class = BookSheetWriter
-        queryset = Book.objects.all().prefetch_related("author", "tags")
+        sheetwriter_class = ModelToSheetWriter
+        queryset = qs
 
     view_func = BookExportView.as_view()
-    req_factory = RequestFactory()
-    request = req_factory.get("/fake-url")
 
-    response = view_func(request)
+    view_instance = instantiate_view(BookExportView)
+    assert view_instance.get_sheetwriter_class() == ModelToSheetWriter
+    assert view_instance._get_iterable() == qs
+
+    response = get_response(BookExportView)
     assert response.status_code == 200
+
+    # now test it works if queryset is set to None
+    # e.g. that it uses the writer's queryset
+
+    class BookSheetQsWriterWithQs(ModelToSheetWriter):
+        queryset = qs
+
+    class BookExportViewWithoutQs(AbstractExportView):
+        sheetwriter_class = BookSheetQsWriterWithQs
+
+    view_instance = instantiate_view(BookExportViewWithoutQs)
+    assert view_instance.get_sheetwriter_class() == BookSheetQsWriterWithQs
+    assert view_instance._get_iterable() is None
+
+    response = get_response(BookExportViewWithoutQs)
+    assert response.status_code == 200
+
+
+def test_abstract_view_iterable_behaviour():
+
+    class BookExportView(AbstractCsvExportView):
+        def get_iterator(self):
+            return range(10)
+
+    view_instance = instantiate_view(BookExportView)
+    assert view_instance._get_iterable() == range(10)
+
+    class BookExportView2(AbstractCsvExportView):
+        iterator = range(10)
+
+    view_instance = instantiate_view(BookExportView2)
+    assert view_instance._get_iterable() == range(10)
+
+    qs = Book.objects.all()
+
+    class BookExportView3(AbstractCsvExportView):
+        def get_queryset(self):
+            return qs
+
+    view_instance = instantiate_view(BookExportView3)
+    assert view_instance._get_iterable() is qs
+
+    class BookExportView4(AbstractCsvExportView):
+        queryset = qs
+
+    view_instance = instantiate_view(BookExportView4)
+    assert view_instance._get_iterable() is qs
 
 
 def test_abstract_view_with_non_qs_writer():
@@ -93,11 +158,26 @@ def test_abstract_view_with_non_qs_writer():
         def get_iterator(self):
             return list(Book.objects.all().prefetch_related("author", "tags"))
 
-    view_func = BookExportView.as_view()
-    req_factory = RequestFactory()
-    request = req_factory.get("/fake-url")
+    view_inst = instantiate_view(BookExportView)
+    assert view_inst.get_sheetwriter_class() == BookSheetWriter
+    assert view_inst._get_iterable() == list(
+        Book.objects.all().prefetch_related("author", "tags")
+    )
 
-    response = view_func(request)
+    response = get_response(BookExportView)
+    assert response.status_code == 200
+
+    # also test with null-iterator, e.g. so it calls the writer's get_iterator
+    class BookSheetWriterWithIterator(BookSheetWriter):
+        iterator = list(Book.objects.all().prefetch_related("author", "tags"))
+
+    class BookExportViewWithoutIterator(AbstractExportView):
+        sheetwriter_class = BookSheetWriterWithIterator
+
+    view_inst = instantiate_view(BookExportViewWithoutIterator)
+    assert view_inst._get_iterable() is None
+
+    response = get_response(BookExportViewWithoutIterator)
     assert response.status_code == 200
 
 
@@ -126,7 +206,7 @@ def test_csv_writer():
     # TODO: figure out why testing response content directly fails
     # for some reason it escapes utf8
     file = io.StringIO()
-    writer = BookCsvWriter(file, Book.objects.filter(id__in=[b1.id, b2.id]))
+    writer = BookCsvWriter(file, queryset=Book.objects.filter(id__in=[b1.id, b2.id]))
     writer.write()
     as_str = file.getvalue()
     assert (
@@ -136,8 +216,15 @@ def test_csv_writer():
 
 
 def test_abstract_csv_view():
-    writerInstanceMock = Mock()
-    WriterClassMock = Mock(return_value=writerInstanceMock)
+    constructor_spy = Mock()
+    write_spy = Mock()
+
+    class WriterClassMock:
+        def __init__(self, *args, **kwargs):
+            constructor_spy(*args, **kwargs)
+
+        def write(self):
+            write_spy()
 
     qs = Book.objects.all().prefetch_related("author", "tags")
 
@@ -145,24 +232,51 @@ def test_abstract_csv_view():
         writer_class = WriterClassMock
         queryset = qs
 
-    view_func = CsvExportView.as_view()
-    req_factory = RequestFactory()
-    request = req_factory.get("/fake-url", headers={"Accept": "text/csv"})
-    response = view_func(request)
+    response = get_response(CsvExportView)
     assert response.status_code == 200
-    WriterClassMock.assert_called_with(iterator=qs, buffer=response)
-    writerInstanceMock.write.assert_called_once()
+    constructor_spy.assert_called_with(iterator=qs, buffer=response)
+    write_spy.assert_called_once()
+
+
+def test_abstract_csv_view_with_qs_writer():
+    qs = Book.objects.all().prefetch_related("author", "tags")
+
+    class CsvExportView(AbstractCsvExportView):
+        writer_class = ModelToCsvWriter
+        queryset = qs
+
+    response = get_response(CsvExportView)
+    assert response.status_code == 200
+
+    # now test again, but without queryset on the view class
+
+    class BookCsvWriter(ModelToCsvWriter):
+        queryset = qs
+
+    class CsvExportViewWithoutQs(AbstractCsvExportView):
+        writer_class = BookCsvWriter
+
+    response = get_response(CsvExportViewWithoutQs)
+    assert response.status_code == 200
 
 
 def test_abstract_excel_view():
-    writerInstanceMock = Mock()
-    ClassMock = Mock(return_value=writerInstanceMock)
+    constructor_spy = Mock()
+    write_spy = Mock()
+
+    class WriterClassMock:
+        def __init__(self, *args, **kwargs):
+            constructor_spy(*args, **kwargs)
+
+        def write(self):
+            write_spy()
+
     wbInstanceMock = Mock()
 
     qs = Book.objects.all().prefetch_related("author", "tags")
 
     class CsvExportView(AbstractExportView):
-        sheetwriter_class = ClassMock
+        sheetwriter_class = WriterClassMock
         queryset = qs
 
     view_func = CsvExportView.as_view()
@@ -174,7 +288,77 @@ def test_abstract_excel_view():
 
     assert response.status_code == 200
 
-    ClassMock.assert_called_with(iterator=qs, workbook=wbInstanceMock)
-    writerInstanceMock.write.assert_called_once()
+    constructor_spy.assert_called_with(iterator=qs, workbook=wbInstanceMock)
+    write_spy.assert_called_once()
     wbInstanceMock.save.assert_called_once()
     wbInstanceMock.save.assert_called_with(response)
+
+
+def test_various_writer_apis():
+    wb = Workbook()
+    qs = Book.objects.all().prefetch_related("author", "tags")
+
+    class BookWriter(ModelToSheetWriter):
+        model = Book
+
+    with pytest.raises(WriterConfigException):
+        # iterator kwarg should fail at __init__
+        BookWriter(workbook=wb, iterator=qs)
+
+    # try with qs kwarg
+    BookWriter(workbook=wb, queryset=qs).write()
+
+    with pytest.raises(TypeError):
+        # should not take any positional args
+        BookWriter(qs, workbook=wb)
+
+    class BookWriterWithGetQuerysetMethod(BookWriter):
+        def get_queryset(self):
+            return qs
+
+    BookWriterWithGetQuerysetMethod(workbook=wb).write()
+
+    class BookWriterWithQuerysetAttribute(BookWriter):
+        queryset = qs
+
+    BookWriterWithQuerysetAttribute(workbook=wb).write()
+
+    class BookWriterWithGetIteratorMethod(BookWriter):
+        def get_iterator(self):
+            return qs
+
+    with pytest.raises(WriterConfigException):
+        BookWriterWithGetIteratorMethod(workbook=wb, sheet_name="books").write()
+
+    class BookWriterWithIteratorAttribute(BookWriter):
+        """
+        model-writers cannot define the iterator directly
+        """
+
+        iterator = qs
+
+    with pytest.raises(WriterConfigException):
+        BookWriterWithIteratorAttribute(workbook=wb).write()
+
+    class BookWriterWithGetIteratorMethodAndSheetName(BookWriter):
+        queryset = qs
+        model = Book
+        sheet_name = "books"
+
+    BookWriterWithGetIteratorMethodAndSheetName(workbook=wb).write()
+
+
+def test_writer_attr_precedence():
+    # sheet_name and queryset kwargs take precedence over class attributes
+    wb = Workbook()
+    book_qs = Book.objects.all().prefetch_related("author", "tags")
+
+    author_qs = Author.objects.all()
+
+    class BookWriter(ModelToSheetWriter):
+        queryset = book_qs
+        sheet_name = "books"
+
+    author_writer = BookWriter(workbook=wb, queryset=author_qs, sheet_name="authors")
+    assert author_writer.queryset == author_qs
+    assert author_writer.sheet_name == "authors"
