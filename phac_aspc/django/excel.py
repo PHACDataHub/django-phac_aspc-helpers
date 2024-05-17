@@ -338,7 +338,7 @@ class AbstractSheetWriter(AbstractWriter):
         To be overwritten by child classes when a style is to be applied to the
         header row.  If overwritten, should return a Style object.
         """
-        style = NamedStyle("default_style")
+        style = NamedStyle("empty_default_style")
         return style
 
     def get_column_widths(self):
@@ -375,7 +375,9 @@ class AbstractSheetWriter(AbstractWriter):
             for col in self.get_column_configs():
                 xl_val = col.get_serialized_value(record)
                 cell = WriteOnlyCell(worksheet, value=xl_val)
-                cell.style = col.get_style()
+                style = col.get_style()
+                if style:
+                    cell.style = style
                 xl_row.append(cell)
 
             worksheet.append(xl_row)
