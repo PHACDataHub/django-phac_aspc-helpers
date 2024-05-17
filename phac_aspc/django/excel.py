@@ -81,9 +81,6 @@ class Column:
     Base class to write columns in a sheet
     """
 
-    style = None
-    column_width = None
-
     def get_header(self):
         """return a header string for the column"""
         raise NotImplementedError()
@@ -114,8 +111,8 @@ class ModelColumn(Column):
     shorthand for defining a column that writes a scalar model field (non foreign-key)
     """
 
-    def __init__(self, model_cls, field_name, header_value=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, model_cls, field_name, header_value=None, **kwargs):
+        super().__init__(**kwargs)
         self.header_value = header_value
         self.model_cls = model_cls
         self.field_name = field_name
@@ -134,8 +131,8 @@ class ModelColumn(Column):
 
 
 class ChoiceColumn(Column):
-    def __init__(self, model_cls, field_name, header_value=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, model_cls, field_name, header_value=None, **kwargs):
+        super().__init__(**kwargs)
         self.header_value = header_value
         self.model_cls = model_cls
         self.field_name = field_name
@@ -154,8 +151,8 @@ class ChoiceColumn(Column):
 
 
 class CustomColumn(Column):
-    def __init__(self, header, get_val, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, header, get_val, **kwargs):
+        super().__init__(**kwargs)
         self.header = header
         self.get_val = get_val
 
@@ -175,10 +172,9 @@ class ManyToManyColumn(Column):
         get_related_str: callable = None,
         delimiter: str = ", ",
         header=None,
-        *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.model = model
         self.field_name = field_name
         self.header = header
