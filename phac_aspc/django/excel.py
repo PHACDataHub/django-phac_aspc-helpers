@@ -10,6 +10,10 @@ from django.views import View
 from django.http import HttpResponse
 from django.utils.functional import Promise
 from django.utils.safestring import SafeString
+from openpyxl.cell import WriteOnlyCell
+
+
+from openpyxl.utils import get_column_letter
 
 try:
     import openpyxl
@@ -77,6 +81,9 @@ class Column:
     Base class to write columns in a sheet
     """
 
+    style = None
+    column_width = None
+
     def get_header(self):
         """return a header string for the column"""
         raise NotImplementedError()
@@ -91,13 +98,24 @@ class Column:
     def get_serialized_value(self, record):
         return self.serialize_value(self.get_value(record))
 
+    def get_style(self):
+        return self.style
+
+    def get_column_width(self):
+        return self.column_width
+
+    def __init__(self, style=None, column_width=None):
+        self.style = style
+        self.column_width = column_width
+
 
 class ModelColumn(Column):
     """
     shorthand for defining a column that writes a scalar model field (non foreign-key)
     """
 
-    def __init__(self, model_cls, field_name, header_value=None):
+    def __init__(self, model_cls, field_name, header_value=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.header_value = header_value
         self.model_cls = model_cls
         self.field_name = field_name
@@ -116,7 +134,8 @@ class ModelColumn(Column):
 
 
 class ChoiceColumn(Column):
-    def __init__(self, model_cls, field_name, header_value=None):
+    def __init__(self, model_cls, field_name, header_value=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.header_value = header_value
         self.model_cls = model_cls
         self.field_name = field_name
@@ -135,7 +154,8 @@ class ChoiceColumn(Column):
 
 
 class CustomColumn(Column):
-    def __init__(self, header, get_val):
+    def __init__(self, header, get_val, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.header = header
         self.get_val = get_val
 
@@ -155,7 +175,10 @@ class ManyToManyColumn(Column):
         get_related_str: callable = None,
         delimiter: str = ", ",
         header=None,
+        *args,
+        **kwargs,
     ):
+        super().__init__(*args, **kwargs)
         self.model = model
         self.field_name = field_name
         self.header = header
@@ -312,17 +335,51 @@ class AbstractSheetWriter(AbstractWriter):
 
         return self.sheet_name
 
+    def get_header_style(self):
+        """
+        To be overwritten by child classes when a style is to be applied to the
+        header row.  If overwritten, should return a Style object.
+        """
+        return None
+
+    def get_column_widths(self):
+        """
+        Returns an array of column widths as set in the get_column_configs.
+        """
+        return [col.get_column_width() for col in self.get_column_configs()]
+
     def write(self):
         worksheet = self.workbook.create_sheet(title=self.get_sheet_name())
 
-        worksheet.append(self.get_header_row())
+        for col_index, column_width in enumerate(self.get_column_widths()):
+            if column_width:
+                column_letter = get_column_letter(col_index + 1)
+                worksheet.column_dimensions[column_letter].width = column_width
+
+        header_labels = self.get_header_row()
+        header_style = self.get_header_style()
+
+        header_row = []
+        for label in header_labels:
+            cell = WriteOnlyCell(worksheet, value=label)
+
+            if header_style:
+                cell.style = header_style
+            header_row.append(cell)
+
+        worksheet.append(header_row)
 
         iterator = self.get_iterator()
+
         for record in iterator:
             xl_row = []
             for col in self.get_column_configs():
                 xl_val = col.get_serialized_value(record)
-                xl_row.append(xl_val)
+                cell = WriteOnlyCell(worksheet, value=xl_val)
+                style = col.get_style()
+                if style:
+                    cell.style = style
+                xl_row.append(cell)
 
             worksheet.append(xl_row)
 
