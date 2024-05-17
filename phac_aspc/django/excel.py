@@ -11,9 +11,6 @@ from django.http import HttpResponse
 from django.utils.functional import Promise
 from django.utils.safestring import SafeString
 from openpyxl.cell import WriteOnlyCell
-from openpyxl.styles import (
-    NamedStyle,
-)
 
 from openpyxl.utils import get_column_letter
 
