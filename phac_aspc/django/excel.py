@@ -338,15 +338,7 @@ class AbstractSheetWriter(AbstractWriter):
         To be overwritten by child classes when a style is to be applied to the
         header row.  If overwritten, should return a Style object.
         """
-        style_name = "empty_default_style"
-
-        # Check if the style already exists
-        if style_name in self.workbook.named_styles:
-            style = self.workbook.named_styles[style_name]
-        else:
-            style = NamedStyle(name=style_name)
-
-        return style
+        return None
 
     def get_column_widths(self):
         """
@@ -363,6 +355,7 @@ class AbstractSheetWriter(AbstractWriter):
                 worksheet.column_dimensions[column_letter].width = column_width
 
         header_labels = self.get_header_row()
+        # pylint: disable=E1128
         header_style = self.get_header_style()
 
         header_row = []
