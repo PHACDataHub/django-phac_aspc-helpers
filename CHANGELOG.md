@@ -5,6 +5,13 @@
 - Writer api improvements ([#91](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/91)) ([dcde15a](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/dcde15aaf99b1392ab9c5b145c746533cff1d093))
 - also [#101](https://github.com/PHACDataHub/django-phac_aspc-helpers/pull/101)
 
+## [3.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v3.0.0...v3.0.0) (2024-05-21)
+
+
+### Miscellaneous Chores
+
+* release 3.0.0 ([dbd3f4b](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/dbd3f4b98af4391fb247d6b1b9b71ea9b44609c3))
+
 ## [3.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v2.2.0...v3.0.0) (2024-05-16)
 
 
