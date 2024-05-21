@@ -362,3 +362,62 @@ def test_writer_attr_precedence():
     author_writer = BookWriter(workbook=wb, queryset=author_qs, sheet_name="authors")
     assert author_writer.queryset == author_qs
     assert author_writer.sheet_name == "authors"
+
+
+def test_writer_get_columns_api():
+    create_data()
+    wb = Workbook()
+    qs = Book.objects.all().prefetch_related("author", "tags")
+
+    column_defs = [
+        ModelColumn(Book, "title"),
+        CustomColumn("Author", lambda x: f"{x.author.first_name} {x.author.last_name}"),
+        ManyToManyColumn(Book, "tags"),
+    ]
+    column_defs2 = column_defs[:1]
+
+    class BookWriterWithColumnConfigsMethod(ModelToSheetWriter):
+        def get_column_configs(self):
+            return column_defs
+
+    writer1 = BookWriterWithColumnConfigsMethod(workbook=wb, queryset=qs)
+    assert writer1.get_column_configs() is column_defs
+    # if you override get_column_configs, get_columns is still the old method
+    assert not writer1.get_columns() is column_defs
+
+    class BookWriterWithColumnsMethod(ModelToSheetWriter):
+        def get_columns(self):
+            return column_defs
+
+    writer2 = BookWriterWithColumnsMethod(workbook=wb, queryset=qs)
+    assert writer2.get_column_configs() is column_defs
+    assert writer2.get_columns() is column_defs
+
+    class BookWriterWithColumnClassAttr(ModelToSheetWriter):
+        columns = column_defs
+
+    writer3 = BookWriterWithColumnClassAttr(workbook=wb, queryset=qs)
+    assert writer3.get_column_configs() is column_defs
+    assert writer3.get_columns() is column_defs
+
+    # the constructor kwarg should take precedence over the class attr
+    writer4 = BookWriterWithColumnClassAttr(
+        workbook=wb, queryset=qs, columns=column_defs2
+    )
+    assert writer4.get_column_configs() is column_defs2
+    assert writer4.get_columns() is column_defs2
+
+    class BookWriterWithNoCols(ModelToSheetWriter):
+        pass
+
+    writer5 = BookWriterWithNoCols(workbook=wb, queryset=qs)
+    # model sheet writer has its own default get_columns fallback
+    assert writer5.get_column_configs() is not None
+    assert writer5.get_columns() is not None
+
+    # non-model writers should raise error if no column configs are provided
+    class NonModelWriter(AbstractSheetWriter):
+        pass
+
+    with pytest.raises(NotImplementedError):
+        NonModelWriter(workbook=wb, sheet_name="abc").get_column_configs()
