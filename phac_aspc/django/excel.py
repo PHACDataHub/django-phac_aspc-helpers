@@ -183,10 +183,14 @@ class WriterConfigException(Exception):
 
 class AbstractWriter:
     iterator = None
+    columns = None
 
-    def __init__(self, iterator=None):
+    def __init__(self, iterator=None, columns=None):
         if iterator is not None:
             self.iterator = iterator
+
+        if columns is not None:
+            self.columns = columns
 
     def get_iterator(self):
         if self.iterator is None:
@@ -200,7 +204,19 @@ class AbstractWriter:
         return [serialize_value(col.get_header()) for col in self.get_column_configs()]
 
     def get_column_configs(self):
-        raise NotImplementedError()
+        """
+        Legacy (now internal) API
+        override get_columns(), columns attr or columns init kwarg instead
+        """
+        return self.get_columns()
+
+    def get_columns(self):
+        if self.columns is not None:
+            return self.columns
+
+        raise NotImplementedError(
+            "must set columns in init, class or override get_column_configs()"
+        )
 
     def write(self):
         raise NotImplementedError()
@@ -235,7 +251,15 @@ class AbstractModelWriter(AbstractWriter):
                 "Must define queryset attr, kwarg or override get_queryset()"
             ) from e
 
-    def get_column_configs(self):
+    def get_columns(self):
+        try:
+            super_cols = super().get_columns()
+        except NotImplementedError:
+            super_cols = None
+
+        if super_cols is not None:
+            return super_cols
+
         model = self.get_queryset().model
 
         fields_to_write = model._meta.fields
