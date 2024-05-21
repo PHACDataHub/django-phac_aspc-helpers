@@ -2,7 +2,8 @@
 
 ### Features
 
-* Writer api improvements ([#91](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/91)) ([dcde15a](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/dcde15aaf99b1392ab9c5b145c746533cff1d093))
+- Writer api improvements ([#91](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/91)) ([dcde15a](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/dcde15aaf99b1392ab9c5b145c746533cff1d093))
+- also [#101](https://github.com/PHACDataHub/django-phac_aspc-helpers/pull/101)
 
 ## [3.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v2.2.0...v3.0.0) (2024-05-16)
 
@@ -19,14 +20,13 @@
 
 ### Bug Fixes
 
-* replace comma-separated fields' tuples with lists ([#89](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/89)) ([e554406](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/e5544062c744c2011e9c7af1879a9b8e1672647f))
+- replace comma-separated fields' tuples with lists ([#89](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/89)) ([e554406](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/e5544062c744c2011e9c7af1879a9b8e1672647f))
 
 ## [2.1.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v2.0.0...v2.1.0) (2024-02-22)
 
-
 ### Features
 
-* add comma-separated field ([#87](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/87)) ([118036e](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/118036e7059c25c5091856bd7b888edae36eb864))
+- add comma-separated field ([#87](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/87)) ([118036e](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/118036e7059c25c5091856bd7b888edae36eb864))
 
 ## [2.0.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v1.2.0...v3.0.0) (2024-01-31)
 
