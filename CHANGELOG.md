@@ -5,6 +5,13 @@
 - Writer api improvements ([#91](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/91)) ([dcde15a](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/dcde15aaf99b1392ab9c5b145c746533cff1d093))
 - also [#101](https://github.com/PHACDataHub/django-phac_aspc-helpers/pull/101)
 
+## [3.1.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v3.0.1...v3.1.0) (2024-05-22)
+
+
+### Features
+
+* Enable formats in excel exports ([#96](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/96)) ([8c8a3d9](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/8c8a3d954ff517b061623cc0fd09a72d932cf22c))
+
 ## [3.0.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v3.0.0...v3.0.1) (2024-05-21)
 
 
