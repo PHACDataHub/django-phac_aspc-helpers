@@ -20,6 +20,15 @@ from openpyxl import Workbook
 from testapp.models import Book, Author
 from testapp.model_factories import TagFactory, BookFactory, AuthorFactory
 
+from openpyxl.styles import (
+    Font,
+    NamedStyle,
+    Alignment,
+    PatternFill,
+    Border,
+    Side,
+)
+
 
 def make_request():
     req_factory = RequestFactory()
@@ -63,7 +72,7 @@ def test_model_to_sheet_writer(django_assert_max_num_queries):
             return columns
 
     with django_assert_max_num_queries(4):
-        wb = Workbook()
+        wb = Workbook(write_only=True)
         writer = BookSheetWriter(
             workbook=wb,
             queryset=Book.objects.all().prefetch_related("author", "tags"),
@@ -295,7 +304,7 @@ def test_abstract_excel_view():
 
 
 def test_various_writer_apis():
-    wb = Workbook()
+    wb = Workbook(write_only=True)
     qs = Book.objects.all().prefetch_related("author", "tags")
 
     class BookWriter(ModelToSheetWriter):
@@ -350,7 +359,7 @@ def test_various_writer_apis():
 
 def test_writer_attr_precedence():
     # sheet_name and queryset kwargs take precedence over class attributes
-    wb = Workbook()
+    wb = Workbook(write_only=True)
     book_qs = Book.objects.all().prefetch_related("author", "tags")
 
     author_qs = Author.objects.all()
@@ -366,7 +375,7 @@ def test_writer_attr_precedence():
 
 def test_writer_get_columns_api():
     create_data()
-    wb = Workbook()
+    wb = Workbook(write_only=True)
     qs = Book.objects.all().prefetch_related("author", "tags")
 
     column_defs = [
@@ -421,3 +430,62 @@ def test_writer_get_columns_api():
 
     with pytest.raises(NotImplementedError):
         NonModelWriter(workbook=wb, sheet_name="abc").get_column_configs()
+
+
+def test_sheetwriter_with_column_styles():
+    create_data()
+    wb = Workbook(write_only=True)
+    qs = Book.objects.all().prefetch_related("author", "tags")
+
+    bold_style = NamedStyle(name="bold", font=Font(bold=True))
+    # bold_style.font = Font(bold=True)
+
+    class BookWriterWithStyles(ModelToSheetWriter):
+        columns = [
+            ModelColumn(Book, "title", style=bold_style, column_width=50),
+            CustomColumn(
+                "Author", lambda x: f"{x.author.first_name} {x.author.last_name}"
+            ),
+            ManyToManyColumn(Book, "tags"),
+        ]
+
+    writer = BookWriterWithStyles(workbook=wb, queryset=qs)
+    writer.write()
+
+
+def test_sheetwriter_with_header_style():
+
+    create_data()
+    wb = Workbook(write_only=True)
+    qs = Book.objects.all().prefetch_related("author", "tags")
+
+    border_side = Side(style="thin", color="000000")
+    style = NamedStyle(
+        name="header",
+        font=Font(bold=True),
+        alignment=Alignment(horizontal="center"),
+        fill=PatternFill("solid", fgColor="00C0C0C0"),
+        border=Border(
+            left=border_side,
+            top=border_side,
+            right=border_side,
+            bottom=border_side,
+        ),
+    )
+    # header_style.font = Font(bold=True)
+    # header_style.alignment = Alignment(horizontal="center")
+    # header_style.fill = PatternFill("solid", fgColor="00C0C0C0")
+    # header_style.border = Border(left=bd, top=bd, right=bd, bottom=bd)
+
+    class BookWriterWithHeaderStyle(ModelToSheetWriter):
+        header_style = style
+
+        columns = [
+            ModelColumn(Book, "title"),
+            CustomColumn(
+                "Author", lambda x: f"{x.author.first_name} {x.author.last_name}"
+            ),
+            ManyToManyColumn(Book, "tags"),
+        ]
+
+    BookWriterWithHeaderStyle(workbook=wb, queryset=qs).write()

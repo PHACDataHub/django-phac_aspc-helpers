@@ -80,6 +80,13 @@ class Column:
     Base class to write columns in a sheet
     """
 
+    style = None
+    column_width = None
+
+    def __init__(self, style=None, column_width=None):
+        self.style = style
+        self.column_width = column_width
+
     def get_header(self):
         """return a header string for the column"""
         raise NotImplementedError()
@@ -99,10 +106,6 @@ class Column:
 
     def get_column_width(self):
         return self.column_width
-
-    def __init__(self, style=None, column_width=None):
-        self.style = style
-        self.column_width = column_width
 
 
 class ModelColumn(Column):
@@ -313,6 +316,7 @@ class AbstractSheetWriter(AbstractWriter):
     # pylint: disable=W0223
 
     sheet_name = None
+    header_style = None
 
     def __init__(self, *args, workbook=None, sheet_name=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -335,7 +339,7 @@ class AbstractSheetWriter(AbstractWriter):
         To be overwritten by child classes when a style is to be applied to the
         header row.  If overwritten, should return a Style object.
         """
-        return None
+        return self.header_style
 
     def get_column_widths(self):
         """
@@ -347,7 +351,7 @@ class AbstractSheetWriter(AbstractWriter):
         worksheet = self.workbook.create_sheet(title=self.get_sheet_name())
 
         for col_index, column_width in enumerate(self.get_column_widths()):
-            if column_width:
+            if column_width is not None:
                 column_letter = get_column_letter(col_index + 1)
                 worksheet.column_dimensions[column_letter].width = column_width
 
