@@ -53,6 +53,7 @@ class DescriptionMixin:
         return name, path, args, kwargs
 
 
+# pylint: disable=abstract-method
 class ManyToManyField(DescriptionMixin, models.ManyToManyField):
     pass
 
@@ -106,6 +107,7 @@ class TextField(
         return name, path, args, kwargs
 
 
+# pylint: disable=abstract-method
 class ForeignKey(DescriptionMixin, models.ForeignKey):
     pass
 
@@ -153,6 +155,7 @@ class SlugField(DescriptionMixin, models.SlugField):
     pass
 
 
+# pylint: disable=abstract-method
 class OneToOneField(DescriptionMixin, models.OneToOneField):
     pass
 
