@@ -1,6 +1,7 @@
 """This file contains utilities for asserting that consuming Django apps meet the
 library settings requirements.
 """
+
 import inspect
 
 from django.core import checks
@@ -41,11 +42,21 @@ def configure_apps(app_list):
     """Return an application list which includes the apps required by this
     library"""
 
+    # Modules that read global state are best deffered to call time rather than module-load
+    # pylint: disable=import-outside-toplevel
+    from phac_aspc.django.settings.logging_env import get_logging_env_value
+
     prefix_list = warn_and_remove(["modeltranslation", "axes"], app_list)
+
+    logging_app = (
+        ["django_structlog"] if get_logging_env_value("USE_HELPERS_CONFIG") else []
+    )
+
     suffix_list = warn_and_remove(
         [
             "phac_aspc.django.helpers",
             "rules.apps.AutodiscoverRulesConfig",
+            *logging_app,
         ],
         app_list,
     )
