@@ -1,4 +1,5 @@
 """Unit tests for utils.py"""
+
 from copy import deepcopy
 import os
 import subprocess
@@ -97,6 +98,7 @@ def test_configure_apps():
         "axes",
         "phac_aspc.django.helpers",
         "rules.apps.AutodiscoverRulesConfig",
+        "django_structlog",
     ]
     assert len(registry.get_checks()) == num
 
@@ -109,6 +111,7 @@ def test_configure_apps():
         "b",
         "phac_aspc.django.helpers",
         "rules.apps.AutodiscoverRulesConfig",
+        "django_structlog",
     ]
     assert len(registry.get_checks()) == num
 
@@ -121,6 +124,7 @@ def test_configure_apps():
         "b",
         "phac_aspc.django.helpers",
         "rules.apps.AutodiscoverRulesConfig",
+        "django_structlog",
     ]
     assert len(registry.get_checks()) == num + 1
 
@@ -132,6 +136,7 @@ def test_configure_apps():
         "axes",
         "b",
         "rules.apps.AutodiscoverRulesConfig",
+        "django_structlog",
     ]
     assert len(registry.get_checks()) == num + 2
 
