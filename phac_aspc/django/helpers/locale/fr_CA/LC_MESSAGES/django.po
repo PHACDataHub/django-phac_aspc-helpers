@@ -44,3 +44,7 @@ msgstr "Logo Microsoft"
 #: .\templates\phac_aspc\helpers\strings\signin_with_microsoft.html:2
 msgid "Sign in with Microsoft"
 msgstr "Connectez-vous avec Microsoft"
+
+#: .\templates\phac_aspc\helpers\strings\signin_with_secure_gateway.html:2
+msgid "Sign in with Secure Gateway"
+msgstr "Connectez-vous avec Secure Gateway"

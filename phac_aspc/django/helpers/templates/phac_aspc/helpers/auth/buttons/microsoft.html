@@ -19,7 +19,7 @@
         margin: 0 12px 0 12px;
     }
 </style>
-<a href="{% url 'phac_aspc_helper_login' %}{% if query_params %}?{{query_params}}{% endif %}"
+<a href="{% url 'phac_aspc_helper_login' %}?provider=microsoft{% if query_params %}&{{ query_params }}{% endif %}"
    class="btn-ms-login align-self-end">
     <img width="21"
          height="21"

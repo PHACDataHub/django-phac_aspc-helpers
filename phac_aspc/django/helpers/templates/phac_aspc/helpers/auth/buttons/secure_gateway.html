@@ -1,0 +1,22 @@
+{% load static %}
+{% load phac_aspc_localization %}
+<style type="text/css">
+    .btn-sg-login {
+        border: 1px solid #8c8c8c;
+        font-size: 15px;
+        font-weight: 600;
+        color: #5e5e5e;
+        background-color: #fff;
+        height: 41px;
+        align-items: center;
+        display: inline-flex;
+        padding: 0 12px 0 12px;
+        text-decoration: none;
+    }
+    
+    .btn-sg-login img {
+        margin: 0 12px 0 12px;
+    }
+</style>
+<a href="{% url 'phac_aspc_helper_login' %}?provider=dev_secure_gateway{% if query_params %}&{{ query_params }}{% endif %}"
+   class="btn-sg-login align-self-end">{% use_string "signin_with_secure_gateway" %}</a>

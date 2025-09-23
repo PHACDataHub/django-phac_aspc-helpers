@@ -11,30 +11,42 @@ from django.urls import reverse
 from authlib.integrations.django_client import OAuth, OAuthError
 
 from phac_aspc.django.settings.security_env import get_oauth_env_value
+from phac_aspc.django.helpers.auth.issuer_validators import ISS_VALIDATORS
 
 oauth = OAuth()
 
 PROVIDER = get_oauth_env_value("PROVIDER")
 BACKEND = get_oauth_env_value("USE_BACKEND")
 REDIRECT_LOGIN = get_oauth_env_value("REDIRECT_ON_LOGIN")
+SG_DEV_APP_CLIENT_ID = get_oauth_env_value("SG_DEV_APP_CLIENT_ID")
+SG_DEV_APP_CLIENT_SECRET = get_oauth_env_value("SG_DEV_APP_CLIENT_SECRET")
+
+PROVIDER_FIELDS = {
+    "microsoft": {
+        "name": "name",
+        "id": "oid",
+    },
+    "dev_secure_gateway": {
+        "name": "email",
+        "id": "sub",
+    },
+}
+
 
 if PROVIDER:
     oauth.register(PROVIDER)
 
-
-def validate_iss(claims, value):
-    """Validate the iss claim"""
-    tenant = get_oauth_env_value("MICROSOFT_TENANT")
-    use_tenant = tenant if tenant != "common" else claims["tid"]
-    # iss = "https://login.microsoftonline.com/{}/v2.0".format(use_tenant)
-    return use_tenant in value
-
+if SG_DEV_APP_CLIENT_ID and SG_DEV_APP_CLIENT_SECRET:
+    oauth.register("dev_secure_gateway")
+    
 
 def login(request):
     """Redirect users to the provider's login page"""
-    if PROVIDER:
-        client = oauth.create_client(PROVIDER)
+    provider = request.GET.get("provider")
+    if provider:
+        client = oauth.create_client(provider)
         auth_url_extra_params = {"state": request.build_absolute_uri()}
+        
         return client.authorize_redirect(
             request,
             request.build_absolute_uri(reverse("phac_aspc_authorize")),
@@ -45,18 +57,28 @@ def login(request):
 
 def authorize(request):
     """Verify the token received and perform authentication"""
-    if PROVIDER:
+    query_params = dict(
+        parse.parse_qsl(parse.urlsplit(request.GET["state"]).query)
+    )
+    provider = query_params["provider"]
+    if provider:
         try:
-            client = oauth.create_client(PROVIDER)
+            client = oauth.create_client(provider)
             token = client.authorize_access_token(
                 request,
-                claims_options={"iss": {"essential": True, "validate": validate_iss}},
+                claims_options={"iss": {"essential": True, "validate": ISS_VALIDATORS[provider]}},
             )
             user_info = token["userinfo"]
-            query_params = dict(
-                parse.parse_qsl(parse.urlsplit(request.GET["state"]).query)
-            )
-            user = authenticate(request, user_info=user_info)
+
+            user_details = {
+                "email": user_info.get("email", None)
+            }
+            
+            fields = PROVIDER_FIELDS.get(provider)
+            user_details["name"] = user_info.get(fields["name"], None)
+            user_details["id"] = user_info.get(fields["id"], None)
+
+            user = authenticate(request, user_info=user_details)
             if user is not None:
                 auth_login(
                     request,

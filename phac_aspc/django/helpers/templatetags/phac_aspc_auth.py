@@ -18,3 +18,15 @@ def phac_aspc_auth_signin_microsoft_button(query_params=""):
         if get_oauth_env_value("PROVIDER")
         else ""
     )
+
+@register.simple_tag()
+def phac_aspc_auth_signin_secure_gateway_button(query_params=""):
+    """Returns a signin button using the secure gateway design"""
+
+    return (
+        loader.get_template("phac_aspc/helpers/auth/buttons/secure_gateway.html").render(
+            {"query_params": query_params}
+        )
+        if get_oauth_env_value("PROVIDER")
+        else ""
+    )

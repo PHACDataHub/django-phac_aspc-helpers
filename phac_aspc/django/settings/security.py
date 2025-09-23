@@ -53,6 +53,28 @@ if get_oauth_env_value("PROVIDER") == "microsoft":
         }
     }
 
+if get_oauth_env_value("SG_DEV_APP_CLIENT_ID") and get_oauth_env_value("SG_DEV_APP_CLIENT_SECRET"):
+    provider = "dev_secure_gateway"
+    dev_sg_base_url = "https://hcscb2cdev.gateway-passerelle.hc-sc.canada.ca/auth/realms/sg/protocol/openid-connect"
+    client_id = get_oauth_env_value("SG_DEV_APP_CLIENT_ID")
+    client_secret = get_oauth_env_value("SG_DEV_APP_CLIENT_SECRET")
+    
+    # Register Secure Gateway to Authlib
+    AUTHLIB_OAUTH_CLIENTS[provider] = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "server_metadata_url": f"https://hcscb2cdev.gateway-passerelle.hc-sc.canada.ca/auth/realms/sg/.well-known/openid-configuration",
+        # "userinfo_endpoint": f"{dev_sg_base_url}/userinfo",
+        # "jwks_uri": f"{dev_sg_base_url}/certs",
+        # "access_token_url": f"{dev_sg_base_url}/token",
+        # "authorize_url": f"{dev_sg_base_url}/auth",
+        "client_kwargs": {
+            "scope": "openid email profile",
+        },
+    }
+
+
+
 #  AC-7 Automatic lockout of users after invalid login attempts
 AUTHENTICATION_BACKENDS = configure_authentication_backends(
     [
