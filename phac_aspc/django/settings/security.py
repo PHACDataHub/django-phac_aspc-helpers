@@ -28,11 +28,14 @@ AXES_IPWARE_META_PRECEDENCE_ORDER = [
     "REMOTE_ADDR",
 ]
 
-# Configure the identity provider if the `{PREFIX}OAUTH_PROVIDER`
+# Configure the identity provider if the `{PREFIX}OAUTH_PROVIDERS`
 # `environment variable is set.
 
-if get_oauth_env_value("PROVIDER") == "microsoft":
-    provider = get_oauth_env_value("PROVIDER")
+
+AUTHLIB_OAUTH_CLIENTS = {}
+
+if "microsoft" in get_oauth_env_value("PROVIDERS"):
+    provider = "microsoft"
     client_id = get_oauth_env_value("APP_CLIENT_ID")
     client_secret = get_oauth_env_value("APP_CLIENT_SECRET")
     tenant = get_oauth_env_value("MICROSOFT_TENANT")
@@ -43,26 +46,29 @@ if get_oauth_env_value("PROVIDER") == "microsoft":
     if client_secret == "":
         raise ImproperlyConfigured("settings.OAUTH_APP_CLIENT_SECRET is required.")
 
-    AUTHLIB_OAUTH_CLIENTS = {
-        f"{provider}": {
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "server_metadata_url": f"https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration",  # pylint: disable=line-too-long  # noqa: E501
-            "client_kwargs": {
-                "scope": "openid email profile",
-            },
-        }
+    AUTHLIB_OAUTH_CLIENTS[provider] = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "server_metadata_url": f"https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration",  # pylint: disable=line-too-long  # noqa: E501
+        "client_kwargs": {
+            "scope": "openid email profile",
+        },
     }
 
-if get_oauth_env_value("SG_DEV_APP_CLIENT_ID") and get_oauth_env_value(
-    "SG_DEV_APP_CLIENT_SECRET"
-):
+
+if "dev_secure_gateway" in get_oauth_env_value("PROVIDERS"):
     provider = "dev_secure_gateway"
-    dev_sg_base_url = "https://hcscb2cdev.gateway-passerelle.hc-sc.canada.ca/auth/realms/sg/protocol/openid-connect"
     client_id = get_oauth_env_value("SG_DEV_APP_CLIENT_ID")
     client_secret = get_oauth_env_value("SG_DEV_APP_CLIENT_SECRET")
 
-    # Register Secure Gateway to Authlib
+    if client_id == "":
+        raise ImproperlyConfigured("settings.OAUTH_SG_DEV_APP_CLIENT_ID is required.")
+
+    if client_secret == "":
+        raise ImproperlyConfigured(
+            "settings.OAUTH_SG_DEV_APP_CLIENT_SECRET is required."
+        )
+
     AUTHLIB_OAUTH_CLIENTS[provider] = {
         "client_id": client_id,
         "client_secret": client_secret,

@@ -78,7 +78,7 @@ def configure_authentication_backends(backend_list):
 
     oauth_backend = (
         [get_oauth_env_value("USE_BACKEND")]
-        if get_oauth_env_value("PROVIDER") and get_oauth_env_value("USE_BACKEND")
+        if get_oauth_env_value("PROVIDERS") and get_oauth_env_value("USE_BACKEND")
         else []
     )
 

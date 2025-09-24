@@ -13,9 +13,3 @@ def validate_dev_sg_iss(claims, value):
     return (
         value == "https://hcscb2cdev.gateway-passerelle.hc-sc.canada.ca/auth/realms/sg"
     )
-
-
-ISS_VALIDATORS = {
-    "microsoft": validate_ms_iss,
-    "dev_secure_gateway": validate_dev_sg_iss,
-}
