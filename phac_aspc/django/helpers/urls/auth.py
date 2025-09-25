@@ -1,4 +1,5 @@
 """Setup URLs for views related to authentication"""
+
 from django.urls import path
 from django.conf.urls.i18n import i18n_patterns
 
@@ -10,6 +11,6 @@ urlpatterns = (
         path("phac_aspc_helper_login", login, name="phac_aspc_helper_login"),
         path("phac_aspc_helper_authorize", authorize, name="phac_aspc_authorize"),
     )
-    if get_oauth_env_value("PROVIDER")
+    if get_oauth_env_value("PROVIDERS")
     else []
 )

@@ -1,4 +1,5 @@
 """Security and authentication configuration env var configs and getters"""
+
 from phac_aspc.django.settings.utils.env_utils import (
     PHAC_ENV_PREFIX,
     get_env,
@@ -7,11 +8,20 @@ from phac_aspc.django.settings.utils.env_utils import (
 
 OAUTH_ENV_PREFIX = f"{PHAC_ENV_PREFIX}OAUTH_"
 
+
+def csv(value):
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(",") if item.strip()]
+    return value
+
+
 oauth_env = get_env(
     prefix=OAUTH_ENV_PREFIX,
-    PROVIDER=(str, ""),
+    PROVIDERS=(csv, ""),
     APP_CLIENT_ID=(str, ""),
     APP_CLIENT_SECRET=(str, ""),
+    SG_DEV_APP_CLIENT_ID=(str, ""),
+    SG_DEV_APP_CLIENT_SECRET=(str, ""),
     MICROSOFT_TENANT=(str, "common"),
     REDIRECT_ON_LOGIN=(str, ""),
     USE_BACKEND=(
