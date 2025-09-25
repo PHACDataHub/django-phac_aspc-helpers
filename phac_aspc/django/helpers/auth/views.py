@@ -22,8 +22,6 @@ oauth = OAuth()
 PROVIDERS = get_oauth_env_value("PROVIDERS")
 BACKEND = get_oauth_env_value("USE_BACKEND")
 REDIRECT_LOGIN = get_oauth_env_value("REDIRECT_ON_LOGIN")
-SG_DEV_APP_CLIENT_ID = get_oauth_env_value("SG_DEV_APP_CLIENT_ID")
-SG_DEV_APP_CLIENT_SECRET = get_oauth_env_value("SG_DEV_APP_CLIENT_SECRET")
 
 PROVIDER_CONFIG = {
     "microsoft": {
