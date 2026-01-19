@@ -5,6 +5,9 @@ PHAC_ASPC_LOGGING_USE_HELPERS_CONFIG = True
 # pylint: disable=wrong-import-position, wildcard-import, unused-wildcard-import
 from phac_aspc.django.settings.logging import *
 
+ALLOWED_HOSTS = ["*"]
+DEBUG = True
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -84,3 +87,7 @@ DATABASES = {
 }
 
 SECRET_KEY = "abcdefg"
+
+
+ROOT_URLCONF = "testapp.urls"
+APPEND_SLASH = True

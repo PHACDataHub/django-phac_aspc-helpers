@@ -1,4 +1,5 @@
 """Related to implementing WET"""
+
 import json
 
 from django import template
@@ -9,6 +10,8 @@ from django.template import loader
 from django.templatetags.static import static
 from django.urls.exceptions import NoReverseMatch
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+
 
 register = template.Library()
 
@@ -38,9 +41,11 @@ def phac_aspc_wet_css(base_only=False):
     no_script = jsdelivr("wet-boew", "wet-boew/css/noscript.min.css")
     return format_html(
         (
-            f'<link rel="stylesheet" href="{css_url}">'
-            f'<noscript><link rel="stylesheet" href="{no_script}"></noscript>'
-        )
+            '<link rel="stylesheet" href="{css_url}">'
+            '<noscript><link rel="stylesheet" href="{no_script}"></noscript>'
+        ),
+        css_url=css_url,
+        no_script=no_script,
     )
 
 
@@ -63,14 +68,17 @@ def phac_aspc_wet_scripts(include_jquery=True):
         if include_jquery
         else ""
     )
-    wet_js = jsdelivr("wet-boew", "wet-boew/js/wet-boew.min.js")
-    gcweb_js = jsdelivr("themes", "GCWeb/js/theme.min.js")
+    wet_js = mark_safe(jsdelivr("wet-boew", "wet-boew/js/wet-boew.min.js"))
+    gcweb_js = mark_safe(jsdelivr("themes", "GCWeb/js/theme.min.js"))
     return format_html(
-        f"""
+        """
         {jquery}
-        <script src="{ wet_js }"></script>
-        <script src="{ gcweb_js }"></script>
-    """
+        <script src="{wet_js}"></script>
+        <script src="{gcweb_js}"></script>
+        """,
+        jquery=mark_safe(jquery),
+        wet_js=wet_js,
+        gcweb_js=gcweb_js,
     )
 
 

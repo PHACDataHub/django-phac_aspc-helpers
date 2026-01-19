@@ -224,6 +224,7 @@ def test_is_running_tests_returns_false_outside_test_execution_environment():
         [
             manage_py_path,
             "shell",
+            "--verbosity=0",
             "--command",
             # pylint: disable=line-too-long
             f"from {is_running_tests.__module__} import is_running_tests; print(is_running_tests())",
