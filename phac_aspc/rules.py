@@ -1,8 +1,11 @@
 # This module is a wrapper around the django-rules package
 from unittest.mock import patch
 
-import rules
-from rules import add_rule, predicate
+try:
+    import rules
+    from rules import add_rule, predicate
+except ImportError:
+    raise ImportError("rules package is not installed")
 
 
 class NonExistentRuleException(Exception):
