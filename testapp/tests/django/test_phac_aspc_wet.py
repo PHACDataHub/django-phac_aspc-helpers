@@ -80,10 +80,10 @@ def test_phac_aspc_wet_css():
 @override_settings(WET_VERSION="a", THEME_VERSION="b")
 def test_phac_aspc_wet_scripts():
     """Test script tag generator"""
+
     assert (
-        phac_aspc_wet_scripts()
+        phac_aspc_wet_scripts().strip()
         == """
-        
       <script
         src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"
         integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB"
@@ -91,16 +91,15 @@ def test_phac_aspc_wet_scripts():
       ></script>
         <script src="https://cdn.jsdelivr.net/gh/wet-boew/wet-boew-dist@a/wet-boew/js/wet-boew.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/wet-boew/themes-dist@b/GCWeb/js/theme.min.js"></script>
-    """
+    """.strip()
     )
 
     assert (
-        phac_aspc_wet_scripts(include_jquery=False)
+        phac_aspc_wet_scripts(include_jquery=False).strip()
         == """
-        
         <script src="https://cdn.jsdelivr.net/gh/wet-boew/wet-boew-dist@a/wet-boew/js/wet-boew.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/wet-boew/themes-dist@b/GCWeb/js/theme.min.js"></script>
-    """
+    """.strip()
     )
 
 
