@@ -1,24 +1,25 @@
 """Unit tests for utils.py"""
 
-from copy import deepcopy
 import os
 import subprocess
+from copy import deepcopy
 from unittest.mock import patch
 
 from django.core.checks.registry import registry
+
 import pytest
 
 from phac_aspc.django.settings.utils import (
-    trigger_configuration_warning,
-    warn_and_remove,
     configure_apps,
     configure_authentication_backends,
     configure_middleware,
-    is_running_tests,
     find_env_file,
     get_env,
     get_env_value,
     global_from_env,
+    is_running_tests,
+    trigger_configuration_warning,
+    warn_and_remove,
 )
 
 
@@ -47,7 +48,9 @@ def test_trigger_configuration_warning():
     msg = "this is a warning"
     trigger_configuration_warning(msg)
     assert len(registry.get_checks()) == num + 1
-    assert "phac_aspc_conf_warning" in [i.__name__ for i in registry.get_checks()]
+    assert "phac_aspc_conf_warning" in [
+        i.__name__ for i in registry.get_checks()
+    ]
     for i in registry.get_checks():
         if i.__name__ == "phac_aspc_conf_warning":
             warn = i(None)
@@ -309,7 +312,9 @@ def test_get_env_value(tmp_path, settings, freeze_environ):
         )
 
         assert get_env_value(env, "FROM_FILE", prefix=prefix) == not_default
-        assert get_env_value(env, "FROM_SETTINGS", prefix=prefix) == not_default
+        assert (
+            get_env_value(env, "FROM_SETTINGS", prefix=prefix) == not_default
+        )
         assert get_env_value(env, "FROM_DEFAULT", prefix=prefix) == default
 
 
@@ -325,5 +330,7 @@ def test_global_from_env(tmp_path, settings, freeze_environ):
         GLOBAL_FROM_DEFAULT=(str, default),
     )
 
-    assert GLOBAL_FROM_SETTINGS == not_default  # pylint: disable=undefined-variable
+    assert (
+        GLOBAL_FROM_SETTINGS == not_default
+    )  # pylint: disable=undefined-variable
     assert GLOBAL_FROM_DEFAULT == default  # pylint: disable=undefined-variable

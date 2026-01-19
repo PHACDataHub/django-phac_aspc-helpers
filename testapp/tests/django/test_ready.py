@@ -1,11 +1,12 @@
 """
 Ready unit tests
 """
+
 from unittest.mock import MagicMock
 
 from phac_aspc.django.helpers.ready import (
-    process_ready_hooks,
     execute_when_ready,
+    process_ready_hooks,
     ready_hooks,
 )
 

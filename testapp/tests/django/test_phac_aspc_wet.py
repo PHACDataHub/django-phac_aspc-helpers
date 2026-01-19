@@ -2,10 +2,11 @@
 """
 Localization templatetags unit tests
 """
-import pytest
 
-from django.test import override_settings
 from django.core.exceptions import ImproperlyConfigured
+from django.test import override_settings
+
+import pytest
 
 from phac_aspc.django.helpers.templatetags.phac_aspc_wet import (
     jsdelivr,
@@ -81,9 +82,7 @@ def test_phac_aspc_wet_css():
 def test_phac_aspc_wet_scripts():
     """Test script tag generator"""
 
-    assert (
-        phac_aspc_wet_scripts().strip()
-        == """
+    assert phac_aspc_wet_scripts().strip() == """
       <script
         src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"
         integrity="sha384-rY/jv8mMhqDabXSo+UCggqKtdmBfd3qC2/KvyTDNQ6PcUJXaxK1tMepoQda4g5vB"
@@ -92,15 +91,11 @@ def test_phac_aspc_wet_scripts():
         <script src="https://cdn.jsdelivr.net/gh/wet-boew/wet-boew-dist@a/wet-boew/js/wet-boew.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/wet-boew/themes-dist@b/GCWeb/js/theme.min.js"></script>
     """.strip()
-    )
 
-    assert (
-        phac_aspc_wet_scripts(include_jquery=False).strip()
-        == """
+    assert phac_aspc_wet_scripts(include_jquery=False).strip() == """
         <script src="https://cdn.jsdelivr.net/gh/wet-boew/wet-boew-dist@a/wet-boew/js/wet-boew.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/wet-boew/themes-dist@b/GCWeb/js/theme.min.js"></script>
     """.strip()
-    )
 
 
 @override_settings(
@@ -117,8 +112,13 @@ def test_phac_aspc_wet_session_timeout_dialog():
     """Test session timeout dialog template tag"""
     context_logged_in = {"request": Request(User(True))}
     context_logged_out = {"request": Request(User())}
-    assert phac_aspc_wet_session_timeout_dialog(context_logged_out, "test_logout") == ""
-    html = phac_aspc_wet_session_timeout_dialog(context_logged_in, "test_logout")
+    assert (
+        phac_aspc_wet_session_timeout_dialog(context_logged_out, "test_logout")
+        == ""
+    )
+    html = phac_aspc_wet_session_timeout_dialog(
+        context_logged_in, "test_logout"
+    )
     assert "&quot;logouturl&quot;: &quot;test_logout&quot;" in html
     assert "&quot;inactivity&quot;: 48000.0" in html
     assert "&quot;reactionTime&quot;: 12000.0" in html

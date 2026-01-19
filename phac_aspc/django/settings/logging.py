@@ -1,13 +1,14 @@
 """From this module import * in your settings.py for a better default logging configuration"""
+
 from phac_aspc.django.helpers.logging.configure_logging import (
-    configure_uniform_std_lib_and_structlog_logging,
-    _default_suffix,
+    PHAC_HELPER_CONSOLE_FORMATTER_KEY,
     PHAC_HELPER_JSON_FORMATTER_KEY,
     PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY,
-    PHAC_HELPER_CONSOLE_FORMATTER_KEY,
+    _default_suffix,
+    configure_uniform_std_lib_and_structlog_logging,
 )
-from .logging_env import get_logging_env_value
 
+from .logging_env import get_logging_env_value
 
 if get_logging_env_value("USE_HELPERS_CONFIG"):
     # `LOGGING_CONFIG = None` drops the Django default logging config rather than merging
@@ -63,7 +64,9 @@ if get_logging_env_value("USE_HELPERS_CONFIG"):
             "()": NoisyLoggerFilter,
         }
 
-        additional_handler_configs[f"{_default_suffix}slack_webhook_handler"] = {
+        additional_handler_configs[
+            f"{_default_suffix}slack_webhook_handler"
+        ] = {
             "level": "ERROR",
             "class": f"{SlackWebhookHandler.__module__}.{SlackWebhookHandler.__name__}",
             "url": slack_webhook_url,

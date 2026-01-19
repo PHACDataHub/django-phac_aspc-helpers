@@ -1,5 +1,6 @@
 """Decorators related to django admin"""
-from django.contrib.admin import site, ModelAdmin, TabularInline
+
+from django.contrib.admin import ModelAdmin, TabularInline, site
 
 from modeltranslation.admin import TranslationAdmin
 
@@ -49,7 +50,9 @@ class add_admin:  # pylint: disable=invalid-name,too-few-public-methods
                 else ModelAdmin
             )
 
-            site.register(cls, type('f"{cls.__name__}Admin"', (base_class,), opts))
+            site.register(
+                cls, type('f"{cls.__name__}Admin"', (base_class,), opts)
+            )
 
         execute_when_ready(register_model)
         return cls

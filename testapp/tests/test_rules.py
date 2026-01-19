@@ -1,10 +1,10 @@
 from phac_aspc.rules import (
-    # must be imported in form that doesn't start with test_
-    # otherwise pytest will try to run it as a test
-    test_rule as func_test_rule,
-    patch_rules,
     add_rule,
     auto_rule,
+    patch_rules,
+)
+from phac_aspc.rules import (
+    test_rule as func_test_rule,  # must be imported in form that doesn't start with test_; otherwise pytest will try to run it as a test
 )
 
 

@@ -1,7 +1,7 @@
-import pytest
-
 from django.db import transaction
 from django.test.client import Client
+
+import pytest
 
 from testapp.models import User
 

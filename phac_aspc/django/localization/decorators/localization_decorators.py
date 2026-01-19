@@ -1,7 +1,8 @@
 """
 Decorators used to provide internationalization
 """
-from modeltranslation.translator import translator, TranslationOptions
+
+from modeltranslation.translator import TranslationOptions, translator
 
 from phac_aspc.django.helpers.ready import execute_when_ready
 

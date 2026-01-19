@@ -1,5 +1,6 @@
-from jinja2 import Environment, FileSystemLoader
 import inspect
+
+from jinja2 import Environment, FileSystemLoader
 
 
 class JinjaRegistry:
@@ -39,7 +40,9 @@ class JinjaRegistry:
                 name = value.__name__
                 return name, value
             else:
-                raise ValueError("name must be provided for non-function/class objects")
+                raise ValueError(
+                    "name must be provided for non-function/class objects"
+                )
 
         return name, value
 

@@ -1,8 +1,11 @@
 """
 Localization templatetags unit tests
 """
-from phac_aspc.django.helpers.templatetags.phac_aspc_localization import get_language
+
 from phac_aspc.django.helpers.locale.language import locale_lang
+from phac_aspc.django.helpers.templatetags.phac_aspc_localization import (
+    get_language,
+)
 
 
 def test_get_language():

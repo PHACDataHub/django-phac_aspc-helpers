@@ -1,7 +1,7 @@
 import os
 import re
 
-from django.template import Template, Context
+from django.template import Context, Template
 
 test_svg_name = "test_phac_aspc_inline_svg.svg"
 

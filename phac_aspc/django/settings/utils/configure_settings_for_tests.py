@@ -1,4 +1,4 @@
-"""This file contains a utility for configuring PHAC helpers settings when 
+"""This file contains a utility for configuring PHAC helpers settings when
 in a testing environment
 """
 

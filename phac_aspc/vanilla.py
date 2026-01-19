@@ -1,6 +1,7 @@
 """
-    Utilities for basic python stuff, e.g. data/string manipulation
+Utilities for basic python stuff, e.g. data/string manipulation
 """
+
 from collections import defaultdict
 
 

@@ -1,7 +1,7 @@
 from django.db import connection
 from django.forms.models import ModelForm
 
-from testapp.models import Tag, TAG_CATEGORIES
+from testapp.models import TAG_CATEGORIES, Tag
 
 
 def test_csv_field_on_create():
@@ -12,7 +12,8 @@ def test_csv_field_on_create():
     assert tag.tag_categories == ("fiction", "biography")
     assert tag.tag_categories_text == ("fiction", "history")
     assert Tag.objects.filter(
-        tag_categories="fiction,biography", tag_categories_text="fiction,history"
+        tag_categories="fiction,biography",
+        tag_categories_text="fiction,history",
     ).exists()
 
 
@@ -81,7 +82,9 @@ def test_csv_char_field():
 
     # perform a raw query
     with connection.cursor() as cursor:
-        cursor.execute(f"SELECT tag_categories FROM testapp_tag WHERE id= {tag.id}")
+        cursor.execute(
+            f"SELECT tag_categories FROM testapp_tag WHERE id= {tag.id}"
+        )
         row = cursor.fetchone()
 
     assert row == ("",)

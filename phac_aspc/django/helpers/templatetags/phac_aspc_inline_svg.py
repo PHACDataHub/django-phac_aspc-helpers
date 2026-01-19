@@ -30,6 +30,8 @@ def phac_aspc_inline_svg(static_file_path=None, **kwargs):
     for attribute, value in kwargs.items():
         svg_root.set(attribute, value)
 
-    svg_string = ElementTree.tostring(svg_root, encoding="unicode", method="html")
+    svg_string = ElementTree.tostring(
+        svg_root, encoding="unicode", method="html"
+    )
 
     return mark_safe(svg_string)

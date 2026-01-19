@@ -685,3 +685,10 @@ You can consume the helpers project locally by installing it in editable mode. T
 2. `coverage html`
 3. `python -m http.server 1337`
 4. visit `http://localhost:1337/htmlcov/` and dig into modules to see which individual line coverage
+
+### Formatting code
+
+To run formatting manually, in bulk run this from the repo's root:
+
+1. `black . --config pyproject.toml`
+2. `isort src/ --settings-path pyproject.toml`

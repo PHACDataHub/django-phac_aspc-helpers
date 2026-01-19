@@ -2,8 +2,7 @@
 
 import json
 
-from django import template
-from django import urls
+from django import template, urls
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template import loader
@@ -11,7 +10,6 @@ from django.templatetags.static import static
 from django.urls.exceptions import NoReverseMatch
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-
 
 register = template.Library()
 
@@ -105,13 +103,17 @@ def phac_aspc_wet_session_timeout_dialog(context, logout_url):
         pass
 
     try:
-        return loader.get_template("phac_aspc/helpers/wet/session_timeout.html").render(
+        return loader.get_template(
+            "phac_aspc/helpers/wet/session_timeout.html"
+        ).render(
             {
                 "config": json.dumps(
                     {
                         "inactivity": session_alive - reaction_time,
                         "reactionTime": reaction_time,
-                        "refreshCallbackUrl": urls.reverse("phac_aspc_helpers_session"),
+                        "refreshCallbackUrl": urls.reverse(
+                            "phac_aspc_helpers_session"
+                        ),
                         "method": "PUT",
                         "sessionalive": session_alive,
                         "logouturl": logouturl,
@@ -121,4 +123,6 @@ def phac_aspc_wet_session_timeout_dialog(context, logout_url):
             request=context["request"],
         )
     except NoReverseMatch as exc:
-        raise ImproperlyConfigured("The WET urls are not loaded.  See README") from exc
+        raise ImproperlyConfigured(
+            "The WET urls are not loaded.  See README"
+        ) from exc

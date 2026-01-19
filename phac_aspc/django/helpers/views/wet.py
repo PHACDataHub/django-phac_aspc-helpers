@@ -1,6 +1,7 @@
 """Views related to WET"""
-from django.views.decorators.csrf import csrf_exempt
+
 from django.http import HttpResponse, HttpResponseNotFound
+from django.views.decorators.csrf import csrf_exempt
 
 
 @csrf_exempt

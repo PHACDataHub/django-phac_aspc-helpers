@@ -1,8 +1,8 @@
 """
 Django application entrypoint
 """
-from django.apps import AppConfig
 
+from django.apps import AppConfig
 
 from phac_aspc.django.helpers.ready import process_ready_hooks
 

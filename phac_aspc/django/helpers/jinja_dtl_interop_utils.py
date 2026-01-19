@@ -6,7 +6,8 @@ def assert_both_dtl_and_jinja_configured():
     are_both_dtl_and_jinja_configured = map(
         lambda template_backend: next(
             filter(
-                lambda template_config: template_config["BACKEND"] == template_backend,
+                lambda template_config: template_config["BACKEND"]
+                == template_backend,
                 settings.TEMPLATES,
             ),
             False,
