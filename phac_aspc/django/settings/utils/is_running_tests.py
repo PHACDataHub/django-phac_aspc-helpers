@@ -1,6 +1,7 @@
 """This file contains a utility for detecting when the django is running inside
 of a test framework environment
 """
+
 import sys
 
 

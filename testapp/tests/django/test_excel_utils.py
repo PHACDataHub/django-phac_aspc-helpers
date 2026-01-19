@@ -1,33 +1,33 @@
-import pytest
 import io
-from unittest.mock import Mock
-from unittest.mock import patch
-from phac_aspc.django.excel import (
-    ModelToSheetWriter,
-    ModelColumn,
-    CustomColumn,
-    ManyToManyColumn,
-    AbstractExportView,
-    ModelToCsvWriter,
-    AbstractCsvExportView,
-    AbstractSheetWriter,
-    WriterConfigException,
-)
-from django.test import RequestFactory
 import random
+from unittest.mock import Mock, patch
 
+from django.test import RequestFactory
+
+import pytest
 from openpyxl import Workbook
-from testapp.models import Book, Author
-from testapp.model_factories import TagFactory, BookFactory, AuthorFactory
-
 from openpyxl.styles import (
+    Alignment,
+    Border,
     Font,
     NamedStyle,
-    Alignment,
     PatternFill,
-    Border,
     Side,
 )
+
+from phac_aspc.django.excel import (
+    AbstractCsvExportView,
+    AbstractExportView,
+    AbstractSheetWriter,
+    CustomColumn,
+    ManyToManyColumn,
+    ModelColumn,
+    ModelToCsvWriter,
+    ModelToSheetWriter,
+    WriterConfigException,
+)
+from testapp.model_factories import AuthorFactory, BookFactory, TagFactory
+from testapp.models import Author, Book
 
 
 def make_request():
@@ -62,7 +62,9 @@ def test_model_to_sheet_writer(django_assert_max_num_queries):
 
     columns = [
         ModelColumn(Book, "title"),
-        CustomColumn("Author", lambda x: f"{x.author.first_name} {x.author.last_name}"),
+        CustomColumn(
+            "Author", lambda x: f"{x.author.first_name} {x.author.last_name}"
+        ),
         ManyToManyColumn(Book, "tags"),
     ]
 
@@ -155,7 +157,8 @@ def test_abstract_view_with_non_qs_writer():
             return [
                 ModelColumn(Book, "title"),
                 CustomColumn(
-                    "Author", lambda x: f"{x.author.first_name} {x.author.last_name}"
+                    "Author",
+                    lambda x: f"{x.author.first_name} {x.author.last_name}",
                 ),
                 ManyToManyColumn(Book, "tags"),
             ]
@@ -198,7 +201,8 @@ def test_csv_writer():
             return [
                 ModelColumn(Book, "title"),
                 CustomColumn(
-                    "Author", lambda x: f"{x.author.first_name} {x.author.last_name}"
+                    "Author",
+                    lambda x: f"{x.author.first_name} {x.author.last_name}",
                 ),
                 ManyToManyColumn(Book, "tags", delimiter="|"),
             ]
@@ -215,7 +219,9 @@ def test_csv_writer():
     # TODO: figure out why testing response content directly fails
     # for some reason it escapes utf8
     file = io.StringIO()
-    writer = BookCsvWriter(file, queryset=Book.objects.filter(id__in=[b1.id, b2.id]))
+    writer = BookCsvWriter(
+        file, queryset=Book.objects.filter(id__in=[b1.id, b2.id])
+    )
     writer.write()
     as_str = file.getvalue()
     assert (
@@ -337,7 +343,9 @@ def test_various_writer_apis():
             return qs
 
     with pytest.raises(WriterConfigException):
-        BookWriterWithGetIteratorMethod(workbook=wb, sheet_name="books").write()
+        BookWriterWithGetIteratorMethod(
+            workbook=wb, sheet_name="books"
+        ).write()
 
     class BookWriterWithIteratorAttribute(BookWriter):
         """
@@ -368,7 +376,9 @@ def test_writer_attr_precedence():
         queryset = book_qs
         sheet_name = "books"
 
-    author_writer = BookWriter(workbook=wb, queryset=author_qs, sheet_name="authors")
+    author_writer = BookWriter(
+        workbook=wb, queryset=author_qs, sheet_name="authors"
+    )
     assert author_writer.queryset == author_qs
     assert author_writer.sheet_name == "authors"
 
@@ -380,7 +390,9 @@ def test_writer_get_columns_api():
 
     column_defs = [
         ModelColumn(Book, "title"),
-        CustomColumn("Author", lambda x: f"{x.author.first_name} {x.author.last_name}"),
+        CustomColumn(
+            "Author", lambda x: f"{x.author.first_name} {x.author.last_name}"
+        ),
         ManyToManyColumn(Book, "tags"),
     ]
     column_defs2 = column_defs[:1]
@@ -444,7 +456,8 @@ def test_sheetwriter_with_column_styles():
         columns = [
             ModelColumn(Book, "title", style=bold_style, column_width=50),
             CustomColumn(
-                "Author", lambda x: f"{x.author.first_name} {x.author.last_name}"
+                "Author",
+                lambda x: f"{x.author.first_name} {x.author.last_name}",
             ),
             ManyToManyColumn(Book, "tags"),
         ]
@@ -483,7 +496,8 @@ def test_sheetwriter_with_header_style():
         columns = [
             ModelColumn(Book, "title"),
             CustomColumn(
-                "Author", lambda x: f"{x.author.first_name} {x.author.last_name}"
+                "Author",
+                lambda x: f"{x.author.first_name} {x.author.last_name}",
             ),
             ManyToManyColumn(Book, "tags"),
         ]

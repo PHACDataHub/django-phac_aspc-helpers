@@ -1,6 +1,6 @@
 import factory
 
-from .models import Book, Author, Tag
+from .models import Author, Book, Tag
 
 
 class AuthorFactory(factory.django.DjangoModelFactory):

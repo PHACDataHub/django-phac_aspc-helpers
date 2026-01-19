@@ -1,7 +1,7 @@
 """Handlers for JSON POST requests, for use alongside the PHAC helpers logging configuration"""
+
 import logging.config
 from abc import ABCMeta, abstractmethod
-
 
 try:
     import requests
@@ -27,7 +27,9 @@ class AbstractJSONPostHandler(logging.Handler, metaclass=ABCMeta):
 
     def __init__(self, url: str, fail_silent: bool = False):
         super().__init__()
-        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger = logging.getLogger(
+            f"{__name__}.{self.__class__.__name__}"
+        )
 
         self.url = url
         self.fail_silent = fail_silent

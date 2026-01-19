@@ -1,9 +1,10 @@
 """Configuration API for the PHAC helpers logging configuration"""
+
 import json
 import logging.config
 import os
 import sys
-from typing import Dict, Callable, Any, Literal
+from typing import Any, Callable, Dict, Literal
 
 import structlog
 
@@ -31,9 +32,13 @@ STRUCTLOG_PRE_PROCESSORS = (
 _default_suffix = "phac_helper_"
 
 PHAC_HELPER_CONSOLE_FORMATTER_KEY = f"{_default_suffix}console_formatter"
-PHAC_HELPER_PLAIN_STRING_FORMATTER_KEY = f"{_default_suffix}plaintext_formatter"
+PHAC_HELPER_PLAIN_STRING_FORMATTER_KEY = (
+    f"{_default_suffix}plaintext_formatter"
+)
 PHAC_HELPER_JSON_FORMATTER_KEY = f"{_default_suffix}json_formatter"
-PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY = f"{_default_suffix}pretty_json_formatter"
+PHAC_HELPER_PRETTY_JSON_FORMATTER_KEY = (
+    f"{_default_suffix}pretty_json_formatter"
+)
 
 PHAC_HELPER_CONSOLE_HANDLER_KEY = f"{_default_suffix}console_handler"
 
@@ -152,7 +157,9 @@ def configure_uniform_std_lib_and_structlog_logging(
         }
 
     formatters = {
-        formatter_key: formatter_function_to_formatter_config(formatter_function)
+        formatter_key: formatter_function_to_formatter_config(
+            formatter_function
+        )
         for (formatter_key, formatter_function) in formatter_functions.items()
     }
 

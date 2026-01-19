@@ -1,4 +1,5 @@
 """Hooks module"""
+
 __author__ = "Luc Belliveau <luc.belliveau@phac.aspc.gc.ca>"
 model_translation_hooks = []
 

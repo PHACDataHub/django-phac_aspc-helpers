@@ -1,17 +1,19 @@
 # pylint: disable=missing-function-docstring, missing-class-docstring
 """
-utilities for writing excel data using openpyxl 
+utilities for writing excel data using openpyxl
 """
-import re
+
 import csv
+import re
+
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
-from django.views import View
 from django.http import HttpResponse
 from django.utils.functional import Promise
 from django.utils.safestring import SafeString
-from openpyxl.cell import WriteOnlyCell
+from django.views import View
 
+from openpyxl.cell import WriteOnlyCell
 from openpyxl.utils import get_column_letter
 
 try:
@@ -19,7 +21,9 @@ try:
     from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
     from openpyxl.utils import escape as escapeSvc
 except (ImportError, ModuleNotFoundError) as exc:
-    raise ImportError("must install openpyxl==3.0.10 to use excel helpers") from exc
+    raise ImportError(
+        "must install openpyxl==3.0.10 to use excel helpers"
+    ) from exc
 
 # Note that OPENPXYL starts columns and rows at index 1.
 
@@ -195,7 +199,9 @@ class ManyToManyColumn(Column):
 
     def get_value(self, record):
         related_records = list(getattr(record, self.field_name).all())
-        return self.delimiter.join([self.get_related_str(x) for x in related_records])
+        return self.delimiter.join(
+            [self.get_related_str(x) for x in related_records]
+        )
 
 
 class WriterConfigException(Exception):
@@ -222,7 +228,10 @@ class AbstractWriter:
 
     def get_header_row(self):
         # return [escape_for_xlsx(name) for name, _ in self.get_column_configs()]
-        return [serialize_value(col.get_header()) for col in self.get_column_configs()]
+        return [
+            serialize_value(col.get_header())
+            for col in self.get_column_configs()
+        ]
 
     def get_column_configs(self):
         """
@@ -441,7 +450,9 @@ class BaseAbstractExportView(View):
 
     def _get_iterable(self):
         if hasattr(self, "queryset"):
-            assert isinstance(self.queryset, QuerySet), "queryset must be a QuerySet"
+            assert isinstance(
+                self.queryset, QuerySet
+            ), "queryset must be a QuerySet"
             return self.queryset
         if hasattr(self, "iterator"):
             return self.iterator
@@ -485,8 +496,12 @@ class AbstractExportView(BaseAbstractExportView):
             writer = WriterCls(workbook=wb, iterator=iterable)
 
         writer.write()
-        response = HttpResponse(headers={"Content-Type": "application/vnd.ms-excel"})
-        response["Content-Disposition"] = f"attachment; filename={self.get_filename()}"
+        response = HttpResponse(
+            headers={"Content-Type": "application/vnd.ms-excel"}
+        )
+        response["Content-Disposition"] = (
+            f"attachment; filename={self.get_filename()}"
+        )
         wb.save(response)
         return response
 

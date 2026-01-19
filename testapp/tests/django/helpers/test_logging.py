@@ -1,7 +1,7 @@
-from copy import deepcopy
 import json
 import logging
 import os
+from copy import deepcopy
 from unittest.mock import Mock
 
 from django.http import HttpResponse
@@ -13,17 +13,17 @@ import responses
 import structlog
 from testfixtures import LogCapture
 
+from phac_aspc.django.helpers.logging.configure_logging import (
+    PHAC_HELPER_CONSOLE_HANDLER_KEY,
+    PHAC_HELPER_JSON_FORMATTER_KEY,
+    configure_uniform_std_lib_and_structlog_logging,
+)
 from phac_aspc.django.helpers.logging.json_post_handlers import (
     AbstractJSONPostHandler,
     SlackWebhookHandler,
 )
 from phac_aspc.django.helpers.logging.utils import (
     add_fields_to_all_logs_for_current_request,
-)
-from phac_aspc.django.helpers.logging.configure_logging import (
-    configure_uniform_std_lib_and_structlog_logging,
-    PHAC_HELPER_JSON_FORMATTER_KEY,
-    PHAC_HELPER_CONSOLE_HANDLER_KEY,
 )
 
 
@@ -62,10 +62,14 @@ def reset_logging_configs_after_test():
 
 
 def get_configured_logging_handler_by_name(name):
-    handler = next(handler for handler in logging.root.handlers if handler.name == name)
+    handler = next(
+        handler for handler in logging.root.handlers if handler.name == name
+    )
 
     if not handler:
-        raise ValueError(f'No handler with name "{name}" found on current root logger')
+        raise ValueError(
+            f'No handler with name "{name}" found on current root logger'
+        )
 
     return handler
 
@@ -81,7 +85,9 @@ class CapturingHandlerWrapper(object):
         record_was_emitted = self._wrapped_handler.handle(record)
 
         if record_was_emitted:
-            self.captured_formatted_logs.append(self._wrapped_handler.format(record))
+            self.captured_formatted_logs.append(
+                self._wrapped_handler.format(record)
+            )
 
         return record_was_emitted
 
@@ -110,7 +116,9 @@ def formatted_log_capturing_logger_factory(handler=None):
 
     loggers = (
         logging.getLogger(f"test_logger_{_logger_factory_id_incrementor}"),
-        structlog.getLogger(f"test_structlogger_{_logger_factory_id_incrementor}"),
+        structlog.getLogger(
+            f"test_structlogger_{_logger_factory_id_incrementor}"
+        ),
     )
     _logger_factory_id_incrementor += 1
 
@@ -179,7 +187,9 @@ def test_configured_console_handler_formatter_is_used():
 
     configure_uniform_std_lib_and_structlog_logging(
         console_handler_formatter_key=custom_formatter_key,
-        additional_formatter_functions={custom_formatter_key: custom_formatter_func},
+        additional_formatter_functions={
+            custom_formatter_key: custom_formatter_func
+        },
     )
 
     logger = logging.getLogger(
@@ -201,7 +211,9 @@ def test_configured_console_handler_formatter_is_used():
 
 
 def test_configured_additional_handlers_are_used():
-    custom_handler_with_custom_formatter_key = "custom_handler_with_custom_formatter"
+    custom_handler_with_custom_formatter_key = (
+        "custom_handler_with_custom_formatter"
+    )
 
     custom_formatter_key = "custom_formatter"
     custom_formatter_func = Mock(return_value="foo")
@@ -227,11 +239,17 @@ def test_configured_additional_handlers_are_used():
                 "filters": [custom_filter_key],
             },
         },
-        additional_formatter_functions={custom_formatter_key: custom_formatter_func},
-        additional_filter_configs={custom_filter_key: {"()": CustomFilterClass}},
+        additional_formatter_functions={
+            custom_formatter_key: custom_formatter_func
+        },
+        additional_filter_configs={
+            custom_filter_key: {"()": CustomFilterClass}
+        },
     )
 
-    logger = logging.getLogger("logger_test_configured_additional_handlers_are_used")
+    logger = logging.getLogger(
+        "logger_test_configured_additional_handlers_are_used"
+    )
     structlogger = structlog.getLogger(
         "structlogger_test_configured_additional_handlers_are_used"
     )
@@ -271,22 +289,28 @@ def test_configured_json_logging_consistent_between_standard_logger_and_structlo
 
     assert len(captured_formatted_logs) == 2
     assert json.loads(captured_formatted_logs[0])["logger"] == logger.name
-    assert json.loads(captured_formatted_logs[1])["logger"] == structlogger.name
+    assert (
+        json.loads(captured_formatted_logs[1])["logger"] == structlogger.name
+    )
     assert test_log_content in captured_formatted_logs[0]
 
     keys_to_ignore = ("logger", "lineno", "timestamp")
 
     def log_to_filtered_dict(json_string):
         return {
-            k: v for k, v in json.loads(json_string).items() if k not in keys_to_ignore
+            k: v
+            for k, v in json.loads(json_string).items()
+            if k not in keys_to_ignore
         }
 
-    assert log_to_filtered_dict(captured_formatted_logs[0]) == log_to_filtered_dict(
-        captured_formatted_logs[1]
-    )
+    assert log_to_filtered_dict(
+        captured_formatted_logs[0]
+    ) == log_to_filtered_dict(captured_formatted_logs[1])
 
 
-def test_add_fields_to_all_logs_for_current_request(vanilla_user_client, settings):
+def test_add_fields_to_all_logs_for_current_request(
+    vanilla_user_client, settings
+):
     configure_uniform_std_lib_and_structlog_logging(
         console_handler_formatter_key=PHAC_HELPER_JSON_FORMATTER_KEY
     )
@@ -348,18 +372,22 @@ def test_add_fields_to_all_logs_for_current_request(vanilla_user_client, setting
 
     for key_1, value_1 in metadata_1.items():
         assert (
-            captured_formatted_logs_as_dicts_by_event[event_with_metadata_1][key_1]
-            == value_1
-        )
-        assert (
-            captured_formatted_logs_as_dicts_by_event[event_with_metadata_1_and_2][
+            captured_formatted_logs_as_dicts_by_event[event_with_metadata_1][
                 key_1
             ]
             == value_1
         )
         assert (
+            captured_formatted_logs_as_dicts_by_event[
+                event_with_metadata_1_and_2
+            ][key_1]
+            == value_1
+        )
+        assert (
             not key_1
-            in captured_formatted_logs_as_dicts_by_event[event_with_no_metadata]
+            in captured_formatted_logs_as_dicts_by_event[
+                event_with_no_metadata
+            ]
         )
 
     for key_2, value_2 in metadata_2.items():
@@ -368,14 +396,16 @@ def test_add_fields_to_all_logs_for_current_request(vanilla_user_client, setting
             in captured_formatted_logs_as_dicts_by_event[event_with_metadata_1]
         )
         assert (
-            captured_formatted_logs_as_dicts_by_event[event_with_metadata_1_and_2][
-                key_2
-            ]
+            captured_formatted_logs_as_dicts_by_event[
+                event_with_metadata_1_and_2
+            ][key_2]
             == value_2
         )
         assert (
             not key_2
-            in captured_formatted_logs_as_dicts_by_event[event_with_no_metadata]
+            in captured_formatted_logs_as_dicts_by_event[
+                event_with_no_metadata
+            ]
         )
 
 
@@ -391,13 +421,13 @@ def test_json_post_handler_posts_json_containing_logged_text_to_provided_url():
     # implementing class; asserting this relationship as a pre-requisite
     assert issubclass(SlackWebhookHandler, AbstractJSONPostHandler)
 
-    error_message = (
-        "just some arbitrary text to expect shows up somewhere in the POSTed JSON"
-    )
+    error_message = "just some arbitrary text to expect shows up somewhere in the POSTed JSON"
 
     def expected_request_matcher(request):
         is_json = request.headers["Content-Type"] == "application/json"
-        contains_original_message = not request.body.decode().find(error_message) == -1
+        contains_original_message = (
+            not request.body.decode().find(error_message) == -1
+        )
 
         if is_json and contains_original_message:
             return True, ""
@@ -470,7 +500,8 @@ def test_json_post_handler_logs_own_errors_without_trying_to_rehandle_them(
         len(
             list(
                 filter(
-                    lambda record: SlackWebhookHandler.__module__ not in record.name,
+                    lambda record: SlackWebhookHandler.__module__
+                    not in record.name,
                     capture_all_log_records.records,
                 )
             )

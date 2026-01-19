@@ -1,4 +1,5 @@
 """Utility to get language code from lang strings with locales"""
+
 from django.utils.translation import get_language, get_language_info
 
 

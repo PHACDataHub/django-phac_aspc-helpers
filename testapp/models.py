@@ -1,10 +1,9 @@
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 
 from phac_aspc.django import fields
-
-from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
@@ -41,6 +40,8 @@ class Tag(models.Model):
 class Book(models.Model):
     # changelog_live_name_loader_class = BookNameLoader
 
-    author = fields.ForeignKey(Author, related_name="books", on_delete=models.CASCADE)
+    author = fields.ForeignKey(
+        Author, related_name="books", on_delete=models.CASCADE
+    )
     title = fields.CharField(max_length=250)
     tags = fields.ManyToManyField(Tag)

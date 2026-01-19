@@ -1,4 +1,5 @@
 """Logging configuration env var configs and getters"""
+
 from phac_aspc.django.settings.utils.env_utils import (
     PHAC_ENV_PREFIX,
     get_env,

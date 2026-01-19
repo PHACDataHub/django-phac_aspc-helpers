@@ -1,12 +1,12 @@
 """Recommended values related to security controls"""
+
 from django.core.exceptions import ImproperlyConfigured
 
-from .utils import (
-    global_from_env,
-    configure_authentication_backends,
-)
-
 from .security_env import get_oauth_env_value, security_env_config
+from .utils import (
+    configure_authentication_backends,
+    global_from_env,
+)
 
 # Lockout users based on their (username, IP address) combinations
 AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
@@ -40,7 +40,9 @@ if get_oauth_env_value("PROVIDER") == "microsoft":
         raise ImproperlyConfigured("settings.OAUTH_APP_CLIENT_ID is required.")
 
     if client_secret == "":
-        raise ImproperlyConfigured("settings.OAUTH_APP_CLIENT_SECRET is required.")
+        raise ImproperlyConfigured(
+            "settings.OAUTH_APP_CLIENT_SECRET is required."
+        )
 
     AUTHLIB_OAUTH_CLIENTS = {
         f"{provider}": {

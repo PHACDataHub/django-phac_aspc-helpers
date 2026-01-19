@@ -1,4 +1,5 @@
 """OAuth authentication related views"""
+
 from urllib import parse
 
 from django.contrib.auth import authenticate
@@ -38,7 +39,7 @@ def login(request):
         return client.authorize_redirect(
             request,
             request.build_absolute_uri(reverse("phac_aspc_authorize")),
-            **auth_url_extra_params
+            **auth_url_extra_params,
         )
     raise ImproperlyConfigured("The login route is not configured.")
 
@@ -50,7 +51,9 @@ def authorize(request):
             client = oauth.create_client(PROVIDER)
             token = client.authorize_access_token(
                 request,
-                claims_options={"iss": {"essential": True, "validate": validate_iss}},
+                claims_options={
+                    "iss": {"essential": True, "validate": validate_iss}
+                },
             )
             user_info = token["userinfo"]
             query_params = dict(

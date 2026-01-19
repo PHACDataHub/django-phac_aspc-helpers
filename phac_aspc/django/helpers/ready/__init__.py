@@ -1,6 +1,7 @@
 """
 Enables support for executing code when all django apps are ready.
 """
+
 # Define a singleton that will contain the functions to be fired
 # on ready.
 ready_hooks = []

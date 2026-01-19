@@ -65,7 +65,9 @@ class BaseSeparatedValuesField(models.Field):
                     )
 
                 values = getattr(model_instance, self.attname)
-                pretty_values = [get_formated_value(value) for value in values if value]
+                pretty_values = [
+                    get_formated_value(value) for value in values if value
+                ]
 
                 return ", ".join(pretty_values)
 

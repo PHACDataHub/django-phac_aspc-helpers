@@ -1,7 +1,8 @@
 """Utilities for use alongside the PHAC helpers logging configuration"""
-from typing import Dict, Any
 
-from django.core.exceptions import MiddlewareNotUsed, ImproperlyConfigured
+from typing import Any, Dict
+
+from django.core.exceptions import ImproperlyConfigured, MiddlewareNotUsed
 
 import structlog
 
@@ -39,7 +40,10 @@ def add_fields_to_all_logs_for_current_request(context_dict: Dict[str, Any]):
         is_phac_helper_logging_configuration_being_used,
     )
 
-    if "django_structlog.middlewares.RequestMiddleware" not in settings.MIDDLEWARE:
+    if (
+        "django_structlog.middlewares.RequestMiddleware"
+        not in settings.MIDDLEWARE
+    ):
         raise MiddlewareNotUsed(
             "django_structlog.middlewares.RequestMiddleware is required for this utility"
         )

@@ -1,6 +1,6 @@
-from phac_aspc.jinja.registry import JinjaRegistry
-
 from jinja2 import Environment, pass_context
+
+from phac_aspc.jinja.registry import JinjaRegistry
 
 
 def test_registry_directly():

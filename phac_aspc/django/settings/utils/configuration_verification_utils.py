@@ -49,7 +49,9 @@ def configure_apps(app_list):
     prefix_list = warn_and_remove(["modeltranslation", "axes"], app_list)
 
     logging_app = (
-        ["django_structlog"] if get_logging_env_value("USE_HELPERS_CONFIG") else []
+        ["django_structlog"]
+        if get_logging_env_value("USE_HELPERS_CONFIG")
+        else []
     )
 
     suffix_list = warn_and_remove(
@@ -78,7 +80,8 @@ def configure_authentication_backends(backend_list):
 
     oauth_backend = (
         [get_oauth_env_value("USE_BACKEND")]
-        if get_oauth_env_value("PROVIDER") and get_oauth_env_value("USE_BACKEND")
+        if get_oauth_env_value("PROVIDER")
+        and get_oauth_env_value("USE_BACKEND")
         else []
     )
 

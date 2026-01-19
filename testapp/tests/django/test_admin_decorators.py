@@ -1,10 +1,11 @@
 # pylint: disable=protected-access
 """Test admin decorators"""
-from django.db import models
-from django.contrib.admin import site
 
-from phac_aspc.django.helpers.ready import process_ready_hooks
+from django.contrib.admin import site
+from django.db import models
+
 from phac_aspc.django.admin.decorators.admin_decorators import add_admin
+from phac_aspc.django.helpers.ready import process_ready_hooks
 
 
 def test_add_admin_decorator():

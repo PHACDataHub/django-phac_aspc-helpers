@@ -1,15 +1,14 @@
-from phac_aspc.jinja.registry import registry as r
-from jinja2 import pass_context
-from django.utils.translation import activate, get_language, override
 from urllib.parse import quote, urlencode, urlparse, urlunparse
+
+from django.templatetags.static import static
+from django.urls import reverse
+from django.utils.translation import activate, get_language, override
+
+from jinja2 import pass_context
 from jinja2.ext import Extension, nodes
 
 import phac_aspc.django.helpers.templatetags as phac_aspc
-from django.templatetags.static import static
-
-
-from django.urls import reverse
-
+from phac_aspc.jinja.registry import registry as r
 
 # basic python builtins
 r.add_global("getattr", getattr)

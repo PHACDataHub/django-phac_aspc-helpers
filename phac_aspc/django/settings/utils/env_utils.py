@@ -1,8 +1,9 @@
-"""This file contains utilities for accessing env values used by consuming libraries 
+"""This file contains utilities for accessing env values used by consuming libraries
 to configure PHAC helpers' behaviour
 """
-import os
+
 import inspect
+import os
 from importlib.util import find_spec
 
 import environ
