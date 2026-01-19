@@ -27,11 +27,11 @@ jobs:
           git tag -a v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }} -m "Release v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}"
           git push origin v${{ steps.release.outputs.major }}
           git push origin v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
-      - name: Set up Python 3.11
+      - name: Set up Python 3.13
         if: ${{ steps.release.outputs.release_created }}
         uses: actions/setup-python@v3
         with:
-          python-version: "3.11"
+          python-version: "3.13"
       - name: Build release
         if: ${{ steps.release.outputs.release_created }}
         run: |
