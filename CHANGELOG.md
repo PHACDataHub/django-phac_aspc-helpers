@@ -5,6 +5,14 @@
 - Writer api improvements ([#91](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/91)) ([dcde15a](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/dcde15aaf99b1392ab9c5b145c746533cff1d093))
 - also [#101](https://github.com/PHACDataHub/django-phac_aspc-helpers/pull/101)
 
+## [3.1.2](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v3.1.1...v3.1.2) (2026-01-19)
+
+
+### Bug Fixes
+
+* add autoformatting to project ([#129](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/129)) ([816e835](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/816e835d9b966b04dbcf9c590fb6c7b8ffcb5625))
+* add django 6 support, add jinja registry decorator, flesh out testapp  ([#127](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/127)) ([bef21f5](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/bef21f53592d42708fe1a482cce8a19cfbedbdd5))
+
 ## [3.1.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v3.1.0...v3.1.1) (2024-06-21)
 
 
