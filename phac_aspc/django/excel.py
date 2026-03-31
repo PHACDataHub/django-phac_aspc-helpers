@@ -448,6 +448,8 @@ class BaseAbstractExportView(View):
                 "Must define filename attr or override get_filename()"
             )
 
+        return self.filename
+
     def _get_iterable(self):
         if hasattr(self, "queryset"):
             assert isinstance(

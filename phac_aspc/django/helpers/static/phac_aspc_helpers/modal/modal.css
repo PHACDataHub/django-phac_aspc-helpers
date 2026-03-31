@@ -1,0 +1,33 @@
+/* ── Modal Stack ── */
+[data-modal] {
+    display: none;
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    outline: none;
+    transition: opacity 0.15s ease;
+    opacity: 0;
+}
+
+[data-modal].modal-open {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+[data-modal].modal-visible {
+    opacity: 1;
+}
+
+[data-modal] .modal-content {
+    background-color: var(--bs-modal-bg, #fff);
+    border-radius: var(--bs-modal-border-radius, 0.5rem);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+body.modal-stack-active {
+    overflow: hidden;
+}
+
+/* -- end modal stack -- */
