@@ -1,7 +1,6 @@
 # flake8: noqa
 """Settings module"""
 
-
 import secrets
 
 from .localization import *
