@@ -5,7 +5,7 @@ requests==2.32.3
 opencensus-ext-azure==1.1.9
 
 # testing, debugging, etc.
-pytest==7.4.2
+pytest==9.0.2
 pytest-cov==4.1.0
 pytest-django==4.8.0
 pytest-timeout===2.2.0
