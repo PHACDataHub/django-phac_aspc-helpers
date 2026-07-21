@@ -1,3 +1,4 @@
+// HELLO OTHER PROJECT
 // NOTE : This is mostly AI-written, probably over-engineered and buggy
 // why not stick with bootstrap or another lib? 
 // nested modals, HTMX integration and focus management are a pain to wedge in
@@ -322,7 +323,17 @@ const ModalStack = (() => {
         el.addEventListener("transitionend", (e) => {
             if (e.target === el) onEnd();
         }, { once: true });
+        setCleared(el);
         setTimeout(onEnd, 300);
+    }
+
+    function setCleared(el){
+        //marks the modal as cleared, 
+        // so that the auto-open logic doesn't re-open it after a swap
+        const parent = el.parentElement;
+        if (parent && parent.hasAttribute("data-modal-slot")) {
+            el.setAttribute("data-modal-cleared", "true");
+        }
     }
 
     function closeCurrent() {
@@ -440,6 +451,10 @@ document.body.addEventListener("htmx:afterSettle", (e) => {
 // Auto-open any [data-modal] swapped into a [data-modal-slot].
 document.body.addEventListener("htmx:afterSettle", (e) => {
     document.querySelectorAll("[data-modal-slot] [data-modal]").forEach((modal) => {
+        if(modal.hasAttribute("data-modal-cleared")) {
+            // This modal was already closed and cleared, don't re-open it.
+            return;
+        }
         if (!ModalStack.isOpen(modal)) {
             ModalStack.open(modal);
         }
