@@ -5,6 +5,13 @@
 - Writer api improvements ([#91](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/91)) ([dcde15a](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/dcde15aaf99b1392ab9c5b145c746533cff1d093))
 - also [#101](https://github.com/PHACDataHub/django-phac_aspc-helpers/pull/101)
 
+## [3.2.1](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v3.2.0...v3.2.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* re-opening of closed/cleared modal ([#138](https://github.com/PHACDataHub/django-phac_aspc-helpers/issues/138)) ([ca24303](https://github.com/PHACDataHub/django-phac_aspc-helpers/commit/ca243036175a85f6dca20a70fbf2e39051a6bdc2))
+
 ## [3.2.0](https://github.com/PHACDataHub/django-phac_aspc-helpers/compare/v3.1.2...v3.2.0) (2026-03-31)
 
 
