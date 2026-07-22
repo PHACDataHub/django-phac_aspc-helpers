@@ -1,4 +1,3 @@
-// HELLO OTHER PROJECT
 // NOTE : This is mostly AI-written, probably over-engineered and buggy
 // why not stick with bootstrap or another lib? 
 // nested modals, HTMX integration and focus management are a pain to wedge in
